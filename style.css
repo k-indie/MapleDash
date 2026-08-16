@@ -4505,3 +4505,78 @@ main{
     bottom:0!important;
   }
 }
+
+/* ===== v1.36 session controls exact placement ===== */
+
+/* 헤더 전체를 기준점으로 사용 */
+.app-header{
+  position:relative!important;
+  min-height:82px!important;
+}
+
+/* 제목은 독립 */
+.app-header > div:first-child{
+  position:static!important;
+  max-width:none!important;
+}
+
+/*
+  요청 위치:
+  화면 우측 상단이되 끝자락에 딱 붙이지 않고,
+  스크린샷처럼 오른쪽에서 약간 안쪽에
+  [동기화됨] [로그아웃] 순서로 배치.
+*/
+.app-header .header-actions{
+  position:absolute!important;
+  top:10px!important;
+  right:10px!important;
+  left:auto!important;
+  bottom:auto!important;
+  width:auto!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  transform:none!important;
+  z-index:30!important;
+}
+
+.app-header .header-actions .sync,
+#syncStatus,
+.sync-status{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  padding:0!important;
+  white-space:nowrap!important;
+  transform:none!important;
+}
+
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+/* 이전 v1.35의 제목 옆 강제 좌표 완전 무효화 */
+.app-header .header-actions{
+  left:auto!important;
+}
+
+/* 작은 화면에서는 자연스럽게 아래로 */
+@media(max-width:620px){
+  .app-header{
+    padding-bottom:46px!important;
+  }
+
+  .app-header .header-actions{
+    top:auto!important;
+    right:0!important;
+    bottom:0!important;
+  }
+}
