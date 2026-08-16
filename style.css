@@ -2336,3 +2336,79 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-row:1/3;
   }
 }
+
+/* ===== v1.14 dashboard character visual scale + typography ===== */
+
+/* 캐릭터 이미지: 카드 안에서 기존보다 훨씬 크게 보이도록 */
+.character-avatar-wrap{
+  height:172px!important;
+  overflow:hidden!important;
+}
+
+.character-avatar{
+  width:190px!important;
+  height:190px!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  transform:scale(2.25)!important;
+  transform-origin:center center!important;
+}
+
+/* 닉네임은 기존 유지 */
+.character-name{
+  font-size:17px!important;
+}
+
+/* 카드 내부 나머지 폰트 약 +2px */
+.character-class-badge{
+  font-size:11px!important;
+}
+
+.character-world{
+  font-size:13px!important;
+}
+
+.character-status-row .status-chip{
+  font-size:10px!important;
+  min-width:34px!important;
+  min-height:21px!important;
+}
+
+.info-pair span{
+  font-size:11px!important;
+}
+
+.info-pair strong{
+  font-size:13px!important;
+}
+
+.character-note{
+  font-size:11px!important;
+}
+
+.character-editor textarea{
+  font-size:11px!important;
+}
+
+.character-editor-actions button{
+  font-size:10px!important;
+}
+
+/* 이미지가 커져도 우상단 액션은 위에 보이도록 */
+.character-profile-actions{
+  z-index:8!important;
+}
+
+/* 모바일은 과도한 확대 방지 */
+@media(max-width:720px){
+  .character-avatar-wrap{
+    height:175px!important;
+  }
+
+  .character-avatar{
+    width:190px!important;
+    height:190px!important;
+    transform:scale(2.0)!important;
+  }
+}
