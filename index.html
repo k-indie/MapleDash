@@ -108,16 +108,14 @@
           <span id="characterCount" class="muted">0 / 20</span>
         </div>
 
-        <form id="characterForm" class="character-add-form">
-          <input id="characterNickname" maxlength="20" placeholder="닉네임" required />
-          <input id="characterClass" maxlength="30" placeholder="직업" />
-          <input id="characterLevel" type="number" min="1" max="999" placeholder="레벨" />
-          <input id="characterPower" type="number" min="0" step="1" placeholder="전투력" />
-          <input id="characterOwnedMeso" type="number" min="0" step="1" placeholder="보유 메소" />
-          <input id="characterBossMeso" type="number" min="0" step="1" placeholder="보스 메소" />
-          <input id="characterMemo" maxlength="120" placeholder="메모" />
-          <button class="primary" type="submit">캐릭터 추가</button>
+        <form id="characterForm" class="character-add-form auto-profile-form">
+          <input id="characterNickname" maxlength="20" placeholder="캐릭터 닉네임" required />
+          <input id="characterOwnedMeso" type="number" min="0" step="1" placeholder="보유 메소 (선택)" />
+          <input id="characterBossMeso" type="number" min="0" step="1" placeholder="보스 메소 (선택)" />
+          <input id="characterMemo" maxlength="120" placeholder="메모 (선택)" />
+          <button class="primary" type="submit">닉네임으로 추가</button>
         </form>
+        <p class="api-help">닉네임을 입력하면 프로필 이미지 · 직업 · 레벨 · 월드 · 전투력을 자동으로 불러옵니다.</p>
       </article>
 
       <article class="panel section-block character-list-panel">

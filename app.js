@@ -290,6 +290,31 @@
     }
   });
 
+  async function fetchCharacterProfile(characterName) {
+    const { data, error } = await sb.functions.invoke("maple-character", {
+      body: { character_name: characterName }
+    });
+
+    if (error) {
+      console.error(error);
+      throw new Error("캐릭터 정보를 불러오지 못했습니다. Edge Function과 NEXON API Key 설정을 확인해주세요.");
+    }
+
+    if (!data || data.error) {
+      throw new Error(data?.message || data?.error || "캐릭터 정보를 불러오지 못했습니다.");
+    }
+
+    return data;
+  }
+
+  function formatUpdatedAt(value) {
+    if (!value) return "";
+    return new Intl.DateTimeFormat("ko-KR", {
+      year:"2-digit", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit"
+    }).format(new Date(value));
+  }
+
   function renderCharacters() {
     const box = $("characterGrid");
     box.innerHTML = "";
@@ -310,10 +335,15 @@
       const bossText = shortMoney(ch.boss_meso || 0);
 
       card.innerHTML = `
-        <div class="character-card-top">
+        <div class="character-avatar-wrap">
+          <img class="character-avatar" alt="">
+        </div>
+
+        <div class="character-card-top with-avatar">
           <div class="character-title">
             <div class="character-name"></div>
             <span class="character-class-badge"></span>
+            <div class="character-world"></div>
           </div>
           <button class="character-delete" type="button">삭제</button>
         </div>
@@ -326,17 +356,15 @@
         </div>
 
         <div class="character-note"></div>
+        <div class="api-updated"></div>
 
         <div class="character-actions">
-          <button class="edit-toggle" type="button">수정</button>
+          <button class="character-refresh" type="button">정보 새로고침</button>
+          <button class="edit-toggle" type="button">메소/메모 수정</button>
         </div>
 
         <div class="character-editor">
           <div class="character-editor-grid">
-            <input class="edit-nickname" maxlength="20" placeholder="닉네임">
-            <input class="edit-class" maxlength="30" placeholder="직업">
-            <input class="edit-level" type="number" min="1" max="999" placeholder="레벨">
-            <input class="edit-power" type="number" min="0" step="1" placeholder="전투력">
             <input class="edit-owned" type="number" min="0" step="1" placeholder="보유 메소">
             <input class="edit-boss" type="number" min="0" step="1" placeholder="보스 메소">
             <textarea class="edit-memo" maxlength="120" placeholder="메모"></textarea>
@@ -348,26 +376,29 @@
         </div>
       `;
 
+      const avatar = card.querySelector(".character-avatar");
+      if (ch.image_url) {
+        avatar.src = ch.image_url;
+        avatar.alt = `${ch.nickname} 캐릭터 이미지`;
+      } else {
+        avatar.style.display = "none";
+      }
+
       card.querySelector(".character-name").textContent = ch.nickname || "-";
-      card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미입력";
+      card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미확인";
+      card.querySelector(".character-world").textContent = ch.world_name || "";
       card.querySelector(".view-level").textContent = levelText;
       card.querySelector(".view-power").textContent = powerText;
       card.querySelector(".view-owned").textContent = ownedText;
       card.querySelector(".view-boss").textContent = bossText;
       card.querySelector(".character-note").textContent = ch.memo || "메모 없음";
+      card.querySelector(".api-updated").textContent =
+        ch.api_updated_at ? `게임 정보 갱신 ${formatUpdatedAt(ch.api_updated_at)}` : "";
 
-      const nickname = card.querySelector(".edit-nickname");
-      const className = card.querySelector(".edit-class");
-      const level = card.querySelector(".edit-level");
-      const power = card.querySelector(".edit-power");
       const owned = card.querySelector(".edit-owned");
       const boss = card.querySelector(".edit-boss");
       const memo = card.querySelector(".edit-memo");
 
-      nickname.value = ch.nickname || "";
-      className.value = ch.class_name || "";
-      level.value = ch.level ?? "";
-      power.value = ch.combat_power ?? "";
       owned.value = ch.owned_meso ?? 0;
       boss.value = ch.boss_meso ?? 0;
       memo.value = ch.memo || "";
@@ -377,10 +408,6 @@
       });
 
       card.querySelector(".cancel-character").addEventListener("click", () => {
-        nickname.value = ch.nickname || "";
-        className.value = ch.class_name || "";
-        level.value = ch.level ?? "";
-        power.value = ch.combat_power ?? "";
         owned.value = ch.owned_meso ?? 0;
         boss.value = ch.boss_meso ?? 0;
         memo.value = ch.memo || "";
@@ -389,17 +416,11 @@
 
       card.querySelector(".save-character").addEventListener("click", async () => {
         const payload = {
-          nickname: nickname.value.trim(),
-          class_name: className.value.trim() || null,
-          level: level.value ? Number(level.value) : null,
-          combat_power: power.value ? Number(power.value) : null,
           owned_meso: Number(owned.value || 0),
           boss_meso: Number(boss.value || 0),
           memo: memo.value.trim() || null,
           updated_at: new Date().toISOString()
         };
-
-        if (!payload.nickname) return alert("닉네임은 비워둘 수 없습니다.");
 
         const { data, error } = await sb
           .from("maple_characters")
@@ -413,7 +434,50 @@
 
         Object.assign(ch, data);
         renderAll();
-        setSync("캐릭터 저장됨");
+        setSync("저장됨");
+      });
+
+      card.querySelector(".character-refresh").addEventListener("click", async e => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = "불러오는 중…";
+        setSync(`${ch.nickname} 조회 중…`);
+
+        try {
+          const info = await fetchCharacterProfile(ch.nickname);
+
+          const payload = {
+            ocid: info.ocid || null,
+            class_name: info.class_name || null,
+            level: info.level ?? null,
+            combat_power: info.combat_power ?? null,
+            image_url: info.image_url || null,
+            world_name: info.world_name || null,
+            api_updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          const { data, error } = await sb
+            .from("maple_characters")
+            .update(payload)
+            .eq("id", ch.id)
+            .eq("user_id", user.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          Object.assign(ch, data);
+          renderAll();
+          setSync("정보 갱신됨");
+        } catch (err) {
+          console.error(err);
+          setSync("조회 실패");
+          alert(err.message || String(err));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "정보 새로고침";
+        }
       });
 
       card.querySelector(".character-delete").addEventListener("click", async () => {
@@ -452,20 +516,32 @@
     const nickname = $("characterNickname").value.trim();
     if (!nickname) return;
 
+    if (characters.some(ch => ch.nickname === nickname)) {
+      alert("이미 등록된 캐릭터입니다.");
+      return;
+    }
+
     const submitButton = e.currentTarget.querySelector('button[type="submit"]');
     submitButton.disabled = true;
-    setSync("캐릭터 추가 중…");
+    submitButton.textContent = "정보 불러오는 중…";
+    setSync(`${nickname} 조회 중…`);
 
     try {
+      const info = await fetchCharacterProfile(nickname);
+
       const payload = {
         user_id: user.id,
         nickname,
-        class_name: $("characterClass").value.trim() || null,
-        level: $("characterLevel").value ? Number($("characterLevel").value) : null,
-        combat_power: $("characterPower").value ? Number($("characterPower").value) : null,
+        ocid: info.ocid || null,
+        class_name: info.class_name || null,
+        level: info.level ?? null,
+        combat_power: info.combat_power ?? null,
+        image_url: info.image_url || null,
+        world_name: info.world_name || null,
         owned_meso: Number($("characterOwnedMeso").value || 0),
         boss_meso: Number($("characterBossMeso").value || 0),
         memo: $("characterMemo").value.trim() || null,
+        api_updated_at: new Date().toISOString(),
         sort_order: characters.length
       };
 
@@ -479,26 +555,18 @@
 
       characters.push(data);
 
-      [
-        "characterNickname",
-        "characterClass",
-        "characterLevel",
-        "characterPower",
-        "characterOwnedMeso",
-        "characterBossMeso",
-        "characterMemo"
-      ].forEach(id => {
-        $(id).value = "";
-      });
+      ["characterNickname","characterOwnedMeso","characterBossMeso","characterMemo"]
+        .forEach(id => $(id).value = "");
 
       renderAll();
       setSync("캐릭터 추가됨");
     } catch (err) {
       console.error(err);
       setSync("추가 실패");
-      alert(`캐릭터 추가에 실패했습니다.\n${err.message || err}`);
+      alert(err.message || String(err));
     } finally {
       submitButton.disabled = false;
+      submitButton.textContent = "닉네임으로 추가";
     }
   });
 
