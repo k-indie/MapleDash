@@ -1337,7 +1337,10 @@ card.innerHTML = `
           <span class="settings-group-world"></span>
         </div>
         <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected}${isChallengerWorld(group.world_name) ? ` · 메이린` : ""} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
-        <button class="delete-btn delete-group" type="button">삭제</button>
+        <div class="settings-group-actions">
+          <button class="edit-group-btn" type="button">수정</button>
+          <button class="delete-btn delete-group" type="button">삭제</button>
+        </div>
       `;
 
       row.querySelector(".settings-group-account").textContent = group.account_name;
@@ -1390,6 +1393,87 @@ card.innerHTML = `
         row.classList.remove("drag-over", "drag-over-before", "drag-over-after");
         const sourceId = e.dataTransfer.getData("text/plain");
         moveGroupByDrag(sourceId, group.id);
+      });
+
+      row.querySelector(".edit-group-btn").addEventListener("click", () => {
+        if (row.querySelector(".settings-group-inline-editor")) return;
+
+        const editor = document.createElement("div");
+        editor.className = "settings-group-inline-editor";
+        editor.innerHTML = `
+          <label>
+            <span>계정명</span>
+            <input class="edit-group-account" type="text" maxlength="40">
+          </label>
+          <label>
+            <span>월드명</span>
+            <input class="edit-group-world" type="text" maxlength="40">
+          </label>
+          <div class="settings-group-inline-actions">
+            <button class="cancel-group-edit" type="button">취소</button>
+            <button class="save-group-edit" type="button">저장</button>
+          </div>
+        `;
+
+        const accountInput = editor.querySelector(".edit-group-account");
+        const worldInput = editor.querySelector(".edit-group-world");
+
+        accountInput.value = group.account_name || "";
+        worldInput.value = group.world_name || "";
+
+        row.appendChild(editor);
+        accountInput.focus();
+        accountInput.select();
+
+        editor.querySelector(".cancel-group-edit").addEventListener("click", () => {
+          editor.remove();
+        });
+
+        editor.querySelector(".save-group-edit").addEventListener("click", async () => {
+          const accountName = accountInput.value.trim();
+          const worldName = worldInput.value.trim();
+
+          if (!accountName || !worldName) {
+            alert("계정명과 월드명을 모두 입력해주세요.");
+            return;
+          }
+
+          const saveBtn = editor.querySelector(".save-group-edit");
+          saveBtn.disabled = true;
+          setSync("그룹 수정 중…");
+
+          const { data, error } = await sb
+            .from("character_groups")
+            .update({
+              account_name: accountName,
+              world_name: worldName
+            })
+            .eq("id", group.id)
+            .eq("user_id", user.id)
+            .select()
+            .single();
+
+          saveBtn.disabled = false;
+
+          if (error) {
+            console.error(error);
+            setSync("그룹 수정 실패");
+            alert(error.message);
+            return;
+          }
+
+          Object.assign(group, data);
+
+          // 현재 선택 그룹이면 아래 내 캐릭터 제목의 그룹명/서버명도 즉시 반영
+          renderSettingsGroups();
+          renderSettingsCharacters();
+          renderGroupStatus();
+          renderCharacters();
+          updateSelectedGroupTitle();
+          renderSummary();
+
+          setSync("그룹 수정됨");
+        });
       });
 
       row.querySelector(".delete-group").addEventListener("click", async () => {
