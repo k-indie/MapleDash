@@ -1594,3 +1594,146 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .character-status-row .monthly-status:not(.hidden):active{
   transform:scale(.96)!important;
 }
+
+/* ===== v1.08 boss icon alignment fix ===== */
+.boss-select-card-head{
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+
+.boss-select-icon{
+  width:52px!important;
+  height:52px!important;
+  min-width:52px!important;
+  min-height:52px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+  background:#0b111c!important;
+  border:1px solid #344159!important;
+  box-sizing:border-box!important;
+}
+
+.boss-real-icon{
+  display:block!important;
+  width:48px!important;
+  height:48px!important;
+  max-width:48px!important;
+  max-height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  object-fit:contain!important;
+  object-position:50% 50%!important;
+  margin:auto!important;
+  padding:0!important;
+  position:static!important;
+  transform:none!important;
+  border-radius:8px!important;
+}
+
+.boss-fallback-icon{
+  width:48px!important;
+  height:48px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:auto!important;
+}
+
+.boss-select-title{
+  align-self:center!important;
+  justify-self:stretch!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.boss-select-title strong,
+.boss-select-title span{
+  margin:0!important;
+  padding:0!important;
+}
+
+/* ===== v1.08 hotfix: meso icon + price text alignment ===== */
+
+/* 난이도 / 메소 / 처치상태를 한 줄 기준으로 정렬 */
+.boss-price-option{
+  display:grid!important;
+  grid-template-columns:56px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:10px!important;
+  min-height:38px!important;
+  padding:7px 10px!important;
+}
+
+/* 난이도 영역 폭 통일 */
+.boss-option-difficulty{
+  width:56px!important;
+  min-width:56px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  font-size:10px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+/* 메소 아이콘 + 금액을 하나의 수평 행으로 고정 */
+.boss-option-price{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  min-width:0!important;
+  font-size:11px!important;
+  font-weight:850!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  font-variant-numeric:tabular-nums;
+}
+
+/* 사용자 제공 메소 아이콘 */
+.boss-option-price img{
+  width:15px!important;
+  height:15px!important;
+  min-width:15px!important;
+  flex:0 0 15px!important;
+  display:block!important;
+  object-fit:contain!important;
+  margin:0!important;
+  padding:0!important;
+  vertical-align:middle!important;
+}
+
+/* 처치 상태도 중앙 정렬 */
+.boss-option-kill{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:52px!important;
+  min-height:22px!important;
+  padding:4px 6px!important;
+  line-height:1!important;
+}
+
+/* 작은 화면에서도 같은 정렬 유지 */
+@media(max-width:600px){
+  .boss-price-option{
+    grid-template-columns:52px minmax(0,1fr) auto!important;
+    column-gap:8px!important;
+  }
+
+  .boss-option-difficulty{
+    width:52px!important;
+    min-width:52px!important;
+  }
+
+  .boss-option-price{
+    font-size:10px!important;
+  }
+}
