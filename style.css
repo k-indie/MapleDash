@@ -1143,3 +1143,90 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .character-actions .edit-toggle{
   font-size:16px!important;
 }
+
+/* ===== Weekly 12 + separate monthly Black Mage ===== */
+.boss-catalog{
+  display:block!important;
+}
+
+.boss-section-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:4px 0 10px;
+  padding:8px 10px;
+  background:#111827;
+  border:1px solid #273149;
+  border-radius:10px;
+}
+
+.boss-section-heading>div{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.boss-section-heading strong{
+  font-size:13px;
+  color:#eef2f8;
+}
+
+.boss-section-heading span{
+  font-size:10px;
+  color:#8f99ad;
+}
+
+.boss-weekly-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+
+.monthly-boss-section{
+  margin-top:18px;
+  padding-top:15px;
+  border-top:1px solid #2a334a;
+}
+
+.monthly-heading{
+  background:rgba(109,78,150,.12);
+  border-color:#4b3d61;
+}
+
+.blackmage-group{
+  max-width:420px;
+  border-color:#514065!important;
+  background:linear-gradient(180deg,#151225,#0b0d18)!important;
+}
+
+.monthly-boss-row{
+  border-color:#514065!important;
+  background:rgba(76,54,99,.12)!important;
+}
+
+.monthly-boss-row.killed{
+  border-color:#8a65b8!important;
+  background:rgba(126,86,171,.16)!important;
+}
+
+/* 검마가 설정되지 않은 캐릭터에서는 버튼 자체가 사라짐 */
+.character-status-row .status-chip.hidden{
+  display:none!important;
+}
+
+/* 2개 버튼만 남아도 가운데 정렬 */
+.character-status-row{
+  justify-content:center!important;
+}
+
+@media(max-width:850px){
+  .boss-weekly-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:520px){
+  .boss-weekly-grid{
+    grid-template-columns:1fr;
+  }
+}
