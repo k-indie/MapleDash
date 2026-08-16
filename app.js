@@ -42,7 +42,8 @@
     "림보":"assets/boss/limbo.png",
     "발드릭스":"assets/boss/baldricks.png",
     "유피테르":"assets/boss/jupiter.png",
-    "검은 마법사":"assets/boss/blackmage.png"
+    "검은 마법사":"assets/boss/blackmage.png",
+    "메이린":"assets/boss/mayrin.png"
   };
 
   const boss = (name, difficulty, price, short) => ({
@@ -110,6 +111,13 @@
   const BLACK_MAGE_CATALOG = [
     boss("검은 마법사","하드",665000000,"검"),
     boss("검은 마법사","익스트림",8740000000,"검")
+  ];
+
+  // 챌린저스 월드 전용 추가 주간 보스.
+  // 주간 12마리 선택 제한에는 포함되지 않지만 주간 수익/완료에는 포함됩니다.
+  const MAYRIN_CATALOG = [
+    boss("메이린","노멀",300000000,"메"),
+    boss("메이린","하드",600000000,"메")
   ];
 
 
@@ -957,10 +965,12 @@ card.innerHTML = `
       characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
     );
 
-    const selectedWeekly = bossSelections.filter(selection =>
-      memberIds.has(selection.character_id) &&
-      !isBlackMageBoss(selection)
-    );
+    const selectedWeekly = bossSelections.filter(selection => {
+      if (!memberIds.has(selection.character_id) || isBlackMageBoss(selection)) return false;
+      if (!isMayrinBoss(selection)) return true;
+      const ch = characters.find(c => c.id === selection.character_id);
+      return isChallengerWorld(ch?.world_name);
+    });
 
     const killed = selectedWeekly.filter(isBossKilledThisWeek).length;
 
@@ -1465,6 +1475,14 @@ card.innerHTML = `
     return (selection?.boss_name || selection?.name) === "검은 마법사";
   }
 
+  function isMayrinBoss(selection) {
+    return (selection?.boss_name || selection?.name) === "메이린";
+  }
+
+  function isChallengerWorld(worldName) {
+    return String(worldName || "").includes("챌린저스");
+  }
+
   function isBossKilledThisWeek(selection) {
     if (!selection?.killed_at) return false;
     return new Date(selection.killed_at) >= weeklyBossResetBoundary();
@@ -1489,8 +1507,11 @@ card.innerHTML = `
   }
 
   function getBossProgress(characterId) {
+    const ch = characters.find(c => c.id === characterId);
     const selected = bossSelections.filter(x =>
-      x.character_id === characterId && !isBlackMageBoss(x)
+      x.character_id === characterId &&
+      !isBlackMageBoss(x) &&
+      (!isMayrinBoss(x) || isChallengerWorld(ch?.world_name))
     );
     return {
       selected: selected.length,
@@ -1515,8 +1536,13 @@ card.innerHTML = `
   }
 
   function getCharacterWeeklyBossIncome(characterId) {
+    const ch = characters.find(c => c.id === characterId);
     return bossSelections
-      .filter(x => x.character_id === characterId && !isBlackMageBoss(x))
+      .filter(x =>
+        x.character_id === characterId &&
+        !isBlackMageBoss(x) &&
+        (!isMayrinBoss(x) || isChallengerWorld(ch?.world_name))
+      )
       .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
   }
 
@@ -1533,7 +1559,12 @@ card.innerHTML = `
 
   function getWeeklyBossIncome() {
     return bossSelections
-      .filter(x => !isBlackMageBoss(x))
+      .filter(x => {
+        if (isBlackMageBoss(x)) return false;
+        if (!isMayrinBoss(x)) return true;
+        const ch = characters.find(c => c.id === x.character_id);
+        return isChallengerWorld(ch?.world_name);
+      })
       .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
   }
 
@@ -1772,7 +1803,7 @@ card.innerHTML = `
           variants.forEach(v => bossDraft.delete(v.key));
 
           if (!wasSelected) {
-            const weeklyCount = [...bossDraft.values()].filter(x => !isBlackMageBoss(x)).length;
+            const weeklyCount = [...bossDraft.values()].filter(x => !isBlackMageBoss(x) && !isMayrinBoss(x)).length;
             if (weeklyCount >= 12) {
               alert("주간 보스는 최대 12마리까지 선택할 수 있습니다.");
               renderBossCatalog();
@@ -1791,6 +1822,115 @@ card.innerHTML = `
     });
 
     box.appendChild(weeklyGrid);
+
+    // 챌린저스 전용 추가 주간 보스: 메이린
+    if (bossEditingCharacter && isChallengerWorld(bossEditingCharacter.world_name)) {
+      const mayrinWrap = document.createElement("section");
+      mayrinWrap.className = "mayrin-weekly-wrap";
+
+      const mayrinHeading = document.createElement("div");
+      mayrinHeading.className = "boss-section-banner mayrin-banner";
+      mayrinHeading.innerHTML = `
+        <div>
+          <strong>추가 주간 보스 · 메이린</strong>
+          <span>챌린저스 전용 · 주간 12마리 제한과 별도</span>
+        </div>
+      `;
+      mayrinWrap.appendChild(mayrinHeading);
+
+      const mayrinSelected = MAYRIN_CATALOG.find(v => bossDraft.has(v.key));
+
+      const mayrinCard = document.createElement("section");
+      mayrinCard.className = `boss-select-card mayrin-card ${mayrinSelected ? "has-selection" : ""}`;
+      mayrinCard.innerHTML = `
+        <div class="boss-select-card-head">
+          <div class="boss-select-icon">${makeBossIcon(MAYRIN_CATALOG[0])}</div>
+          <div class="boss-select-title">
+            <strong>메이린</strong>
+            <span>${mayrinSelected ? mayrinSelected.difficulty + " 선택됨" : "노멀 / 하드 중 선택"}</span>
+          </div>
+        </div>
+        <div class="boss-select-options"></div>
+      `;
+
+      const mayrinOptions = mayrinCard.querySelector(".boss-select-options");
+
+      MAYRIN_CATALOG.forEach(b => {
+        const selectedData = bossDraft.get(b.key);
+        const selected = !!selectedData;
+        const killed = selected && isBossKilledThisWeek(selectedData);
+        const partySize = selected ? getBossPartySize(selectedData) : 1;
+        const shownIncome = selected ? Math.floor(Number(b.price) / partySize) : Number(b.price);
+
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = `boss-price-option mayrin-option ${selected ? "selected" : ""}`;
+        option.innerHTML = `
+          <span class="boss-option-difficulty">${b.difficulty}</span>
+          <span class="boss-option-price">
+            <img src="assets/boss/meso.png" alt="">
+            <span>${shortMoney(shownIncome)}</span>
+          </span>
+          ${selected ? `
+            <select class="boss-party-select" aria-label="메이린 ${b.difficulty} 파티 인원" title="파티 인원">
+              ${[1,2,3,4,5,6].map(n => `<option value="${n}" ${partySize === n ? "selected" : ""}>${n}인</option>`).join("")}
+            </select>
+            <span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 처치" : "○ 미처치"}</span>
+          ` : ""}
+        `;
+
+        const partySelect = option.querySelector(".boss-party-select");
+        if (partySelect) {
+          partySelect.addEventListener("click", e => e.stopPropagation());
+          partySelect.addEventListener("change", e => {
+            e.stopPropagation();
+            const current = bossDraft.get(b.key);
+            if (!current) return;
+            bossDraft.set(b.key, {
+              ...current,
+              ...b,
+              party_size: Number(e.target.value || 1)
+            });
+            renderBossCatalog();
+          });
+        }
+
+        option.addEventListener("click", e => {
+          if (e.target.closest(".boss-party-select")) return;
+
+          const killTarget = e.target.closest(".boss-option-kill");
+          if (killTarget && selected) {
+            const current = bossDraft.get(b.key);
+            bossDraft.set(b.key, {
+              ...current,
+              ...b,
+              party_size: getBossPartySize(current),
+              killed_at: isBossKilledThisWeek(current) ? null : new Date().toISOString()
+            });
+            renderBossCatalog();
+            return;
+          }
+
+          const wasSelected = bossDraft.has(b.key);
+          MAYRIN_CATALOG.forEach(v => bossDraft.delete(v.key));
+
+          if (!wasSelected) {
+            bossDraft.set(b.key, {
+              ...b,
+              party_size: 1,
+              killed_at: null
+            });
+          }
+
+          renderBossCatalog();
+        });
+
+        mayrinOptions.appendChild(option);
+      });
+
+      mayrinWrap.appendChild(mayrinCard);
+      box.appendChild(mayrinWrap);
+    }
 
     const monthlyWrap = document.createElement("section");
     monthlyWrap.className = "blackmage-monthly-wrap";
@@ -1894,7 +2034,7 @@ card.innerHTML = `
     box.appendChild(monthlyWrap);
 
     const values = [...bossDraft.values()];
-    const weeklyValues = values.filter(x => !isBlackMageBoss(x));
+    const weeklyValues = values.filter(x => !isBlackMageBoss(x) && !isMayrinBoss(x));
     const weeklyKilled = weeklyValues.filter(isBossKilledThisWeek).length;
     const total = values.reduce((sum, b) => sum + getBossPersonalIncome(b), 0);
 

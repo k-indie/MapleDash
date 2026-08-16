@@ -2767,3 +2767,33 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .character-info .info-pair strong{
   white-space:nowrap;
 }
+
+/* ===== v1.19 Challenger special weekly boss: Mayrin ===== */
+.mayrin-weekly-wrap{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:2px solid #315f78;
+}
+
+.mayrin-banner{
+  border-color:#3c7897!important;
+  background:
+    linear-gradient(180deg,rgba(42,100,130,.22),rgba(18,47,64,.18))!important;
+}
+
+.mayrin-banner strong{
+  color:#bceaff!important;
+}
+
+.mayrin-card{
+  max-width:540px;
+  border-color:#356d89!important;
+  background:
+    radial-gradient(circle at 8% 20%,rgba(76,154,193,.14),transparent 38%),
+    linear-gradient(180deg,#101d28,#0a111a)!important;
+}
+
+.mayrin-option.selected{
+  border-color:#4da3cf!important;
+  background:rgba(52,125,163,.16)!important;
+}
