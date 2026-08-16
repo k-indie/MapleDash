@@ -2405,26 +2405,36 @@ card.innerHTML = `
     };
 
     const buckets = getMonthlyIncomeBuckets();
-    const hunting = Number(economySettings.hunting_income || 0);
+    const huntingIncome = Number(economySettings.hunting_income || 0);
     const MESO_UNIT = 100000000; // 1억 메소
 
-    let points = 0;
+    const heliosPoints =
+      rates.reboot > 0
+        ? (Number(buckets.helios || 0) / MESO_UNIT) * rates.reboot
+        : 0;
 
-    // 메포 시세 = "1억 메소당 메이플 포인트"
-    if (rates.reboot > 0) {
-      points += (buckets.helios / MESO_UNIT) * rates.reboot;
-    }
+    const challengerPoints =
+      rates.challenger > 0
+        ? (Number(buckets.challenger || 0) / MESO_UNIT) * rates.challenger
+        : 0;
 
-    if (rates.challenger > 0) {
-      points += (buckets.challenger / MESO_UNIT) * rates.challenger;
-    }
+    const normalBossPoints =
+      rates.normal > 0
+        ? (Number(buckets.normal || 0) / MESO_UNIT) * rates.normal
+        : 0;
 
-    if (rates.normal > 0) {
-      points += (buckets.normal / MESO_UNIT) * rates.normal;
-      points += (hunting / MESO_UNIT) * rates.normal;
-    }
+    // 사냥 수익은 일반 서버 메포 시세로 별도 환산하여 반드시 합산
+    const huntingPoints =
+      rates.normal > 0
+        ? (huntingIncome / MESO_UNIT) * rates.normal
+        : 0;
 
-    return Math.floor(points);
+    return Math.floor(
+      heliosPoints
+      + challengerPoints
+      + normalBossPoints
+      + huntingPoints
+    );
   }
   function parseFormattedNumber(value) {
     const digits = String(value ?? "").replace(/[^\d]/g, "");
