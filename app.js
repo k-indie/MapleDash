@@ -965,19 +965,68 @@ card.innerHTML = `
       characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
     );
 
-    const selectedWeekly = bossSelections.filter(selection => {
-      if (!memberIds.has(selection.character_id) || isBlackMageBoss(selection)) return false;
-      if (!isMayrinBoss(selection)) return true;
+    const normalWeekly = bossSelections.filter(selection =>
+      memberIds.has(selection.character_id) &&
+      !isBlackMageBoss(selection) &&
+      !isMayrinBoss(selection)
+    );
+
+    const mayrinWeekly = bossSelections.filter(selection => {
+      if (!memberIds.has(selection.character_id) || !isMayrinBoss(selection)) return false;
       const ch = characters.find(c => c.id === selection.character_id);
       return isChallengerWorld(ch?.world_name);
     });
 
-    const killed = selectedWeekly.filter(isBossKilledThisWeek).length;
+    return {
+      killed: normalWeekly.filter(isBossKilledThisWeek).length,
+      selected: normalWeekly.length,
+      mayrinConfigured: mayrinWeekly.length > 0,
+      mayrinDone: mayrinWeekly.some(isBossKilledThisWeek),
+      members: memberIds.size
+    };
+  }
+
+  function getGroupNormalWeeklySelectedCount(groupId, excludingCharacterId = null) {
+    const memberIds = new Set(
+      characters
+        .filter(ch => ch.group_id === groupId && ch.id !== excludingCharacterId)
+        .map(ch => ch.id)
+    );
+
+    return bossSelections.filter(selection =>
+      memberIds.has(selection.character_id) &&
+      !isBlackMageBoss(selection) &&
+      !isMayrinBoss(selection)
+    ).length;
+  }
+
+  function getDraftNormalWeeklyCount() {
+    return [...bossDraft.values()].filter(x =>
+      !isBlackMageBoss(x) && !isMayrinBoss(x)
+    ).length;
+  }
+
+  function wouldExceedGroupWeeklyLimit(character, nextDraftNormalCount) {
+    if (!character?.group_id) return false;
+
+    const otherCharactersCount =
+      getGroupNormalWeeklySelectedCount(character.group_id, character.id);
+
+    return otherCharactersCount + nextDraftNormalCount > 90;
+  }
+
+  function getGroupWeeklyLimitState(character, nextDraftNormalCount) {
+    if (!character?.group_id) {
+      return { grouped: false, current: nextDraftNormalCount, limit: 90 };
+    }
+
+    const otherCharactersCount =
+      getGroupNormalWeeklySelectedCount(character.group_id, character.id);
 
     return {
-      killed,
-      selected: selectedWeekly.length,
-      members: memberIds.size
+      grouped: true,
+      current: otherCharactersCount + nextDraftNormalCount,
+      limit: 90
     };
   }
 
@@ -1031,7 +1080,14 @@ card.innerHTML = `
 
       card.querySelector(".group-account").textContent = group.account_name;
       card.querySelector(".group-world").textContent = group.world_name;
-      card.querySelector(".group-member-count").textContent = `${progress.members}캐릭`;
+      const memberBadge = card.querySelector(".group-member-count");
+      if (isChallengerWorld(group.world_name)) {
+        memberBadge.innerHTML =
+          `<span>${progress.members}캐릭 · ${progress.selected}/90</span>` +
+          `<span class="group-mayrin-badge ${progress.mayrinDone ? "done" : ""}">메이린 ${progress.mayrinDone ? "✓" : "○"}</span>`;
+      } else {
+        memberBadge.textContent = `${progress.members}캐릭 · ${progress.selected}/90`;
+      }
 
       const mesoEditor = card.querySelector(".group-meso-editor");
       const mesoInput = card.querySelector(".group-meso-input");
@@ -1141,7 +1197,7 @@ card.innerHTML = `
           <strong class="settings-group-account"></strong>
           <span class="settings-group-world"></span>
         </div>
-        <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
+        <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected}${isChallengerWorld(group.world_name) ? ` · 메이린 ${progress.mayrinDone ? "✓" : "○"}` : ""} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
         <button class="delete-btn delete-group" type="button">삭제</button>
       `;
 
@@ -1803,12 +1859,32 @@ card.innerHTML = `
           variants.forEach(v => bossDraft.delete(v.key));
 
           if (!wasSelected) {
-            const weeklyCount = [...bossDraft.values()].filter(x => !isBlackMageBoss(x) && !isMayrinBoss(x)).length;
+            const weeklyCount = getDraftNormalWeeklyCount();
+
             if (weeklyCount >= 12) {
-              alert("주간 보스는 최대 12마리까지 선택할 수 있습니다.");
+              alert("이 캐릭터의 일반 주간 보스는 최대 12마리까지 선택할 수 있습니다.");
               renderBossCatalog();
               return;
             }
+
+            const nextDraftCount = weeklyCount + 1;
+            if (wouldExceedGroupWeeklyLimit(bossEditingCharacter, nextDraftCount)) {
+              const state = getGroupWeeklyLimitState(bossEditingCharacter, nextDraftCount);
+              const group = getGroupById(bossEditingCharacter.group_id);
+              const groupName = group
+                ? `${group.account_name} · ${group.world_name}`
+                : "현재 그룹";
+
+              alert(
+                `⚠️ ${groupName}의 일반 주간 보스 90마리 제한을 초과합니다.\n` +
+                `선택 후 ${state.current} / ${state.limit}마리가 됩니다.\n\n` +
+                `메이린은 이 90마리 제한에 포함되지 않습니다.`
+              );
+
+              renderBossCatalog();
+              return;
+            }
+
             bossDraft.set(b.key, { ...b, party_size: 1, killed_at: null });
           }
 
@@ -2047,6 +2123,26 @@ card.innerHTML = `
   async function saveBossSelection(){
     if(!bossEditingCharacter)return;
     const ch=bossEditingCharacter, chosen=[...bossDraft.values()];
+
+    const draftNormalCount = chosen.filter(x =>
+      !isBlackMageBoss(x) && !isMayrinBoss(x)
+    ).length;
+
+    if (wouldExceedGroupWeeklyLimit(ch, draftNormalCount)) {
+      const state = getGroupWeeklyLimitState(ch, draftNormalCount);
+      const group = getGroupById(ch.group_id);
+      const groupName = group
+        ? `${group.account_name} · ${group.world_name}`
+        : "현재 그룹";
+
+      alert(
+        `⚠️ ${groupName}의 일반 주간 보스 90마리 제한을 초과해서 저장할 수 없습니다.\n` +
+        `현재 설정 기준 ${state.current} / ${state.limit}마리입니다.\n\n` +
+        `메이린은 별도 계산되어 이 제한에 포함되지 않습니다.`
+      );
+      return;
+    }
+
     $("bossModalSave").disabled=true; setSync("보스 설정 저장 중…");
     try{
       const d=await sb.from("character_boss_selections").delete().eq("user_id",user.id).eq("character_id",ch.id); if(d.error)throw d.error;

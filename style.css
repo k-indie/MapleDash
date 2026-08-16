@@ -2797,3 +2797,79 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   border-color:#4da3cf!important;
   background:rgba(52,125,163,.16)!important;
 }
+
+/* ===== v1.20 group 90-limit + separate Mayrin counter ===== */
+.group-mayrin-count{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  min-height:20px;
+  padding-top:2px;
+  border-top:1px dashed #29475a;
+}
+
+.group-mayrin-count span{
+  color:#77b8d8;
+  font-size:9px;
+}
+
+.group-mayrin-count strong{
+  color:#a7e6ff;
+  font-size:12px;
+}
+
+.group-status-card.limit-warning{
+  border-color:#c27632!important;
+}
+
+/* ===== v1.21 group card typography + group-wide Mayrin status ===== */
+
+/* 서버명: 기존 10px -> 13px */
+.group-world{
+  font-size:13px!important;
+}
+
+/* n캐릭 / 90 표시: 기존 8px -> 11px */
+.group-member-count{
+  font-size:11px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  white-space:nowrap!important;
+}
+
+/* 주간 보스 처치: 기존 9px -> 12px */
+.group-status-count span{
+  font-size:12px!important;
+}
+
+/* 보유 메소 라벨: 기존 9px -> 12px */
+.group-meso-line>span{
+  font-size:12px!important;
+}
+
+/* 메이린은 그룹당 1회 상태로만 표시 */
+.group-mayrin-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 5px;
+  border:1px solid #36566a;
+  border-radius:5px;
+  background:rgba(46,97,124,.14);
+  color:#8ccbe7;
+  font-size:10px;
+  font-weight:850;
+}
+
+.group-mayrin-badge.done{
+  border-color:#3f8b6a;
+  background:rgba(67,151,112,.14);
+  color:#83e0b4;
+}
+
+/* 기존 별도 메이린 행은 더 이상 사용하지 않음 */
+.group-mayrin-count{
+  display:none!important;
+}
