@@ -344,6 +344,66 @@
   function resetBoundaryForCycle(cycle,now=new Date()){if(cycle==="daily")return new Date(now.getFullYear(),now.getMonth(),now.getDate());if(cycle==="weekly"){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate());d.setDate(d.getDate()-((d.getDay()-4+7)%7));return d;}return new Date(now.getFullYear(),now.getMonth(),1);}
   function isCharacterCheckDone(cid,item){const s=characterCheckStates.find(x=>x.character_id===cid&&x.checklist_id===item.id);return !!s?.completed_at&&new Date(s.completed_at)>=resetBoundaryForCycle(item.cycle);}
   function getCharacterChecklistProgress(cid,cycle){const items=checklist.filter(x=>x.cycle===cycle);return{done:items.filter(x=>isCharacterCheckDone(cid,x)).length,total:items.length};}
+  async function toggleWholeCycle(ch, cycle) {
+    const items = checklist.filter(x => x.cycle === cycle);
+    if (!items.length) return;
+
+    const progress = getCharacterChecklistProgress(ch.id, cycle);
+    const shouldComplete = progress.done !== progress.total;
+    const completedAt = shouldComplete ? new Date().toISOString() : null;
+
+    setSync(shouldComplete ? "숙제 완료 처리 중…" : "숙제 완료 해제 중…");
+
+    try {
+      for (const item of items) {
+        const existing = characterCheckStates.find(x =>
+          x.character_id === ch.id && x.checklist_id === item.id
+        );
+
+        if (existing) {
+          const { data, error } = await sb
+            .from("character_check_states")
+            .update({ completed_at: completedAt })
+            .eq("id", existing.id)
+            .eq("user_id", user.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          Object.assign(existing, data);
+        } else {
+          const { data, error } = await sb
+            .from("character_check_states")
+            .insert({
+              user_id: user.id,
+              character_id: ch.id,
+              checklist_id: item.id,
+              completed_at: completedAt
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          characterCheckStates.push(data);
+        }
+      }
+
+      renderCharacters();
+      renderSummary();
+
+      if (checklistEditingCharacter?.id === ch.id) {
+        renderCharacterChecklistModal();
+      }
+
+      setSync(shouldComplete ? "숙제 완료" : "숙제 해제됨");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+      setSync("저장 실패");
+      await loadAll();
+    }
+  }
+
   function openCharacterChecklist(ch){checklistEditingCharacter=ch;$("characterChecklistTitle").textContent=ch.nickname||"캐릭터";$("characterChecklistSubtitle").textContent=`${ch.class_name||"직업 미확인"} · ${ch.world_name||"월드 미확인"}`;$("characterChecklistModal").classList.remove("hidden");document.body.classList.add("modal-open");renderCharacterChecklistModal();}
   function closeCharacterChecklist(){$("characterChecklistModal").classList.add("hidden");document.body.classList.remove("modal-open");checklistEditingCharacter=null;}
   async function toggleCharacterCheck(item){const ch=checklistEditingCharacter;if(!ch)return;const existing=characterCheckStates.find(x=>x.character_id===ch.id&&x.checklist_id===item.id),completed_at=isCharacterCheckDone(ch.id,item)?null:new Date().toISOString();const q=existing?await sb.from("character_check_states").update({completed_at}).eq("id",existing.id).eq("user_id",user.id).select().single():await sb.from("character_check_states").insert({user_id:user.id,character_id:ch.id,checklist_id:item.id,completed_at}).select().single();if(q.error){alert(q.error.message);return;}if(existing)Object.assign(existing,q.data);else characterCheckStates.push(q.data);renderCharacterChecklistModal();renderCharacters();renderSummary();setSync("체크 저장됨");}
@@ -378,7 +438,11 @@
           <div class="character-title">
             <div class="character-name"></div>
             <span class="character-class-badge"></span>
-            <div class="character-world"></div><div class="character-status-row"><span class="status-chip daily-status"></span><span class="status-chip weekly-status"></span><span class="status-chip monthly-status"></span></div>
+            <div class="character-world"></div><div class="character-status-row">
+              <button class="status-chip daily-status" type="button" title="일일 숙제 전체 완료/해제"></button>
+              <button class="status-chip weekly-status" type="button" title="주간 숙제 전체 완료/해제"></button>
+              <button class="status-chip monthly-status" type="button" title="월간 숙제 전체 완료/해제"></button>
+            </div>
           </div>
         </div>
 
@@ -422,7 +486,30 @@
       card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미확인";
       card.querySelector(".character-world").textContent = ch.world_name || "";
       const dp=getCharacterChecklistProgress(ch.id,"daily"),wp=getCharacterChecklistProgress(ch.id,"weekly"),mp=getCharacterChecklistProgress(ch.id,"monthly");
-      card.querySelector(".daily-status").textContent=`일일 ${dp.done}/${dp.total}`;card.querySelector(".weekly-status").textContent=`주간 ${wp.done}/${wp.total}`;card.querySelector(".monthly-status").textContent=`월간 ${mp.done}/${mp.total}`;
+      const dailyBtn = card.querySelector(".daily-status");
+      const weeklyBtn = card.querySelector(".weekly-status");
+      const monthlyBtn = card.querySelector(".monthly-status");
+
+      dailyBtn.textContent=`일일 ${dp.done}/${dp.total}`;
+      weeklyBtn.textContent=`주간 ${wp.done}/${wp.total}`;
+      monthlyBtn.textContent=`월간 ${mp.done}/${mp.total}`;
+
+      dailyBtn.classList.toggle("complete", dp.total > 0 && dp.done === dp.total);
+      weeklyBtn.classList.toggle("complete", wp.total > 0 && wp.done === wp.total);
+      monthlyBtn.classList.toggle("complete", mp.total > 0 && mp.done === mp.total);
+
+      dailyBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleWholeCycle(ch, "daily");
+      });
+      weeklyBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleWholeCycle(ch, "weekly");
+      });
+      monthlyBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleWholeCycle(ch, "monthly");
+      });
       card.querySelector(".view-level").textContent = levelText;
       card.querySelector(".view-power").textContent = powerText;
       card.querySelector(".view-owned").textContent = ownedText;
