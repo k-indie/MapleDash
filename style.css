@@ -2873,3 +2873,34 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .group-mayrin-count{
   display:none!important;
 }
+
+/* ===== v1.22 compact group badge / Mayrin state ===== */
+.group-member-count{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+}
+
+.group-member-count>span:first-child{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* 기본 메이린 = n캐릭 배지와 비슷한 회색 */
+.group-mayrin-badge{
+  padding:2px 5px!important;
+  border:1px solid #344158!important;
+  border-radius:5px!important;
+  background:#151e2d!important;
+  color:#a9b3c2!important;
+  font-size:11px!important;
+  font-weight:800!important;
+}
+
+/* 클리어했을 때만 초록색 */
+.group-mayrin-badge.done{
+  border-color:#3f8b6a!important;
+  background:rgba(67,151,112,.16)!important;
+  color:#83e0b4!important;
+}

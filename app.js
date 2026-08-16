@@ -1083,10 +1083,10 @@ card.innerHTML = `
       const memberBadge = card.querySelector(".group-member-count");
       if (isChallengerWorld(group.world_name)) {
         memberBadge.innerHTML =
-          `<span>${progress.members}캐릭 · ${progress.selected}/90</span>` +
-          `<span class="group-mayrin-badge ${progress.mayrinDone ? "done" : ""}">메이린 ${progress.mayrinDone ? "✓" : "○"}</span>`;
+          `<span>${progress.members}캐릭</span>` +
+          `<span class="group-mayrin-badge ${progress.mayrinDone ? "done" : ""}">메이린</span>`;
       } else {
-        memberBadge.textContent = `${progress.members}캐릭 · ${progress.selected}/90`;
+        memberBadge.textContent = `${progress.members}캐릭`;
       }
 
       const mesoEditor = card.querySelector(".group-meso-editor");
@@ -1197,7 +1197,7 @@ card.innerHTML = `
           <strong class="settings-group-account"></strong>
           <span class="settings-group-world"></span>
         </div>
-        <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected}${isChallengerWorld(group.world_name) ? ` · 메이린 ${progress.mayrinDone ? "✓" : "○"}` : ""} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
+        <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected}${isChallengerWorld(group.world_name) ? ` · 메이린` : ""} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
         <button class="delete-btn delete-group" type="button">삭제</button>
       `;
 
