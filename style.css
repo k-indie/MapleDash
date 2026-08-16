@@ -1520,3 +1520,12 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   object-position:center center!important;
   display:block!important;
 }
+
+/* ===== v1.04 user-provided meso asset ===== */
+.boss-option-price img{
+  width:14px!important;
+  height:14px!important;
+  object-fit:contain!important;
+  image-rendering:auto!important;
+  flex:0 0 14px!important;
+}
