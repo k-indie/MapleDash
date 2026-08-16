@@ -708,9 +708,13 @@
         monthlyBtn.classList.remove("hidden");
         monthlyBtn.classList.toggle("complete", isBossKilledThisMonth(blackMage));
         monthlyBtn.title = isBossKilledThisMonth(blackMage)
-          ? "이번 달 검은마법사 처치 완료"
-          : "캐릭터를 눌러 검은마법사 처치 상태를 변경하세요.";
-        monthlyBtn.addEventListener("click", e => e.stopPropagation());
+          ? "이번 달 검은마법사 처치 완료 · 클릭하면 해제"
+          : "클릭하면 이번 달 검은마법사 처치 완료";
+
+        monthlyBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          toggleBlackMage(ch);
+        });
       } else {
         monthlyBtn.classList.add("hidden");
       }
@@ -1029,6 +1033,7 @@
   }
 
   function isBossKilledThisMonth(selection) {
+    // 매월 1일 00:00 이전의 처치 기록은 자동으로 미완료 처리됩니다.
     if (!selection?.killed_at) return false;
     return new Date(selection.killed_at) >= monthlyBossResetBoundary();
   }
@@ -1092,6 +1097,50 @@
       console.error(err);
       alert(err.message || String(err));
       setSync("저장 실패");
+      await loadAll();
+    }
+  }
+
+  async function toggleBlackMage(ch) {
+    const blackMage = getBlackMageSelection(ch.id);
+
+    if (!blackMage) {
+      alert("설정에서 검은마법사를 먼저 선택해주세요.");
+      return;
+    }
+
+    const killedNow = isBossKilledThisMonth(blackMage);
+    const nextKilledAt = killedNow ? null : new Date().toISOString();
+
+    setSync(killedNow ? "검마 완료 해제 중…" : "검마 완료 저장 중…");
+
+    try {
+      const { data, error } = await sb
+        .from("character_boss_selections")
+        .update({ killed_at: nextKilledAt })
+        .eq("user_id", user.id)
+        .eq("character_id", ch.id)
+        .eq("boss_key", blackMage.boss_key)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      Object.assign(blackMage, data);
+
+      renderCharacters();
+      renderSettingsCharacters();
+      renderSummary();
+
+      if (checklistEditingCharacter?.id === ch.id) {
+        renderCharacterChecklistModal();
+      }
+
+      setSync(killedNow ? "검마 완료 해제됨" : "검마 완료");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+      setSync("검마 저장 실패");
       await loadAll();
     }
   }

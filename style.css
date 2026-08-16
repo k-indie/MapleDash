@@ -1586,3 +1586,11 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   object-position:center center!important;
   display:block!important;
 }
+
+/* ===== v1.07 clickable Black Mage button ===== */
+.character-status-row .monthly-status:not(.hidden){
+  cursor:pointer!important;
+}
+.character-status-row .monthly-status:not(.hidden):active{
+  transform:scale(.96)!important;
+}
