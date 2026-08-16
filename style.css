@@ -1265,3 +1265,35 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   vertical-align:middle;
   white-space:nowrap;
 }
+
+/* ===== v1.01: hard-separated monthly Black Mage section ===== */
+.monthly-boss-section{
+  margin-top:28px!important;
+  padding-top:20px!important;
+  border-top:3px solid #6a4f88!important;
+}
+
+.monthly-boss-section::before{
+  content:"";
+  display:block;
+  height:1px;
+  margin-bottom:12px;
+  background:linear-gradient(90deg,transparent,#8b6cad,transparent);
+}
+
+.monthly-boss-section .boss-section-heading{
+  background:linear-gradient(180deg,rgba(104,74,140,.24),rgba(52,36,73,.22))!important;
+  border-color:#775b98!important;
+}
+
+.monthly-boss-section .boss-section-heading strong{
+  color:#d8c2ff!important;
+}
+
+.blackmage-group{
+  max-width:none!important;
+  border-color:#624b82!important;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(114,77,154,.15),transparent 38%),
+    linear-gradient(180deg,#171326,#0b0d18)!important;
+}
