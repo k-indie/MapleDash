@@ -1101,7 +1101,15 @@
     bossDraft = new Map(
       bossSelections
         .filter(x => x.character_id === ch.id)
-        .map(x => [x.boss_key, x])
+        .map(x => [
+          x.boss_key,
+          {
+            ...x,
+            key: x.boss_key,
+            name: x.boss_name,
+            price: Number(x.crystal_price || 0)
+          }
+        ])
     );
     $("bossModalCharacter").textContent = `${ch.nickname} · 주간 12마리 + 월간 검은마법사`;
     $("bossModal").classList.remove("hidden");
@@ -1315,10 +1323,10 @@
         const rows=chosen.map(b=>({
           user_id:user.id,
           character_id:ch.id,
-          boss_key:b.key,
-          boss_name:b.name,
+          boss_key:b.key || b.boss_key,
+          boss_name:b.name || b.boss_name,
           difficulty:b.difficulty,
-          crystal_price:b.price,
+          crystal_price:Number(b.price ?? b.crystal_price ?? 0),
           killed_at:b.killed_at || null
         }));
         const ins=await sb.from("character_boss_selections").insert(rows); if(ins.error)throw ins.error;
@@ -1330,10 +1338,10 @@
       bossSelections.push(...chosen.map(b=>({
         user_id:user.id,
         character_id:ch.id,
-        boss_key:b.key,
-        boss_name:b.name,
+        boss_key:b.key || b.boss_key,
+        boss_name:b.name || b.boss_name,
         difficulty:b.difficulty,
-        crystal_price:b.price,
+        crystal_price:Number(b.price ?? b.crystal_price ?? 0),
         killed_at:b.killed_at || null
       })));
       Object.assign(ch,up.data); closeBossModal(); renderAll(); setSync("보스 설정 저장됨");
