@@ -1230,3 +1230,26 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-template-columns:1fr;
   }
 }
+
+/* ===== Fix Black Mage separation + clickable weekly bulk button ===== */
+.character-status-row .weekly-status{
+  cursor:pointer!important;
+}
+.character-status-row .weekly-status:active{
+  transform:scale(.96)!important;
+}
+
+/* 월간 검마 영역을 더 확실히 분리 */
+.monthly-boss-section{
+  margin-top:22px!important;
+  padding-top:18px!important;
+  border-top:2px solid #4b3d61!important;
+}
+.monthly-boss-section .monthly-heading{
+  margin-bottom:10px!important;
+  background:rgba(108,76,148,.18)!important;
+  border-color:#624b82!important;
+}
+.blackmage-group{
+  margin-top:0!important;
+}
