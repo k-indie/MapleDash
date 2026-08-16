@@ -555,6 +555,8 @@
     renderCharacterChecklistModal();
     renderCharacters();
     renderSettingsCharacters();
+    renderSettingsGroups();
+    renderGroupStatus();
     renderSummary();
     setSync(killedNow ? "처치 해제됨" : "처치 완료");
   }
@@ -1704,6 +1706,8 @@ card.innerHTML = `
 
       renderCharacters();
       renderSettingsCharacters();
+      renderSettingsGroups();
+      renderGroupStatus();
       renderSummary();
 
       if (checklistEditingCharacter?.id === ch.id) {

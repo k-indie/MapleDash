@@ -2904,3 +2904,35 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   background:rgba(67,151,112,.16)!important;
   color:#83e0b4!important;
 }
+
+/* ===== v1.23 group card title layout ===== */
+.group-status-head>div{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:3px!important;
+  min-width:0!important;
+}
+
+.group-account{
+  width:100%!important;
+  max-width:none!important;
+  font-size:15px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.group-world{
+  width:100%!important;
+  font-size:13px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.group-status-head{
+  align-items:flex-start!important;
+}
