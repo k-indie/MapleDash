@@ -439,9 +439,9 @@
             <div class="character-name"></div>
             <span class="character-class-badge"></span>
             <div class="character-world"></div><div class="character-status-row">
-              <button class="status-chip daily-status" type="button" title="일일 숙제 전체 완료/해제"></button>
+              <button class="status-chip daily-status" type="button" title="일간 숙제 전체 완료/해제"></button>
               <button class="status-chip weekly-status" type="button" title="주간 숙제 전체 완료/해제"></button>
-              <button class="status-chip monthly-status" type="button" title="월간 숙제 전체 완료/해제"></button>
+              <button class="status-chip monthly-status" type="button" title="검마 완료/해제"></button>
             </div>
           </div>
         </div>
@@ -490,9 +490,9 @@
       const weeklyBtn = card.querySelector(".weekly-status");
       const monthlyBtn = card.querySelector(".monthly-status");
 
-      dailyBtn.textContent=`일일 ${dp.done}/${dp.total}`;
-      weeklyBtn.textContent=`주간 ${wp.done}/${wp.total}`;
-      monthlyBtn.textContent=`월간 ${mp.done}/${mp.total}`;
+      dailyBtn.textContent="일간";
+      weeklyBtn.textContent="주간";
+      monthlyBtn.textContent="검마";
 
       dailyBtn.classList.toggle("complete", dp.total > 0 && dp.done === dp.total);
       weeklyBtn.classList.toggle("complete", wp.total > 0 && wp.done === wp.total);
