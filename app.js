@@ -497,6 +497,7 @@
       }
 
       renderCharacters();
+      renderGroupStatus();
       renderSummary();
 
       if (checklistEditingCharacter?.id === ch.id) {
@@ -962,6 +963,33 @@ card.innerHTML = `
     return characterGroups.find(g => g.id === groupId) || null;
   }
 
+  function getCharacterDailyDone(characterId) {
+    const p = getCharacterChecklistProgress(characterId, "daily");
+    return p.total > 0 && p.done === p.total;
+  }
+
+  function getCharacterWeeklyDone(characterId) {
+    const p = getBossProgress(characterId);
+    return p.selected === 0 || p.killed === p.selected;
+  }
+
+  function getGroupHomeworkStatus(groupId) {
+    const members = characters.filter(ch => ch.group_id === groupId);
+
+    const dailyDone = members.filter(ch => getCharacterDailyDone(ch.id)).length;
+    const weeklyDone = members.filter(ch => getCharacterWeeklyDone(ch.id)).length;
+
+    return {
+      members,
+      dailyDone,
+      dailyTotal: members.length,
+      weeklyDone,
+      weeklyTotal: members.length,
+      dailyComplete: members.length > 0 && dailyDone === members.length,
+      weeklyComplete: members.length > 0 && weeklyDone === members.length
+    };
+  }
+
   function getGroupWeeklyProgress(groupId) {
     const memberIds = new Set(
       characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
@@ -1057,6 +1085,11 @@ card.innerHTML = `
           <span class="group-member-count"></span>
         </div>
 
+        <div class="group-homework-wrap">
+          <div class="group-homework-buttons"></div>
+          <div class="group-homework-popover" role="tooltip"></div>
+        </div>
+
         <div class="group-status-metrics">
           <div class="group-status-count">
             <span>주간 보스 처치</span>
@@ -1089,6 +1122,52 @@ card.innerHTML = `
           `<span class="group-mayrin-badge ${progress.mayrinDone ? "done" : ""}">메이린</span>`;
       } else {
         memberBadge.textContent = `${progress.members}캐릭`;
+      }
+
+      const homework = getGroupHomeworkStatus(group.id);
+      const homeworkButtons = card.querySelector(".group-homework-buttons");
+      const homeworkPopover = card.querySelector(".group-homework-popover");
+
+      homeworkButtons.innerHTML = `
+        <button type="button"
+          class="group-homework-btn daily ${homework.dailyComplete ? "complete" : ""}"
+          aria-label="그룹 일간 숙제 현황">
+          일간 ${homework.dailyDone}/${homework.dailyTotal}
+        </button>
+        <button type="button"
+          class="group-homework-btn weekly ${homework.weeklyComplete ? "complete" : ""}"
+          aria-label="그룹 주간 숙제 현황">
+          주간 ${homework.weeklyDone}/${homework.weeklyTotal}
+        </button>
+      `;
+
+      if (!homework.members.length) {
+        homeworkPopover.innerHTML = '<div class="group-homework-empty">소속 캐릭터가 없습니다.</div>';
+      } else {
+        homeworkPopover.innerHTML = `
+          <div class="group-homework-popover-head">
+            <strong>캐릭터 숙제 현황</strong>
+            <span>일간 · 주간</span>
+          </div>
+          <div class="group-homework-list"></div>
+        `;
+
+        const list = homeworkPopover.querySelector(".group-homework-list");
+
+        homework.members.forEach(member => {
+          const dailyDone = getCharacterDailyDone(member.id);
+          const weeklyDone = getCharacterWeeklyDone(member.id);
+
+          const row = document.createElement("div");
+          row.className = "group-homework-character";
+          row.innerHTML = `
+            <span class="group-homework-name"></span>
+            <span class="mini-homework-status ${dailyDone ? "done" : ""}">일간</span>
+            <span class="mini-homework-status ${weeklyDone ? "done" : ""}">주간</span>
+          `;
+          row.querySelector(".group-homework-name").textContent = member.nickname || "캐릭터";
+          list.appendChild(row);
+        });
       }
 
       const mesoEditor = card.querySelector(".group-meso-editor");
