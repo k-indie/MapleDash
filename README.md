@@ -1,14 +1,13 @@
 # Maple Personal Dashboard - No API
 
-NEXON API 없이 GitHub Pages + Supabase만 사용하는 개인 메이플 대시보드입니다.
+NEXON API 불러오는 GitHub Pages + Supabase만 사용하는 개인 메이플 대시보드입니다.
 
 ## 기능
 - 이메일/비밀번호 로그인
 - 여러 기기 데이터 동기화
-- 일일 / 주간 / 1회 체크리스트
-- 메소 수입 / 지출 기록
-- 강화 기록
-- 캐릭터 정보 수동 입력
+- 일일/주간 체크리스트
+- 주간/월간 보스 수익
+- 캐릭터 정보 자동 입력
 - 월간 요약
 - RLS로 본인 데이터만 접근
 
