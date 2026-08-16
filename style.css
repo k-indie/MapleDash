@@ -3123,3 +3123,86 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .character-list-panel .section-head{
   align-items:flex-end!important;
 }
+
+/* ===== v1.26 Maple Point calculator ===== */
+.economy-calculator{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.economy-inputs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(118px,1fr));
+  gap:5px;
+}
+
+.economy-inputs label{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.economy-inputs label span{
+  color:#8490a3;
+  font-size:8px;
+  white-space:nowrap;
+}
+
+.economy-inputs input{
+  width:100%;
+  min-width:0;
+  height:28px;
+  padding:4px 6px;
+  border:1px solid #303b53;
+  border-radius:6px;
+  background:#0f1724;
+  color:#e6ebf3;
+  font-size:9px;
+}
+
+.economy-result{
+  min-width:156px;
+  padding:6px 9px;
+  border:1px solid #5d4b2d;
+  border-radius:8px;
+  background:linear-gradient(180deg,rgba(193,124,28,.12),rgba(77,47,12,.10));
+}
+
+.economy-result span{
+  display:block;
+  color:#aa946d;
+  font-size:8px;
+  margin-bottom:2px;
+}
+
+.economy-result strong{
+  color:#ffcf74;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+@media(max-width:1350px){
+  .economy-inputs{
+    grid-template-columns:repeat(2,minmax(115px,1fr));
+  }
+}
+
+@media(max-width:900px){
+  .economy-calculator{
+    width:100%;
+    margin-left:0;
+    flex-wrap:wrap;
+  }
+
+  .economy-inputs{
+    width:100%;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .economy-result{
+    width:100%;
+  }
+}

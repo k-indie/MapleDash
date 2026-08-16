@@ -14,6 +14,13 @@
   let characters = [];
   let characterGroups = [];
   let selectedDashboardGroupId = null;
+  let economySettings = {
+    challenger_rate: 0,
+    normal_rate: 0,
+    reboot_rate: 0,
+    hunting_income: 0
+  };
+  let economySaveTimer = null;
   let characterCheckStates=[];
   let checklistEditingCharacter=null;
   let bossSelections = [];
@@ -234,6 +241,24 @@
           selectedDashboardGroupId = characterGroups[0]?.id || null;
         }
       }
+
+      const eco = await sb
+        .from("maple_economy_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (eco.error) {
+        console.warn("maple_economy_settings load skipped:", eco.error);
+      } else if (eco.data) {
+        economySettings = {
+          challenger_rate: Number(eco.data.challenger_rate || 0),
+          normal_rate: Number(eco.data.normal_rate || 0),
+          reboot_rate: Number(eco.data.reboot_rate || 0),
+          hunting_income: Number(eco.data.hunting_income || 0)
+        };
+      }
+
       renderAll();
       setSync("동기화됨");
     } catch (err) {
@@ -2330,6 +2355,132 @@ card.innerHTML = `
     sub.textContent = `${group.account_name} · ${group.world_name}`;
   }
 
+  function getGroupMonthlyIncome(groupId) {
+    const memberIds = new Set(
+      characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
+    );
+
+    let weekly = 0;
+    let blackMage = 0;
+
+    bossSelections.forEach(selection => {
+      if (!memberIds.has(selection.character_id)) return;
+
+      if (isBlackMageBoss(selection)) {
+        blackMage += getBossPersonalIncome(selection);
+      } else {
+        weekly += getBossPersonalIncome(selection);
+      }
+    });
+
+    return weekly * 4 + blackMage;
+  }
+
+  function getMonthlyIncomeBuckets() {
+    let helios = 0;
+    let challenger = 0;
+    let normal = 0;
+
+    characterGroups.forEach(group => {
+      const income = getGroupMonthlyIncome(group.id);
+      const world = String(group.world_name || "");
+
+      if (world.includes("핼리오스")) {
+        helios += income;
+      } else if (world.includes("챌린저스")) {
+        challenger += income;
+      } else {
+        normal += income;
+      }
+    });
+
+    return { helios, challenger, normal };
+  }
+
+  function calculateMaplePoints() {
+    const rates = {
+      challenger: Number(economySettings.challenger_rate || 0),
+      normal: Number(economySettings.normal_rate || 0),
+      reboot: Number(economySettings.reboot_rate || 0)
+    };
+
+    const buckets = getMonthlyIncomeBuckets();
+    const hunting = Number(economySettings.hunting_income || 0);
+
+    let points = 0;
+
+    if (rates.reboot > 0) points += buckets.helios / rates.reboot;
+    if (rates.challenger > 0) points += buckets.challenger / rates.challenger;
+    if (rates.normal > 0) {
+      points += buckets.normal / rates.normal;
+      points += hunting / rates.normal;
+    }
+
+    return Math.floor(points);
+  }
+
+  function renderEconomyCalculator() {
+    if (!$("challengerRate")) return;
+
+    $("challengerRate").value = economySettings.challenger_rate || "";
+    $("normalRate").value = economySettings.normal_rate || "";
+    $("rebootRate").value = economySettings.reboot_rate || "";
+    $("huntingIncome").value = economySettings.hunting_income || "";
+
+    $("maplePointResult").textContent =
+      `${calculateMaplePoints().toLocaleString("ko-KR")} 메이플 포인트`;
+  }
+
+  async function saveEconomySettings() {
+    const payload = {
+      user_id: user.id,
+      challenger_rate: Number(economySettings.challenger_rate || 0),
+      normal_rate: Number(economySettings.normal_rate || 0),
+      reboot_rate: Number(economySettings.reboot_rate || 0),
+      hunting_income: Math.max(0, Math.floor(Number(economySettings.hunting_income || 0))),
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await sb
+      .from("maple_economy_settings")
+      .upsert(payload, { onConflict: "user_id" });
+
+    if (error) {
+      console.error(error);
+      setSync("시세 저장 실패");
+      return;
+    }
+
+    setSync("시세 저장됨");
+  }
+
+  function scheduleEconomySave() {
+    clearTimeout(economySaveTimer);
+    economySaveTimer = setTimeout(saveEconomySettings, 450);
+  }
+
+  function bindEconomyCalculator() {
+    const bindings = [
+      ["challengerRate", "challenger_rate"],
+      ["normalRate", "normal_rate"],
+      ["rebootRate", "reboot_rate"],
+      ["huntingIncome", "hunting_income"]
+    ];
+
+    bindings.forEach(([id, key]) => {
+      const input = $(id);
+      if (!input || input.dataset.bound === "1") return;
+      input.dataset.bound = "1";
+
+      input.addEventListener("input", () => {
+        economySettings[key] = Math.max(0, Number(input.value || 0));
+        $("maplePointResult").textContent =
+          `${calculateMaplePoints().toLocaleString("ko-KR")} 메이플 포인트`;
+        scheduleEconomySave();
+      });
+    });
+  }
+
   function renderAll() {
     renderChecklist();
     renderCharacters();
@@ -2338,6 +2489,8 @@ card.innerHTML = `
     renderGroupStatus();
     updateSelectedGroupTitle();
     renderSummary();
+    renderEconomyCalculator();
+    bindEconomyCalculator();
   }
 
   sb.auth.onAuthStateChange((event, session) => {

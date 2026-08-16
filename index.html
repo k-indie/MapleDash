@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.25" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.26" />
 
-  <link rel="stylesheet" href="style.css?v=1.25" />
+  <link rel="stylesheet" href="style.css?v=1.26" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.25</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.26</span></h1>
           
         </div>
         <div class="header-actions">
@@ -59,7 +59,19 @@
               
               <h2>그룹별 현황</h2>
               
+            
+          <div class="economy-calculator">
+            <div class="economy-inputs">
+              <label><span>챌린저스 메포 시세</span><input id="challengerRate" type="number" min="0" step="0.01" placeholder="예: 2500"></label>
+              <label><span>일반 서버 메포 시세</span><input id="normalRate" type="number" min="0" step="0.01" placeholder="예: 2800"></label>
+              <label><span>리부트 메포 시세</span><input id="rebootRate" type="number" min="0" step="0.01" placeholder="예: 3000"></label>
+              <label><span>사냥 수익</span><input id="huntingIncome" type="number" min="0" step="1" placeholder="메소"></label>
             </div>
+            <div class="economy-result">
+              <span>예상 메이플 포인트</span>
+              <strong id="maplePointResult">0 메이플 포인트</strong>
+            </div>
+          </div></div>
           </div>
           <div id="groupStatusGrid" class="group-status-grid"></div>
         </article>
@@ -148,7 +160,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.25"></script>
-  <script src="app.js?v=1.25"></script>
+  <script src="config.js?v=1.26"></script>
+  <script src="app.js?v=1.26"></script>
 </body>
 </html>
