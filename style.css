@@ -1253,3 +1253,15 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .blackmage-group{
   margin-top:0!important;
 }
+
+/* ===== App version badge ===== */
+.app-version{
+  display:inline-block;
+  margin-left:7px;
+  color:#7f899d;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.02em;
+  vertical-align:middle;
+  white-space:nowrap;
+}
