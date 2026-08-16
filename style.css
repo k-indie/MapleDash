@@ -2750,3 +2750,11 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-column:2/4!important;
   }
 }
+
+/* ===== v1.17 summary labels ===== */
+.summary-card .summary-label,
+.summary-card .label,
+.summary-card span:first-child{
+  font-size:15px!important;
+  font-weight:800!important;
+}

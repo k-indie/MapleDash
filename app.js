@@ -706,7 +706,7 @@
       monthlyBtn.textContent = "검마";
 
       dailyBtn.classList.toggle("complete", dp.total > 0 && dp.done === dp.total);
-      weeklyBtn.classList.toggle("complete", bp.selected > 0 && bp.killed === bp.selected);
+      weeklyBtn.classList.toggle("complete", bp.selected === 0 || bp.killed === bp.selected);
 
       dailyBtn.addEventListener("click", e => {
         e.stopPropagation();
@@ -715,7 +715,7 @@
 
       weeklyBtn.title = bp.selected > 0
         ? `주간 보스 ${bp.killed}/${bp.selected} · 클릭하면 전체 처치/해제`
-        : "설정에서 주간 보스를 먼저 선택해주세요.";
+        : "설정된 주간 보스 없음 · 완료 처리";
       weeklyBtn.addEventListener("click", e => {
         e.stopPropagation();
         toggleAllWeeklyBosses(ch);
@@ -1512,6 +1512,22 @@
       .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
   }
 
+  function getWeeklyBossIncome() {
+    return bossSelections
+      .filter(x => !isBlackMageBoss(x))
+      .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
+  function getBlackMageMonthlyIncome() {
+    return bossSelections
+      .filter(isBlackMageBoss)
+      .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
+  function getMonthlyBossIncome() {
+    return getWeeklyBossIncome() * 4 + getBlackMageMonthlyIncome();
+  }
+
   async function toggleAllWeeklyBosses(ch) {
     const weeklySelections = bossSelections.filter(x =>
       x.character_id === ch.id && !isBlackMageBoss(x)
@@ -1919,14 +1935,14 @@
 
     const weeklyDoneCharacters = characters.filter(ch => {
       const p = getBossProgress(ch.id);
-      return p.selected > 0 && p.killed === p.selected;
+      return p.selected === 0 || p.killed === p.selected;
     }).length;
 
     $("dailySummary").textContent=`${dailyDoneCharacters} / ${characters.length}`;
     $("weeklySummary").textContent=`${weeklyDoneCharacters} / ${characters.length}`;
     $("ownedMesoSummary").textContent=shortMoney(characterGroups.reduce((a,g)=>a+Number(g.owned_meso||0),0));
-    $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+getCharacterBossIncome(ch.id),0));
-    $("characterCountSummary").textContent=characters.length;
+    $("weeklyBossIncomeSummary").textContent=shortMoney(getWeeklyBossIncome());
+    $("monthlyBossIncomeSummary").textContent=shortMoney(getMonthlyBossIncome());
     $("characterCount").textContent=`${characters.length} / 20`;
   }
 
