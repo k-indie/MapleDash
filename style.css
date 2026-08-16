@@ -2758,3 +2758,12 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   font-size:15px!important;
   font-weight:800!important;
 }
+
+/* ===== v1.18 character weekly/monthly boss income ===== */
+.character-info .info-pair span{
+  white-space:nowrap;
+}
+
+.character-info .info-pair strong{
+  white-space:nowrap;
+}

@@ -635,9 +635,7 @@
 
       const levelText = ch.level ? `Lv.${fmt.format(ch.level)}` : "-";
       const powerText = ch.combat_power ? shortMoney(ch.combat_power) : "-";
-      const bossText = shortMoney(getCharacterBossIncome(ch.id));
-
-      card.innerHTML = `
+card.innerHTML = `
         <div class="character-avatar-wrap">
           <img class="character-avatar" alt="">
           <div class="character-profile-actions">
@@ -665,7 +663,8 @@
         <div class="character-info">
           <div class="info-pair"><span>레벨</span><strong class="view-level"></strong></div>
           <div class="info-pair"><span>전투력</span><strong class="view-power"></strong></div>
-          <div class="info-pair"><span>보스 메소</span><strong class="view-boss"></strong></div>
+          <div class="info-pair"><span>주간 보스 수익</span><strong class="view-weekly-boss-income"></strong></div>
+          <div class="info-pair"><span>월간 보스 수익</span><strong class="view-monthly-boss-income"></strong></div>
         </div>
 
         <div class="character-note-space">
@@ -737,7 +736,10 @@
       }
       card.querySelector(".view-level").textContent = levelText;
       card.querySelector(".view-power").textContent = powerText;
-      card.querySelector(".view-boss").textContent = bossText;
+      card.querySelector(".view-weekly-boss-income").textContent =
+        shortMoney(getCharacterWeeklyBossIncome(ch.id));
+      card.querySelector(".view-monthly-boss-income").textContent =
+        shortMoney(getCharacterMonthlyBossIncome(ch.id));
       card.querySelector(".character-note").textContent = ch.memo || "";
 
       const memo = card.querySelector(".edit-memo");
@@ -1510,6 +1512,23 @@
     return bossSelections
       .filter(x => x.character_id === characterId)
       .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
+  function getCharacterWeeklyBossIncome(characterId) {
+    return bossSelections
+      .filter(x => x.character_id === characterId && !isBlackMageBoss(x))
+      .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
+  function getCharacterBlackMageIncome(characterId) {
+    return bossSelections
+      .filter(x => x.character_id === characterId && isBlackMageBoss(x))
+      .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
+  function getCharacterMonthlyBossIncome(characterId) {
+    return getCharacterWeeklyBossIncome(characterId) * 4
+      + getCharacterBlackMageIncome(characterId);
   }
 
   function getWeeklyBossIncome() {
