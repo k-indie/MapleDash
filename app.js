@@ -39,6 +39,17 @@
     if (el) el.textContent = text;
   };
 
+  function showView(viewId) {
+    document.querySelectorAll(".app-view-section").forEach(section => section.classList.add("hidden"));
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    $(viewId).classList.remove("hidden");
+    document.querySelector(`.nav-btn[data-view="${viewId}"]`)?.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => showView(btn.dataset.view));
+  });
+
   if (!configured) {
     $("authMessage").textContent = "config.js에 Supabase URL과 Publishable Key를 입력해주세요.";
     $("authMessage").style.color = "#ff727c";
@@ -345,7 +356,6 @@
             <span class="character-class-badge"></span>
             <div class="character-world"></div>
           </div>
-          <button class="character-delete" type="button">삭제</button>
         </div>
 
         <div class="character-info">
@@ -480,20 +490,7 @@
         }
       });
 
-      card.querySelector(".character-delete").addEventListener("click", async () => {
-        if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;
 
-        const { error } = await sb
-          .from("maple_characters")
-          .delete()
-          .eq("id", ch.id)
-          .eq("user_id", user.id);
-
-        if (error) return alert(error.message);
-
-        characters = characters.filter(x => x.id !== ch.id);
-        renderAll();
-      });
 
       box.appendChild(card);
     });
@@ -570,6 +567,63 @@
     }
   });
 
+  function renderSettingsCharacters() {
+    const box = $("settingsCharacterList");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    if (!characters.length) {
+      box.innerHTML = '<div class="empty-state">등록된 캐릭터가 없습니다.</div>';
+      return;
+    }
+
+    characters.forEach(ch => {
+      const row = document.createElement("div");
+      row.className = "settings-character-row";
+      row.innerHTML = `
+        <div class="settings-char-main">
+          <img class="settings-char-image" alt="">
+          <div>
+            <strong class="settings-char-name"></strong>
+            <div class="settings-char-sub"></div>
+          </div>
+        </div>
+        <button class="delete-btn danger-delete" type="button">삭제</button>
+      `;
+
+      const img = row.querySelector(".settings-char-image");
+      if (ch.image_url) {
+        img.src = ch.image_url;
+        img.alt = `${ch.nickname} 캐릭터 이미지`;
+      } else {
+        img.style.display = "none";
+      }
+
+      row.querySelector(".settings-char-name").textContent = ch.nickname || "-";
+      row.querySelector(".settings-char-sub").textContent =
+        `${ch.class_name || "직업 미확인"} · ${ch.world_name || "월드 미확인"}`;
+
+      row.querySelector(".danger-delete").addEventListener("click", async () => {
+        if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;
+
+        const { error } = await sb
+          .from("maple_characters")
+          .delete()
+          .eq("id", ch.id)
+          .eq("user_id", user.id);
+
+        if (error) return alert(error.message);
+
+        characters = characters.filter(x => x.id !== ch.id);
+        renderAll();
+        setSync("캐릭터 삭제됨");
+      });
+
+      box.appendChild(row);
+    });
+  }
+
   function renderSummary() {
     const daily = checklist.filter(x => x.cycle === "daily");
     const weekly = checklist.filter(x => x.cycle === "weekly");
@@ -588,6 +642,7 @@
   function renderAll() {
     renderChecklist();
     renderCharacters();
+    renderSettingsCharacters();
     renderSummary();
   }
 

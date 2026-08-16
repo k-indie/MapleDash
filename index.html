@@ -13,7 +13,7 @@
       <div class="logo">M</div>
       <p class="kicker">PERSONAL MAPLE DASHBOARD</p>
       <h1>메이플 개인 대시보드</h1>
-      <p class="muted">숙제 · 메소 · 캐릭터를 한 페이지에서 관리합니다.</p>
+      <p class="muted">숙제 · 메소 · 캐릭터를 관리합니다.</p>
 
       <form id="authForm" class="auth-form">
         <input id="emailInput" type="email" autocomplete="email" placeholder="이메일" required />
@@ -29,7 +29,7 @@
         <div>
           <p class="kicker">MAPLESTORY</p>
           <h1>내 메이플 관리 페이지</h1>
-          <p class="muted">한 페이지에서 바로 체크하고 관리하세요.</p>
+          <p class="muted">숙제와 캐릭터 현황을 확인하세요.</p>
         </div>
         <div class="header-actions">
           <span id="syncStatus" class="sync">동기화 준비</span>
@@ -37,98 +37,100 @@
         </div>
       </header>
 
-      <section class="dashboard-row">
-        <article class="dash-card panel">
-          <span>일일 숙제</span>
-          <strong id="dailySummary">0 / 0</strong>
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="dashboardView" type="button">대시보드</button>
+        <button class="nav-btn" data-view="settingsView" type="button">설정</button>
+      </nav>
+
+      <section id="dashboardView" class="app-view-section">
+        <section class="dashboard-row">
+          <article class="dash-card panel"><span>일일 숙제</span><strong id="dailySummary">0 / 0</strong></article>
+          <article class="dash-card panel"><span>주간 숙제</span><strong id="weeklySummary">0 / 0</strong></article>
+          <article class="dash-card panel"><span>보유중인 메소</span><strong id="ownedMesoSummary">0</strong></article>
+          <article class="dash-card panel"><span>보스돌이 메소</span><strong id="bossMesoSummary">0</strong></article>
+          <article class="dash-card panel"><span>관리 캐릭터</span><strong id="characterCountSummary">0</strong></article>
+        </section>
+
+        <article class="panel section-block">
+          <div class="section-head">
+            <div>
+              <p class="kicker">CHECKLIST</p>
+              <h2>체크리스트</h2>
+              <p class="muted section-desc">일일 00:00 · 주간 목요일 00:00 · 월간 1일 00:00 자동 초기화</p>
+            </div>
+          </div>
+
+          <form id="checklistForm" class="triple-form">
+            <input id="checkTitle" maxlength="100" placeholder="예: 몬스터파크" required />
+            <select id="checkCycle">
+              <option value="daily">일일</option>
+              <option value="weekly">주간</option>
+              <option value="monthly">월간</option>
+            </select>
+            <button class="primary" type="submit">추가</button>
+          </form>
+
+          <div class="check-sections">
+            <section>
+              <div class="check-section-title"><h3>일일</h3><span>매일 00:00</span></div>
+              <div id="dailyChecklist" class="record-list"></div>
+            </section>
+            <section>
+              <div class="check-section-title"><h3>주간</h3><span>목요일 00:00</span></div>
+              <div id="weeklyChecklist" class="record-list"></div>
+            </section>
+            <section>
+              <div class="check-section-title"><h3>월간</h3><span>매월 1일 00:00</span></div>
+              <div id="monthlyChecklist" class="record-list"></div>
+            </section>
+          </div>
         </article>
-        <article class="dash-card panel">
-          <span>주간 숙제</span>
-          <strong id="weeklySummary">0 / 0</strong>
-        </article>
-        <article class="dash-card panel">
-          <span>보유중인 메소</span>
-          <strong id="ownedMesoSummary">0</strong>
-        </article>
-        <article class="dash-card panel">
-          <span>보스돌이 메소</span>
-          <strong id="bossMesoSummary">0</strong>
-        </article>
-        <article class="dash-card panel">
-          <span>관리 캐릭터</span>
-          <strong id="characterCountSummary">0</strong>
+
+        <article class="panel section-block character-list-panel">
+          <div class="section-head">
+            <div>
+              <p class="kicker">MY CHARACTERS</p>
+              <h2>내 캐릭터</h2>
+              <p class="muted section-desc">게임 정보는 자동 갱신하고, 메소와 메모는 카드에서 수정할 수 있습니다.</p>
+            </div>
+          </div>
+          <div id="characterGrid" class="character-grid"></div>
         </article>
       </section>
 
-      <article class="panel section-block">
-        <div class="section-head">
-          <div>
-            <p class="kicker">CHECKLIST</p>
-            <h2>체크리스트</h2>
-            <p class="muted section-desc">
-              일일은 매일 00:00 · 주간은 매주 목요일 00:00 · 월간은 매월 1일 00:00에 자동 초기화됩니다.
-            </p>
+      <section id="settingsView" class="app-view-section hidden">
+        <article class="panel section-block settings-panel">
+          <div class="section-head">
+            <div>
+              <p class="kicker">SETTINGS</p>
+              <h2>캐릭터 설정</h2>
+              <p class="muted section-desc">새 캐릭터 추가는 이곳에서만 할 수 있습니다.</p>
+            </div>
+            <span id="characterCount" class="muted">0 / 20</span>
           </div>
-        </div>
 
-        <form id="checklistForm" class="triple-form">
-          <input id="checkTitle" maxlength="100" placeholder="예: 몬스터파크" required />
-          <select id="checkCycle">
-            <option value="daily">일일</option>
-            <option value="weekly">주간</option>
-            <option value="monthly">월간</option>
-          </select>
-          <button class="primary" type="submit">추가</button>
-        </form>
+          <form id="characterForm" class="character-add-form auto-profile-form">
+            <input id="characterNickname" maxlength="20" placeholder="캐릭터 닉네임" required />
+            <input id="characterOwnedMeso" type="number" min="0" step="1" placeholder="보유 메소 (선택)" />
+            <input id="characterBossMeso" type="number" min="0" step="1" placeholder="보스 메소 (선택)" />
+            <input id="characterMemo" maxlength="120" placeholder="메모 (선택)" />
+            <button class="primary" type="submit">닉네임으로 추가</button>
+          </form>
 
-        <div class="check-sections">
-          <section>
-            <div class="check-section-title"><h3>일일</h3><span>매일 00:00</span></div>
-            <div id="dailyChecklist" class="record-list"></div>
-          </section>
+          <p class="api-help">닉네임을 입력하면 프로필 이미지 · 직업 · 레벨 · 월드 · 전투력을 자동으로 불러옵니다.</p>
+        </article>
 
-          <section>
-            <div class="check-section-title"><h3>주간</h3><span>목요일 00:00</span></div>
-            <div id="weeklyChecklist" class="record-list"></div>
-          </section>
-
-          <section>
-            <div class="check-section-title"><h3>월간</h3><span>매월 1일 00:00</span></div>
-            <div id="monthlyChecklist" class="record-list"></div>
-          </section>
-        </div>
-      </article>
-
-      <article class="panel section-block add-character-panel">
-        <div class="section-head">
-          <div>
-            <p class="kicker">ADD CHARACTER</p>
-            <h2>캐릭터 추가</h2>
+        <article class="panel section-block">
+          <div class="section-head">
+            <div>
+              <p class="kicker">REGISTERED</p>
+              <h2>등록된 캐릭터</h2>
+              <p class="muted section-desc">캐릭터 삭제는 여기에서만 할 수 있습니다.</p>
+            </div>
           </div>
-          <span id="characterCount" class="muted">0 / 20</span>
-        </div>
-
-        <form id="characterForm" class="character-add-form auto-profile-form">
-          <input id="characterNickname" maxlength="20" placeholder="캐릭터 닉네임" required />
-          <input id="characterOwnedMeso" type="number" min="0" step="1" placeholder="보유 메소 (선택)" />
-          <input id="characterBossMeso" type="number" min="0" step="1" placeholder="보스 메소 (선택)" />
-          <input id="characterMemo" maxlength="120" placeholder="메모 (선택)" />
-          <button class="primary" type="submit">닉네임으로 추가</button>
-        </form>
-        <p class="api-help">닉네임을 입력하면 프로필 이미지 · 직업 · 레벨 · 월드 · 전투력을 자동으로 불러옵니다.</p>
-      </article>
-
-      <article class="panel section-block character-list-panel">
-        <div class="section-head">
-          <div>
-            <p class="kicker">MY CHARACTERS</p>
-            <h2>내 캐릭터</h2>
-            <p class="muted section-desc">카드를 눌러 수정할 수 있습니다.</p>
-          </div>
-        </div>
-
-        <div id="characterGrid" class="character-grid"></div>
-      </article>
+          <div id="settingsCharacterList" class="settings-character-list"></div>
+        </article>
+      </section>
     </section>
   </main>
 
