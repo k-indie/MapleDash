@@ -678,3 +678,64 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     transform:scale(1.20)!important;
   }
 }
+
+/* ===== Center character + font size bump ===== */
+.character-avatar-wrap{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+}
+
+.character-avatar{
+  position:relative!important;
+  left:0!important;
+  right:auto!important;
+  top:0!important;
+  margin:0 auto!important;
+  transform:scale(1.42) translateX(0)!important;
+  transform-origin:center center!important;
+}
+
+/* + about 3px across card typography */
+.character-name{
+  font-size:19px!important;
+}
+
+.character-class-badge{
+  font-size:12px!important;
+}
+
+.character-world{
+  font-size:12px!important;
+}
+
+.info-pair span{
+  font-size:12px!important;
+}
+
+.info-pair strong{
+  font-size:13px!important;
+}
+
+.character-note{
+  font-size:12px!important;
+}
+
+.api-updated{
+  font-size:11px!important;
+}
+
+.edit-toggle,
+.character-refresh{
+  font-size:12px!important;
+}
+
+.character-editor input,
+.character-editor textarea{
+  font-size:12px!important;
+}
+
+.character-editor-actions button{
+  font-size:11px!important;
+}
