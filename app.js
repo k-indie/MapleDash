@@ -1098,11 +1098,13 @@
       return p.total > 0 && p.done === p.total;
     }).length;
 
-    const wt=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").total,0);
-    const wd=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").done,0);
+    const weeklyDoneCharacters = characters.filter(ch => {
+      const p = getBossProgress(ch.id);
+      return p.selected > 0 && p.killed === p.selected;
+    }).length;
 
     $("dailySummary").textContent=`${dailyDoneCharacters} / ${characters.length}`;
-    $("weeklySummary").textContent=`${wd} / ${wt}`;
+    $("weeklySummary").textContent=`${weeklyDoneCharacters} / ${characters.length}`;
     $("ownedMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.owned_meso||0),0));
     $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.boss_meso||0),0));
     $("characterCountSummary").textContent=characters.length;
