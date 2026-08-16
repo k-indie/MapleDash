@@ -1140,30 +1140,47 @@
 
       dragHandle.addEventListener("dragstart", e => {
         row.classList.add("dragging");
+        document.body.classList.add("sorting-active");
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", group.id);
+
+        if (e.dataTransfer.setDragImage) {
+          e.dataTransfer.setDragImage(row, 28, 28);
+        }
       });
 
       dragHandle.addEventListener("dragend", () => {
         row.classList.remove("dragging");
+        document.body.classList.remove("sorting-active");
         box.querySelectorAll(".settings-group-row").forEach(item => {
-          item.classList.remove("drag-over");
+          item.classList.remove("drag-over", "drag-over-before", "drag-over-after");
         });
       });
 
       row.addEventListener("dragover", e => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
-        if (!row.classList.contains("dragging")) row.classList.add("drag-over");
+        if (row.classList.contains("dragging")) return;
+
+        const rect = row.getBoundingClientRect();
+        const before = e.clientY < rect.top + rect.height / 2;
+
+        box.querySelectorAll(".settings-group-row").forEach(item => {
+          item.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        });
+
+        row.classList.add("drag-over", before ? "drag-over-before" : "drag-over-after");
       });
 
       row.addEventListener("dragleave", e => {
-        if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over");
+        if (!row.contains(e.relatedTarget)) {
+          row.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        }
       });
 
       row.addEventListener("drop", e => {
         e.preventDefault();
-        row.classList.remove("drag-over");
+        row.classList.remove("drag-over", "drag-over-before", "drag-over-after");
         const sourceId = e.dataTransfer.getData("text/plain");
         moveGroupByDrag(sourceId, group.id);
       });
@@ -1233,6 +1250,51 @@
     setSync("그룹 추가됨");
   });
 
+  async function saveCharacterOrder() {
+    setSync("캐릭터 순서 저장 중…");
+
+    const results = await Promise.all(
+      characters.map((ch, index) =>
+        sb.from("maple_characters")
+          .update({ sort_order: index })
+          .eq("id", ch.id)
+          .eq("user_id", user.id)
+      )
+    );
+
+    const failed = results.find(result => result.error);
+    if (failed) {
+      console.error(failed.error);
+      setSync("캐릭터 순서 저장 실패");
+      alert(`캐릭터 순서를 저장하지 못했습니다.\n${failed.error.message}`);
+      await loadAll();
+      return false;
+    }
+
+    characters.forEach((ch, index) => {
+      ch.sort_order = index;
+    });
+
+    setSync("캐릭터 순서 저장됨");
+    return true;
+  }
+
+  async function moveCharacterByDrag(sourceId, targetId) {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+
+    const sourceIndex = characters.findIndex(ch => ch.id === sourceId);
+    const targetIndex = characters.findIndex(ch => ch.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const [moved] = characters.splice(sourceIndex, 1);
+    const adjustedTarget = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    characters.splice(adjustedTarget, 0, moved);
+
+    renderCharacters();
+    renderSettingsCharacters();
+    await saveCharacterOrder();
+  }
+
   function renderSettingsCharacters() {
     const box = $("settingsCharacterList");
     if (!box) return;
@@ -1248,10 +1310,8 @@
       const row = document.createElement("div");
       row.className = "settings-character-row";
       row.innerHTML = `
-        <div class="settings-order-controls">
-          <button class="order-btn move-up" type="button" aria-label="위로 이동" title="위로 이동">↑</button>
-          <button class="order-btn move-down" type="button" aria-label="아래로 이동" title="아래로 이동">↓</button>
-        </div>
+        <button class="character-drag-handle" type="button" draggable="true"
+          aria-label="드래그해서 캐릭터 순서 변경" title="드래그해서 순서 변경">⠿</button>
         <div class="settings-char-main">
           <img class="settings-char-image" alt="">
           <div>
@@ -1316,15 +1376,56 @@
         setSync("그룹 저장됨");
       });
 
-      const currentIndex = characters.findIndex(item => item.id === ch.id);
-      const upBtn = row.querySelector(".move-up");
-      const downBtn = row.querySelector(".move-down");
+      row.dataset.characterId = ch.id;
+      const dragHandle = row.querySelector(".character-drag-handle");
 
-      upBtn.disabled = currentIndex === 0;
-      downBtn.disabled = currentIndex === characters.length - 1;
+      dragHandle.addEventListener("dragstart", e => {
+        row.classList.add("dragging");
+        document.body.classList.add("sorting-active");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", ch.id);
 
-      upBtn.addEventListener("click", () => moveCharacter(currentIndex, -1));
-      downBtn.addEventListener("click", () => moveCharacter(currentIndex, 1));
+        // 브라우저 기본 드래그 이미지를 현재 행 자체로 사용
+        if (e.dataTransfer.setDragImage) {
+          e.dataTransfer.setDragImage(row, 28, 28);
+        }
+      });
+
+      dragHandle.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+        document.body.classList.remove("sorting-active");
+        box.querySelectorAll(".settings-character-row").forEach(item => {
+          item.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        });
+      });
+
+      row.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (row.classList.contains("dragging")) return;
+
+        const rect = row.getBoundingClientRect();
+        const before = e.clientY < rect.top + rect.height / 2;
+
+        box.querySelectorAll(".settings-character-row").forEach(item => {
+          item.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        });
+
+        row.classList.add("drag-over", before ? "drag-over-before" : "drag-over-after");
+      });
+
+      row.addEventListener("dragleave", e => {
+        if (!row.contains(e.relatedTarget)) {
+          row.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        }
+      });
+
+      row.addEventListener("drop", e => {
+        e.preventDefault();
+        const sourceId = e.dataTransfer.getData("text/plain");
+        row.classList.remove("drag-over", "drag-over-before", "drag-over-after");
+        moveCharacterByDrag(sourceId, ch.id);
+      });
 
       row.querySelector(".boss-edit-btn").addEventListener("click", () => openBossModal(ch));
       row.querySelector(".danger-delete").addEventListener("click", async () => {

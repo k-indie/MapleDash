@@ -2622,3 +2622,131 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 @media(max-width:480px){
   .group-status-grid{grid-template-columns:1fr!important}
 }
+
+/* ===== v1.16 animated drag-sort for groups + characters ===== */
+
+/* 공통 드래그 핸들 */
+.character-drag-handle,
+.group-drag-handle{
+  width:28px!important;
+  height:34px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  background:transparent!important;
+  color:#71809a!important;
+  font-size:22px!important;
+  line-height:1!important;
+  cursor:grab!important;
+  user-select:none!important;
+  touch-action:none;
+  transition:color .12s ease,transform .12s ease;
+}
+
+.character-drag-handle:hover,
+.group-drag-handle:hover{
+  color:#d7dfec!important;
+  transform:scale(1.08);
+}
+
+.character-drag-handle:active,
+.group-drag-handle:active{
+  cursor:grabbing!important;
+}
+
+/* 캐릭터 설정 행은 드래그 핸들까지 포함하도록 */
+.settings-character-row{
+  grid-template-columns:auto minmax(0,1fr) minmax(150px,auto) auto!important;
+  position:relative!important;
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    opacity .16s ease,
+    background .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease!important;
+  will-change:transform;
+}
+
+/* 그룹 행도 부드럽게 밀리는 느낌 */
+.settings-group-row{
+  position:relative!important;
+  transition:
+    transform .18s cubic-bezier(.2,.8,.2,1),
+    opacity .16s ease,
+    background .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease!important;
+  will-change:transform;
+}
+
+/* 들고 있는 항목 */
+.settings-character-row.dragging,
+.settings-group-row.dragging{
+  opacity:.34!important;
+  transform:scale(.985)!important;
+  background:#111827!important;
+  border-color:#596985!important;
+  box-shadow:0 10px 25px rgba(0,0,0,.28)!important;
+}
+
+/* 다른 항목이 '슉' 밀리는 시각 효과 */
+.settings-character-row.drag-over-before,
+.settings-group-row.drag-over-before{
+  transform:translateY(5px)!important;
+}
+
+.settings-character-row.drag-over-after,
+.settings-group-row.drag-over-after{
+  transform:translateY(-5px)!important;
+}
+
+/* 삽입 위치 라인 */
+.settings-character-row.drag-over-before::before,
+.settings-group-row.drag-over-before::before,
+.settings-character-row.drag-over-after::after,
+.settings-group-row.drag-over-after::after{
+  content:"";
+  position:absolute;
+  left:34px;
+  right:8px;
+  height:2px;
+  border-radius:99px;
+  background:linear-gradient(90deg,#ffb52e,#ffd166);
+  box-shadow:0 0 8px rgba(255,181,46,.45);
+  pointer-events:none;
+}
+
+.settings-character-row.drag-over-before::before,
+.settings-group-row.drag-over-before::before{
+  top:-5px;
+}
+
+.settings-character-row.drag-over-after::after,
+.settings-group-row.drag-over-after::after{
+  bottom:-5px;
+}
+
+/* 드래그 중 전체 리스트가 살아있는 느낌 */
+.sorting-active .settings-character-row:not(.dragging),
+.sorting-active .settings-group-row:not(.dragging){
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    background .12s ease,
+    border-color .12s ease!important;
+}
+
+/* 기존 화살표 UI 완전 숨김 */
+.settings-order-controls,
+.order-btn{
+  display:none!important;
+}
+
+@media(max-width:950px){
+  .settings-character-row{
+    grid-template-columns:auto minmax(0,1fr) auto!important;
+  }
+  .settings-character-group{
+    grid-column:2/4!important;
+  }
+}
