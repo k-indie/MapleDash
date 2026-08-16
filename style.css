@@ -825,3 +825,62 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .boss-difficulties{display:flex;flex-wrap:wrap;gap:5px}.boss-option{flex:1 1 88px;display:flex;flex-direction:column;gap:2px;padding:7px 8px;border-radius:8px;border:1px solid #2a334a;background:#141b2a;color:#aeb7c7;text-align:left}.boss-option span,.boss-option strong{font-size:10px}.boss-option strong{color:#e4e9f2}.boss-option.selected{border-color:#ffb52e;background:rgba(255,181,46,.13)}.boss-option.selected span,.boss-option.selected strong{color:#ffd27a}
 .boss-modal-actions{position:sticky;bottom:-20px;display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;background:linear-gradient(transparent,#0e1422 28%)}.modal-open{overflow:hidden}
 @media(max-width:850px){.boss-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.boss-modal{padding:8px}.boss-catalog{grid-template-columns:1fr}}
+
+/* ===== Weekly boss kill progress ===== */
+.boss-summary-bar{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.boss-summary-bar>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.boss-summary-bar>div span{
+  text-align:left!important;
+  font-size:10px;
+  color:#8f99ad;
+}
+.boss-summary-bar>div strong{
+  font-size:15px;
+  white-space:nowrap;
+}
+.boss-option-wrap{
+  flex:1 1 95px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.boss-option-wrap .boss-option{
+  width:100%;
+}
+.boss-kill-btn{
+  width:100%;
+  border:1px solid #34405a;
+  border-radius:7px;
+  background:#111827;
+  color:#8f99ad;
+  padding:5px 6px;
+  font-size:9px;
+  font-weight:850;
+}
+.boss-kill-btn:hover{
+  border-color:#53617f;
+  color:#d9e0eb;
+}
+.boss-kill-btn.killed{
+  border-color:#4dbf8b;
+  background:rgba(77,191,139,.13);
+  color:#78e0b0;
+}
+.boss-progress-pair{
+  grid-column:1/-1;
+  margin-top:2px;
+  padding-top:5px;
+  border-top:1px solid #202941;
+}
+.boss-progress-pair strong{
+  color:#78e0b0!important;
+}
+.character-card{cursor:pointer}.character-status-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.status-chip{padding:4px 6px;border-radius:7px;border:1px solid #2c3650;background:#111827;color:#c4ccda;font-size:10px;font-weight:850;white-space:nowrap}.daily-status{border-color:#355071}.weekly-status{border-color:#584a70}.monthly-status{border-color:#655337}.character-checklist-panel{width:min(720px,96vw)!important}.character-checklist-content{display:grid;gap:11px;margin-top:15px}.character-check-section{background:#0a0f1a;border:1px solid #222b40;border-radius:13px;padding:12px}.character-check-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.character-check-head h3{margin:0;font-size:15px}.character-check-head strong{color:#ffca68}.character-check-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.character-check-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #2a334a;border-radius:9px;background:#121927;color:#c7cfdd;text-align:left;font-size:12px;font-weight:750}.character-check-item.done{background:rgba(77,191,139,.11);border-color:#397f62;color:#8ee5bc}.character-check-box{width:20px;height:20px;display:grid;place-items:center;border:1px solid #45516b;border-radius:6px;background:#0c121e}.character-check-item.done .character-check-box{background:#245b47;border-color:#4dbf8b;color:#fff}.settings-check-sections .record-list input[type="checkbox"]{display:none}@media(max-width:560px){.character-check-items{grid-template-columns:1fr}.status-chip{font-size:9px;padding:3px 5px}}
