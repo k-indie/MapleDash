@@ -15,23 +15,23 @@
   let isLoading = false;
 
   const shortMoney = value => {
-    let n = Number(value || 0);
+    let n = Math.floor(Number(value || 0));
     const sign = n < 0 ? "-" : "";
     n = Math.abs(n);
 
-    if (n >= 1_000_000_000_000) {
-      const v = n / 1_000_000_000_000;
-      return `${sign}${v.toFixed(v >= 10 || Number.isInteger(v) ? 0 : 1)}조`;
+    const eok = Math.floor(n / 100000000);
+    const man = Math.floor((n % 100000000) / 10000);
+    const rest = n % 10000;
+
+    const parts = [];
+    if (eok > 0) parts.push(`${fmt.format(eok)}억`);
+    if (man > 0) parts.push(`${fmt.format(man)}만`);
+
+    if (parts.length === 0) {
+      return `${sign}${fmt.format(rest)}`;
     }
-    if (n >= 100_000_000) {
-      const v = n / 100_000_000;
-      return `${sign}${v.toFixed(v >= 100 || Number.isInteger(v) ? 0 : 1)}억`;
-    }
-    if (n >= 10_000) {
-      const v = n / 10_000;
-      return `${sign}${v.toFixed(v >= 100 || Number.isInteger(v) ? 0 : 1)}만`;
-    }
-    return `${sign}${fmt.format(n)}`;
+
+    return `${sign}${parts.join(" ")}`;
   };
 
   const setSync = text => {
