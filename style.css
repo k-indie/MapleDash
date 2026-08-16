@@ -2452,3 +2452,173 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     justify-self:end!important;
   }
 }
+
+/* ===== v1.15 group drag-sort + compact 6-column dashboard ===== */
+
+/* 설정: 6점 드래그 핸들 */
+.settings-group-row{
+  grid-template-columns:auto minmax(0,1fr) auto auto!important;
+  gap:9px!important;
+  padding:8px 10px!important;
+  transition:border-color .12s ease,background .12s ease,opacity .12s ease;
+}
+
+.group-drag-handle{
+  width:28px;
+  height:32px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  border:0;
+  background:transparent;
+  color:#778399;
+  font-size:22px;
+  line-height:1;
+  cursor:grab;
+  user-select:none;
+}
+
+.group-drag-handle:hover{
+  color:#d6deeb;
+}
+
+.group-drag-handle:active{
+  cursor:grabbing;
+}
+
+.settings-group-row.dragging{
+  opacity:.45;
+}
+
+.settings-group-row.drag-over{
+  border-color:#d89427!important;
+  background:#151c29!important;
+}
+
+/* 대시보드: 한 줄 최대 6그룹 */
+.group-status-grid{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+
+.group-status-card{
+  padding:8px 9px!important;
+  border-radius:10px!important;
+}
+
+/* 그룹 이름 + 서버명 한 줄 */
+.group-status-head{
+  align-items:center!important;
+  margin-bottom:6px!important;
+  gap:6px!important;
+}
+
+.group-status-head>div{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:baseline!important;
+  gap:6px!important;
+}
+
+.group-account{
+  font-size:15px!important;
+  font-weight:900!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.group-world{
+  font-size:10px!important;
+  white-space:nowrap;
+  color:#91a0b6!important;
+}
+
+.group-member-count{
+  padding:2px 5px!important;
+  font-size:8px!important;
+  border-radius:5px!important;
+}
+
+.group-status-metrics{
+  gap:4px!important;
+  margin-bottom:5px!important;
+}
+
+.group-status-count{
+  margin-bottom:0!important;
+  gap:6px!important;
+}
+
+.group-status-count span{
+  font-size:9px!important;
+}
+
+.group-status-count strong{
+  font-size:14px!important;
+}
+
+.group-meso-line{
+  min-height:20px!important;
+  gap:5px!important;
+}
+
+.group-meso-line>span{
+  font-size:9px!important;
+}
+
+.group-owned-meso{
+  font-size:11px!important;
+}
+
+.group-meso-edit{
+  width:21px!important;
+  height:21px!important;
+  font-size:11px!important;
+  border-radius:6px!important;
+}
+
+.group-progress-track{
+  height:5px!important;
+}
+
+.group-meso-editor{
+  margin-top:6px!important;
+  gap:4px!important;
+}
+
+.group-meso-input{
+  padding:5px 6px!important;
+  font-size:9px!important;
+}
+
+.group-meso-cancel,
+.group-meso-save{
+  padding:5px 7px!important;
+  font-size:8px!important;
+}
+
+/* 폭이 줄면 자연스럽게 열 수 감소 */
+@media(max-width:1400px){
+  .group-status-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(max-width:1180px){
+  .group-status-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:950px){
+  .group-status-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+  .group-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .settings-group-row{
+    grid-template-columns:auto minmax(0,1fr) auto!important;
+  }
+  .settings-group-progress{
+    grid-column:2/3!important;
+  }
+}
+@media(max-width:480px){
+  .group-status-grid{grid-template-columns:1fr!important}
+}

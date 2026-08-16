@@ -955,15 +955,16 @@
       characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
     );
 
-    const killed = bossSelections.filter(selection =>
+    const selectedWeekly = bossSelections.filter(selection =>
       memberIds.has(selection.character_id) &&
-      !isBlackMageBoss(selection) &&
-      isBossKilledThisWeek(selection)
-    ).length;
+      !isBlackMageBoss(selection)
+    );
+
+    const killed = selectedWeekly.filter(isBossKilledThisWeek).length;
 
     return {
       killed,
-      limit: 90,
+      selected: selectedWeekly.length,
       members: memberIds.size
     };
   }
@@ -980,10 +981,10 @@
 
     characterGroups.forEach(group => {
       const progress = getGroupWeeklyProgress(group.id);
-      const percent = Math.min(100, (progress.killed / 90) * 100);
+      const percent = progress.selected > 0 ? Math.min(100, (progress.killed / progress.selected) * 100) : 0;
 
       const card = document.createElement("article");
-      card.className = `group-status-card ${progress.killed >= 90 ? "limit-reached" : ""}`;
+      card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""}`;
       card.innerHTML = `
         <div class="group-status-head">
           <div>
@@ -996,7 +997,7 @@
         <div class="group-status-metrics">
           <div class="group-status-count">
             <span>주간 보스 처치</span>
-            <strong>${progress.killed} / 90</strong>
+            <strong>${progress.killed} / ${progress.selected}</strong>
           </div>
           <div class="group-meso-line">
             <span>보유 메소</span>
@@ -1061,6 +1062,51 @@
     });
   }
 
+  async function saveGroupOrder() {
+    setSync("그룹 순서 저장 중…");
+
+    const results = await Promise.all(
+      characterGroups.map((group, index) =>
+        sb.from("character_groups")
+          .update({ sort_order: index })
+          .eq("id", group.id)
+          .eq("user_id", user.id)
+      )
+    );
+
+    const failed = results.find(result => result.error);
+    if (failed) {
+      console.error(failed.error);
+      setSync("그룹 순서 저장 실패");
+      alert(`그룹 순서를 저장하지 못했습니다.\n${failed.error.message}`);
+      await loadAll();
+      return false;
+    }
+
+    characterGroups.forEach((group, index) => {
+      group.sort_order = index;
+    });
+
+    setSync("그룹 순서 저장됨");
+    return true;
+  }
+
+  async function moveGroupByDrag(sourceId, targetId) {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+
+    const sourceIndex = characterGroups.findIndex(g => g.id === sourceId);
+    const targetIndex = characterGroups.findIndex(g => g.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const [moved] = characterGroups.splice(sourceIndex, 1);
+    const adjustedTarget = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    characterGroups.splice(adjustedTarget, 0, moved);
+
+    renderSettingsGroups();
+    renderGroupStatus();
+    await saveGroupOrder();
+  }
+
   function renderSettingsGroups() {
     const box = $("settingsGroupList");
     if (!box) return;
@@ -1075,17 +1121,52 @@
       const progress = getGroupWeeklyProgress(group.id);
       const row = document.createElement("div");
       row.className = "settings-group-row";
+      row.dataset.groupId = group.id;
       row.innerHTML = `
+        <button class="group-drag-handle" type="button" draggable="true"
+          aria-label="드래그해서 그룹 순서 변경" title="드래그해서 순서 변경">⠿</button>
         <div class="settings-group-main">
           <strong class="settings-group-account"></strong>
           <span class="settings-group-world"></span>
         </div>
-        <div class="settings-group-progress">보스 ${progress.killed}/90 · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
+        <div class="settings-group-progress">보스 ${progress.killed}/${progress.selected} · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
         <button class="delete-btn delete-group" type="button">삭제</button>
       `;
 
       row.querySelector(".settings-group-account").textContent = group.account_name;
       row.querySelector(".settings-group-world").textContent = group.world_name;
+
+      const dragHandle = row.querySelector(".group-drag-handle");
+
+      dragHandle.addEventListener("dragstart", e => {
+        row.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", group.id);
+      });
+
+      dragHandle.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+        box.querySelectorAll(".settings-group-row").forEach(item => {
+          item.classList.remove("drag-over");
+        });
+      });
+
+      row.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (!row.classList.contains("dragging")) row.classList.add("drag-over");
+      });
+
+      row.addEventListener("dragleave", e => {
+        if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over");
+      });
+
+      row.addEventListener("drop", e => {
+        e.preventDefault();
+        row.classList.remove("drag-over");
+        const sourceId = e.dataTransfer.getData("text/plain");
+        moveGroupByDrag(sourceId, group.id);
+      });
 
       row.querySelector(".delete-group").addEventListener("click", async () => {
         if (!confirm(`${group.account_name} · ${group.world_name} 그룹을 삭제할까요?\\n배정된 캐릭터는 '미지정'으로 돌아갑니다.`)) return;
