@@ -441,3 +441,153 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   }
   .nav-btn{flex:1}
 }
+
+
+/* ===== Compact 6-column character cards ===== */
+.character-grid{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+.character-card{
+  border-radius:14px!important;
+  padding:10px!important;
+}
+
+.character-avatar-wrap{
+  height:138px!important;
+  border-radius:11px!important;
+  margin-bottom:9px!important;
+}
+
+.character-avatar{
+  max-width:116px!important;
+  max-height:124px!important;
+  transform:scale(1.06)!important;
+}
+
+.character-card-top{
+  margin-bottom:8px!important;
+}
+
+.character-name{
+  font-size:14px!important;
+  margin-bottom:2px!important;
+}
+
+.character-class-badge{
+  padding:2px 5px!important;
+  font-size:8px!important;
+}
+
+.character-world{
+  font-size:8px!important;
+  margin-top:3px!important;
+}
+
+.character-info{
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+  padding:7px!important;
+  margin-bottom:7px!important;
+  border-radius:9px!important;
+}
+
+.info-pair{
+  gap:5px!important;
+}
+
+.info-pair span{
+  font-size:8px!important;
+}
+
+.info-pair strong{
+  font-size:9px!important;
+}
+
+.character-note{
+  min-height:22px!important;
+  padding-top:6px!important;
+  font-size:8px!important;
+  line-height:1.35!important;
+}
+
+.api-updated{
+  margin-top:4px!important;
+  font-size:7px!important;
+}
+
+.character-actions{
+  gap:4px!important;
+  margin-top:7px!important;
+}
+
+.edit-toggle,
+.character-refresh{
+  padding:5px 6px!important;
+  font-size:8px!important;
+  border-radius:7px!important;
+}
+
+.character-editor{
+  margin-top:7px!important;
+  padding-top:7px!important;
+}
+
+.character-editor-grid{
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+}
+
+.character-editor input,
+.character-editor textarea{
+  padding:6px!important;
+  font-size:9px!important;
+}
+
+.character-editor textarea{
+  min-height:45px!important;
+}
+
+.character-editor-actions{
+  margin-top:5px!important;
+  gap:4px!important;
+}
+
+.character-editor-actions button{
+  padding:6px!important;
+  font-size:8px!important;
+}
+
+@media(max-width:1180px){
+  .character-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:980px){
+  .character-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:760px){
+  .character-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .character-avatar-wrap{
+    height:130px!important;
+  }
+}
+
+@media(max-width:560px){
+  .character-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:360px){
+  .character-grid{
+    grid-template-columns:1fr!important;
+  }
+}
