@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.09" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.10" />
 
-  <link rel="stylesheet" href="style.css?v=1.09" />
+  <link rel="stylesheet" href="style.css?v=1.10" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.09</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.10</span></h1>
           
         </div>
         <div class="header-actions">
@@ -52,6 +52,17 @@
           <article class="dash-card panel"><span>보스돌이 메소</span><strong id="bossMesoSummary">0</strong></article>
           <article class="dash-card panel"><span>관리 캐릭터</span><strong id="characterCountSummary">0</strong></article>
         </section>
+
+        <article class="panel section-block group-status-panel">
+          <div class="section-head">
+            <div>
+              <p class="kicker">ACCOUNT · WORLD</p>
+              <h2>그룹별 주간 보스 현황</h2>
+              <p class="muted section-desc">같은 계정 + 월드 그룹의 이번 주 보스 처치 수를 90마리 기준으로 집계합니다.</p>
+            </div>
+          </div>
+          <div id="groupStatusGrid" class="group-status-grid"></div>
+        </article>
 
         <article class="panel section-block character-list-panel">
           <div class="section-head">
@@ -90,6 +101,24 @@
         <article class="panel section-block">
           <div class="section-head">
             <div>
+              <p class="kicker">ACCOUNT · WORLD GROUPS</p>
+              <h2>계정 · 월드 그룹</h2>
+              <p class="muted section-desc">계정과 월드별로 캐릭터를 묶습니다. 그룹별 주간 보스 처치 제한은 90마리로 표시됩니다.</p>
+            </div>
+          </div>
+
+          <form id="groupForm" class="group-create-form">
+            <input id="groupAccountName" maxlength="30" placeholder="계정 이름 (예: 본계정)" required />
+            <input id="groupWorldName" maxlength="30" placeholder="월드 이름 (예: 챌린저스3)" required />
+            <button class="primary" type="submit">그룹 추가</button>
+          </form>
+
+          <div id="settingsGroupList" class="settings-group-list"></div>
+        </article>
+
+        <article class="panel section-block">
+          <div class="section-head">
+            <div>
               <p class="kicker">REGISTERED</p>
               <h2>등록된 캐릭터</h2>
               <p class="muted section-desc">캐릭터 삭제는 여기에서만 할 수 있습니다.</p>
@@ -118,7 +147,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.09"></script>
-  <script src="app.js?v=1.09"></script>
+  <script src="config.js?v=1.10"></script>
+  <script src="app.js?v=1.10"></script>
 </body>
 </html>

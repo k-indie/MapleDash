@@ -12,6 +12,7 @@
   let user = null;
   let checklist = [];
   let characters = [];
+  let characterGroups = [];
   let characterCheckStates=[];
   let checklistEditingCharacter=null;
   let bossSelections = [];
@@ -186,22 +187,25 @@
     setSync("불러오는 중…");
 
     try {
-      const [c, ch, bs, cs] = await Promise.all([
+      const [c, ch, bs, cs, gr] = await Promise.all([
         sb.from("maple_checklist").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
         sb.from("maple_characters").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true }),
         sb.from("character_boss_selections").select("*").eq("user_id", user.id),
-        sb.from("character_check_states").select("*").eq("user_id", user.id)
+        sb.from("character_check_states").select("*").eq("user_id", user.id),
+        sb.from("character_groups").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
       ]);
 
       if (c.error) throw c.error;
       if (ch.error) throw ch.error;
       if (bs.error) throw bs.error;
       if (cs.error) throw cs.error;
+      if (gr.error) throw gr.error;
 
       checklist = c.data || [];
       characters = ch.data || [];
       bossSelections = bs.data || [];
       characterCheckStates = cs.data || [];
+      characterGroups = gr.data || [];
       renderAll();
       setSync("동기화됨");
     } catch (err) {
@@ -939,6 +943,160 @@
     await saveCharacterOrder();
   }
 
+  function getGroupById(groupId) {
+    return characterGroups.find(g => g.id === groupId) || null;
+  }
+
+  function getGroupWeeklyProgress(groupId) {
+    const memberIds = new Set(
+      characters.filter(ch => ch.group_id === groupId).map(ch => ch.id)
+    );
+
+    const killed = bossSelections.filter(selection =>
+      memberIds.has(selection.character_id) &&
+      !isBlackMageBoss(selection) &&
+      isBossKilledThisWeek(selection)
+    ).length;
+
+    return {
+      killed,
+      limit: 90,
+      members: memberIds.size
+    };
+  }
+
+  function renderGroupStatus() {
+    const box = $("groupStatusGrid");
+    if (!box) return;
+    box.innerHTML = "";
+
+    if (!characterGroups.length) {
+      box.innerHTML = '<div class="empty-state">설정에서 계정 · 월드 그룹을 먼저 만들어주세요.</div>';
+      return;
+    }
+
+    characterGroups.forEach(group => {
+      const progress = getGroupWeeklyProgress(group.id);
+      const percent = Math.min(100, (progress.killed / 90) * 100);
+
+      const card = document.createElement("article");
+      card.className = `group-status-card ${progress.killed >= 90 ? "limit-reached" : ""}`;
+      card.innerHTML = `
+        <div class="group-status-head">
+          <div>
+            <strong class="group-account"></strong>
+            <span class="group-world"></span>
+          </div>
+          <span class="group-member-count"></span>
+        </div>
+        <div class="group-status-count">
+          <span>주간 보스 처치</span>
+          <strong>${progress.killed} / 90</strong>
+        </div>
+        <div class="group-progress-track">
+          <span style="width:${percent}%"></span>
+        </div>
+      `;
+
+      card.querySelector(".group-account").textContent = group.account_name;
+      card.querySelector(".group-world").textContent = group.world_name;
+      card.querySelector(".group-member-count").textContent = `${progress.members}캐릭`;
+
+      box.appendChild(card);
+    });
+  }
+
+  function renderSettingsGroups() {
+    const box = $("settingsGroupList");
+    if (!box) return;
+    box.innerHTML = "";
+
+    if (!characterGroups.length) {
+      box.innerHTML = '<div class="empty-state">등록된 그룹이 없습니다.</div>';
+      return;
+    }
+
+    characterGroups.forEach(group => {
+      const progress = getGroupWeeklyProgress(group.id);
+      const row = document.createElement("div");
+      row.className = "settings-group-row";
+      row.innerHTML = `
+        <div class="settings-group-main">
+          <strong class="settings-group-account"></strong>
+          <span class="settings-group-world"></span>
+        </div>
+        <div class="settings-group-progress">보스 ${progress.killed}/90 · ${progress.members}캐릭</div>
+        <button class="delete-btn delete-group" type="button">삭제</button>
+      `;
+
+      row.querySelector(".settings-group-account").textContent = group.account_name;
+      row.querySelector(".settings-group-world").textContent = group.world_name;
+
+      row.querySelector(".delete-group").addEventListener("click", async () => {
+        if (!confirm(`${group.account_name} · ${group.world_name} 그룹을 삭제할까요?\\n배정된 캐릭터는 '미지정'으로 돌아갑니다.`)) return;
+
+        const { error } = await sb
+          .from("character_groups")
+          .delete()
+          .eq("id", group.id)
+          .eq("user_id", user.id);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        characterGroups = characterGroups.filter(g => g.id !== group.id);
+        characters.forEach(ch => {
+          if (ch.group_id === group.id) ch.group_id = null;
+        });
+
+        renderAll();
+        setSync("그룹 삭제됨");
+      });
+
+      box.appendChild(row);
+    });
+  }
+
+  $("groupForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const accountName = $("groupAccountName").value.trim();
+    const worldName = $("groupWorldName").value.trim();
+    if (!accountName || !worldName) return;
+
+    if (characterGroups.some(g =>
+      g.account_name === accountName && g.world_name === worldName
+    )) {
+      alert("같은 계정 이름과 월드의 그룹이 이미 있습니다.");
+      return;
+    }
+
+    const { data, error } = await sb
+      .from("character_groups")
+      .insert({
+        user_id: user.id,
+        account_name: accountName,
+        world_name: worldName,
+        sort_order: characterGroups.length
+      })
+      .select()
+      .single();
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    characterGroups.push(data);
+    $("groupAccountName").value = "";
+    $("groupWorldName").value = "";
+
+    renderAll();
+    setSync("그룹 추가됨");
+  });
+
   function renderSettingsCharacters() {
     const box = $("settingsCharacterList");
     if (!box) return;
@@ -965,6 +1123,9 @@
             <div class="settings-char-sub"></div>
           </div>
         </div>
+        <div class="settings-character-group">
+          <select class="character-group-select" title="계정 · 월드 그룹"></select>
+        </div>
         <div class="settings-row-actions"><button class="boss-edit-btn" type="button" title="주간 보스 설정">✎</button><button class="delete-btn danger-delete" type="button">삭제</button></div>
       `;
 
@@ -980,6 +1141,44 @@
       const settingsBossProgress = getBossProgress(ch.id);
       row.querySelector(".settings-char-sub").textContent =
         `${ch.class_name || "직업 미확인"} · ${ch.world_name || "월드 미확인"} · 보스 ${settingsBossProgress.killed}/${settingsBossProgress.selected}`;
+
+      const groupSelect = row.querySelector(".character-group-select");
+      groupSelect.innerHTML = '<option value="">그룹 미지정</option>';
+
+      // 캐릭터의 실제 월드와 같은 월드 그룹만 선택지에 보여줍니다.
+      characterGroups
+        .filter(group => !ch.world_name || group.world_name === ch.world_name)
+        .forEach(group => {
+          const option = document.createElement("option");
+          option.value = group.id;
+          option.textContent = `${group.account_name} · ${group.world_name}`;
+          groupSelect.appendChild(option);
+        });
+
+      groupSelect.value = ch.group_id || "";
+
+      groupSelect.addEventListener("change", async () => {
+        const groupId = groupSelect.value || null;
+
+        const { data, error } = await sb
+          .from("maple_characters")
+          .update({ group_id: groupId, updated_at: new Date().toISOString() })
+          .eq("id", ch.id)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) {
+          alert(error.message);
+          groupSelect.value = ch.group_id || "";
+          return;
+        }
+
+        Object.assign(ch, data);
+        renderGroupStatus();
+        renderSettingsGroups();
+        setSync("그룹 저장됨");
+      });
 
       const currentIndex = characters.findIndex(item => item.id === ch.id);
       const upBtn = row.querySelector(".move-up");
@@ -1424,7 +1623,9 @@
   function renderAll() {
     renderChecklist();
     renderCharacters();
+    renderSettingsGroups();
     renderSettingsCharacters();
+    renderGroupStatus();
     renderSummary();
   }
 
