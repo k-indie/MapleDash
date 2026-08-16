@@ -1529,3 +1529,60 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   image-rendering:auto!important;
   flex:0 0 14px!important;
 }
+
+/* ===== v1.05 settings character list size up ===== */
+.settings-character-row{
+  min-height:78px!important;
+  padding:12px 14px!important;
+}
+
+.settings-char-main{
+  gap:13px!important;
+}
+
+.settings-char-image{
+  width:76px!important;
+  height:76px!important;
+  flex:0 0 76px!important;
+  object-fit:contain!important;
+  border-radius:12px!important;
+  background:#111827!important;
+}
+
+.settings-char-name{
+  font-size:15px!important;
+  margin-bottom:5px!important;
+}
+
+.settings-char-sub{
+  font-size:11px!important;
+}
+
+/* ===== v1.05 boss modal action buttons size down ===== */
+.boss-modal-actions{
+  gap:7px!important;
+}
+
+.boss-modal-actions .primary,
+.boss-modal-actions .secondary{
+  flex:0 0 auto!important;
+  min-width:72px!important;
+  padding:7px 12px!important;
+  border-radius:8px!important;
+  font-size:11px!important;
+  line-height:1.1!important;
+}
+
+/* ===== v1.06 user-cut boss icons ===== */
+.boss-select-icon{
+  overflow:hidden!important;
+  padding:0!important;
+}
+
+.boss-real-icon{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  display:block!important;
+}
