@@ -3619,3 +3619,215 @@ header,
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* ===== v1.30 hard layout fix ===== */
+
+/* 헤더 영역 정상화: 제목은 넓게, 로그아웃은 우측 */
+.site-header,
+header{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  width:100%!important;
+}
+
+.brand,
+.header-brand,
+.hero-copy{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+
+h1{
+  max-width:none!important;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  overflow:visible!important;
+}
+
+/* 동기화 / 로그아웃은 원래 헤더 오른쪽에 */
+.header-actions,
+.auth-actions,
+.session-actions{
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+}
+
+/* 이전 버전의 월간 stack 배치 무효화 */
+.monthly-summary-stack,
+.monthly-income-stack,
+.economy-summary-wrap,
+.top-economy-calculator{
+  display:none!important;
+}
+
+/* 요약 전체 shell:
+   상단에 계산기 높이만 확보하고 카드 자체 높이는 정상 유지 */
+.dashboard-summary-shell{
+  position:relative!important;
+  padding-top:108px!important;
+  margin-top:6px!important;
+}
+
+/* 계산기는 월간 보스 수익 5번째 컬럼 바로 위 */
+.monthly-floating-calculator{
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  width:calc((100% - 28px) / 5)!important;
+  min-width:0!important;
+  z-index:5!important;
+}
+
+.monthly-floating-calculator .economy-calculator{
+  width:100%!important;
+  margin:0!important;
+  padding:7px!important;
+  display:block!important;
+  border:1px solid #5d4b2d!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,rgba(193,124,28,.10),rgba(77,47,12,.08))!important;
+  box-sizing:border-box!important;
+}
+
+/* 4 입력칸은 2x2 */
+.monthly-floating-calculator .economy-inputs{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:4px!important;
+}
+
+.monthly-floating-calculator .economy-inputs label{
+  min-width:0!important;
+}
+
+.monthly-floating-calculator .economy-inputs label span{
+  display:block!important;
+  margin-bottom:2px!important;
+  color:#8b96a8!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.monthly-floating-calculator .economy-inputs input{
+  width:100%!important;
+  min-width:0!important;
+  height:27px!important;
+  padding:4px 6px!important;
+  font-size:11px!important;
+  box-sizing:border-box!important;
+}
+
+.monthly-floating-calculator .economy-result{
+  width:100%!important;
+  min-width:0!important;
+  margin-top:5px!important;
+  padding:5px 6px!important;
+  box-sizing:border-box!important;
+}
+
+.monthly-floating-calculator .economy-result span{
+  font-size:10px!important;
+}
+
+.monthly-floating-calculator .economy-result strong{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:13px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* 요약 카드 5개는 서로 동일한 정상 높이 */
+.dashboard-row-v130{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important;
+  align-items:stretch!important;
+}
+
+.dashboard-row-v130 .dash-card{
+  min-width:0!important;
+  min-height:78px!important;
+  height:auto!important;
+  margin:0!important;
+  padding:13px!important;
+  align-self:stretch!important;
+}
+
+/* 숫자 input 화살표 제거 유지 */
+.economy-calculator input[type="number"]::-webkit-inner-spin-button,
+.economy-calculator input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+.economy-calculator input[type="number"]{
+  -moz-appearance:textfield!important;
+  appearance:textfield!important;
+}
+
+/* 중간 화면: 계산기는 우측 2칸 폭 */
+@media(max-width:1250px){
+  .dashboard-summary-shell{
+    padding-top:104px!important;
+  }
+
+  .monthly-floating-calculator{
+    width:calc(((100% - 21px) / 4) * 2 + 7px)!important;
+  }
+
+  .dashboard-row-v130{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+
+  .dashboard-row-v130 .monthly-income-card{
+    grid-column:4 / 5;
+  }
+}
+
+/* 모바일/태블릿에서는 계산기를 일반 흐름으로 */
+@media(max-width:900px){
+  h1{
+    white-space:normal!important;
+  }
+
+  .dashboard-summary-shell{
+    padding-top:0!important;
+  }
+
+  .monthly-floating-calculator{
+    position:static!important;
+    width:100%!important;
+    margin-bottom:7px!important;
+  }
+
+  .monthly-floating-calculator .economy-inputs{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+
+  .dashboard-row-v130{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:600px){
+  .monthly-floating-calculator .economy-inputs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
