@@ -3070,3 +3070,56 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   text-align:center;
   padding:8px;
 }
+
+/* ===== v1.25 dashboard group filter ===== */
+.group-status-card{
+  cursor:pointer;
+  transition:
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease,
+    transform .12s ease!important;
+}
+
+.group-status-card:hover{
+  transform:translateY(-2px);
+  border-color:#485773!important;
+}
+
+.group-status-card.selected-group{
+  border-color:#d89427!important;
+  background:
+    linear-gradient(180deg,rgba(194,124,25,.12),rgba(11,17,29,.96))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,181,46,.08),
+    0 7px 18px rgba(0,0,0,.18)!important;
+}
+
+.group-status-card.selected-group::after{
+  content:"선택됨";
+  position:absolute;
+  top:6px;
+  right:7px;
+  padding:2px 5px;
+  border-radius:5px;
+  background:#d89427;
+  color:#161009;
+  font-size:8px;
+  font-weight:900;
+  pointer-events:none;
+}
+
+.group-status-card{
+  position:relative;
+}
+
+.selected-group-character-subtitle{
+  margin:3px 0 0!important;
+  color:#ffca68!important;
+  font-size:11px!important;
+  font-weight:800!important;
+}
+
+.character-list-panel .section-head{
+  align-items:flex-end!important;
+}

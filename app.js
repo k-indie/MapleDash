@@ -13,6 +13,7 @@
   let checklist = [];
   let characters = [];
   let characterGroups = [];
+  let selectedDashboardGroupId = null;
   let characterCheckStates=[];
   let checklistEditingCharacter=null;
   let bossSelections = [];
@@ -224,8 +225,14 @@
       if (gr.error) {
         console.warn("character_groups load skipped:", gr.error);
         characterGroups = [];
+        selectedDashboardGroupId = null;
       } else {
         characterGroups = gr.data || [];
+
+        const stillExists = characterGroups.some(g => g.id === selectedDashboardGroupId);
+        if (!stillExists) {
+          selectedDashboardGroupId = characterGroups[0]?.id || null;
+        }
       }
       renderAll();
       setSync("동기화됨");
@@ -633,14 +640,18 @@
   function renderCharacters() {
     const box = $("characterGrid");
     box.innerHTML = "";
-    $("characterCount").textContent = `${characters.length} / 20`;
+    $("characterCount").textContent = `${visibleCharacters.length} / ${characters.length}`;
 
-    if (!characters.length) {
+    if (!visibleCharacters.length) {
       box.innerHTML = '<div class="empty-state">등록된 캐릭터가 없습니다.</div>';
       return;
     }
 
-    characters.forEach(ch => {
+    const visibleCharacters = selectedDashboardGroupId
+      ? characters.filter(ch => ch.group_id === selectedDashboardGroupId)
+      : [];
+
+    visibleCharacters.forEach(ch => {
       const card = document.createElement("article");
       card.className = "character-card";
 
@@ -1075,7 +1086,7 @@ card.innerHTML = `
       const percent = progress.selected > 0 ? Math.min(100, (progress.killed / progress.selected) * 100) : 0;
 
       const card = document.createElement("article");
-      card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""}`;
+      card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""} ${selectedDashboardGroupId === group.id ? "selected-group" : ""}`;
       card.innerHTML = `
         <div class="group-status-head">
           <div>
@@ -1205,6 +1216,18 @@ card.innerHTML = `
         renderSettingsGroups();
         renderSummary();
         setSync("그룹 보유 메소 저장됨");
+      });
+
+      card.addEventListener("click", e => {
+        // 메소 수정 버튼/입력 등 인터랙션 클릭은 그룹 선택 트리거에서 제외
+        if (e.target.closest("button,input,select,textarea")) return;
+
+        if (selectedDashboardGroupId === group.id) return;
+
+        selectedDashboardGroupId = group.id;
+        renderGroupStatus();
+        renderCharacters();
+        updateSelectedGroupTitle();
       });
 
       box.appendChild(card);
@@ -1353,6 +1376,10 @@ card.innerHTML = `
           if (ch.group_id === group.id) ch.group_id = null;
         });
 
+        if (selectedDashboardGroupId === group.id) {
+          selectedDashboardGroupId = characterGroups[0]?.id || null;
+        }
+
         renderAll();
         setSync("그룹 삭제됨");
       });
@@ -1392,6 +1419,8 @@ card.innerHTML = `
     }
 
     characterGroups.push(data);
+    if (!selectedDashboardGroupId) selectedDashboardGroupId = data.id;
+
     $("groupAccountName").value = "";
     $("groupWorldName").value = "";
 
@@ -2284,12 +2313,30 @@ card.innerHTML = `
     $("characterCount").textContent=`${characters.length} / 20`;
   }
 
+  function updateSelectedGroupTitle() {
+    const title = $("selectedGroupCharacterTitle");
+    const sub = $("selectedGroupCharacterSubtitle");
+    if (!title || !sub) return;
+
+    const group = getGroupById(selectedDashboardGroupId);
+
+    if (!group) {
+      title.textContent = "내 캐릭터";
+      sub.textContent = "그룹을 선택해주세요.";
+      return;
+    }
+
+    title.textContent = "내 캐릭터";
+    sub.textContent = `${group.account_name} · ${group.world_name}`;
+  }
+
   function renderAll() {
     renderChecklist();
     renderCharacters();
     renderSettingsGroups();
     renderSettingsCharacters();
     renderGroupStatus();
+    updateSelectedGroupTitle();
     renderSummary();
   }
 
