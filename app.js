@@ -5,7 +5,7 @@
     cfg.SUPABASE_PUBLISHABLE_KEY !== "YOUR_PUBLISHABLE_KEY";
 
   const $ = id => document.getElementById(id);
-  let sb, user = null, checklist = [], meso = [], enhancements = [], profile = null;
+  let sb, user = null, checklist = [], meso = [], enhancements = [], characters = [];
   let checkFilter = "all";
   const fmt = new Intl.NumberFormat("ko-KR");
 
@@ -89,13 +89,13 @@
       sb.from("maple_checklist").select("*").eq("user_id", user.id).order("created_at", { ascending:true }),
       sb.from("meso_records").select("*").eq("user_id", user.id).order("created_at", { ascending:false }).limit(500),
       sb.from("enhancement_records").select("*").eq("user_id", user.id).order("created_at", { ascending:false }).limit(500),
-      sb.from("maple_profile").select("*").eq("user_id", user.id).maybeSingle()
+      sb.from("maple_characters").select("*").eq("user_id", user.id).order("sort_order", { ascending:true }).order("created_at", { ascending:true })
     ]);
     [c,m,e,p].forEach(result => { if (result.error) console.error(result.error); });
     checklist = c.data || [];
     meso = m.data || [];
     enhancements = e.data || [];
-    profile = p.data || null;
+    characters = p.data || [];
     renderAll();
     setSync("동기화됨");
   }
@@ -303,35 +303,98 @@
     renderAll();
   }
 
-  function renderProfile() {
-    $("profileNickname").value = profile?.nickname || "";
-    $("profileClass").value = profile?.class_name || "";
-    $("profileLevel").value = profile?.level ?? "";
-    $("profilePower").value = profile?.combat_power ?? "";
-    $("profileMemo").value = profile?.memo || "";
+  function renderCharacters() {
+    const box = $("characterGrid");
+    box.innerHTML = "";
+    $("characterCount").textContent = `${characters.length} / 20`;
 
-    $("summaryNickname").textContent = profile?.nickname || "-";
-    $("summaryClass").textContent = profile?.class_name || "-";
-    $("summaryLevel").textContent = profile?.level || "-";
-    $("summaryPower").textContent = profile?.combat_power ? shortMoney(profile.combat_power) : "-";
+    if (!characters.length) {
+      box.innerHTML = '<div class="empty-state character-empty">등록된 캐릭터가 없습니다.</div>';
+      return;
+    }
+
+    characters.forEach(ch => {
+      const card = document.createElement("article");
+      card.className = "character-card";
+      card.innerHTML = `
+        <div class="character-card-head">
+          <div>
+            <input class="char-nickname" maxlength="20" value="">
+            <input class="char-class" maxlength="30" value="">
+          </div>
+          <button class="delete-btn" type="button">삭제</button>
+        </div>
+        <div class="character-mini-grid">
+          <label><span>레벨</span><input class="char-level" type="number" min="1" max="999"></label>
+          <label><span>전투력</span><input class="char-power" type="number" min="0" step="1"></label>
+        </div>
+        <label class="char-memo-label"><span>메모</span><textarea class="char-memo" maxlength="120"></textarea></label>
+        <button class="secondary char-save" type="button">저장</button>`;
+
+      card.querySelector(".char-nickname").value = ch.nickname || "";
+      card.querySelector(".char-class").value = ch.class_name || "";
+      card.querySelector(".char-level").value = ch.level ?? "";
+      card.querySelector(".char-power").value = ch.combat_power ?? "";
+      card.querySelector(".char-memo").value = ch.memo || "";
+
+      card.querySelector(".char-save").onclick = async () => {
+        const payload = {
+          nickname: card.querySelector(".char-nickname").value.trim(),
+          class_name: card.querySelector(".char-class").value.trim() || null,
+          level: card.querySelector(".char-level").value ? Number(card.querySelector(".char-level").value) : null,
+          combat_power: card.querySelector(".char-power").value ? Number(card.querySelector(".char-power").value) : null,
+          memo: card.querySelector(".char-memo").value.trim() || null,
+          updated_at: new Date().toISOString()
+        };
+        if (!payload.nickname) return alert("닉네임은 비워둘 수 없습니다.");
+        const { data, error } = await sb.from("maple_characters")
+          .update(payload)
+          .eq("id", ch.id)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+        if (error) return alert(error.message);
+        Object.assign(ch, data);
+        setSync("캐릭터 저장됨");
+      };
+
+      card.querySelector(".delete-btn").onclick = async () => {
+        if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;
+        const { error } = await sb.from("maple_characters")
+          .delete()
+          .eq("id", ch.id)
+          .eq("user_id", user.id);
+        if (error) return alert(error.message);
+        characters = characters.filter(x => x.id !== ch.id);
+        renderCharacters();
+      };
+
+      box.appendChild(card);
+    });
   }
 
-  $("profileForm").onsubmit = async e => {
+  $("characterForm").onsubmit = async e => {
     e.preventDefault();
-    const payload = {
-      user_id:user.id,
-      nickname:$("profileNickname").value.trim() || null,
-      class_name:$("profileClass").value.trim() || null,
-      level:$("profileLevel").value ? Number($("profileLevel").value) : null,
-      combat_power:$("profilePower").value ? Number($("profilePower").value) : null,
-      memo:$("profileMemo").value.trim() || null,
-      updated_at:new Date().toISOString()
-    };
-    const { data, error } = await sb.from("maple_profile").upsert(payload, { onConflict:"user_id" }).select().single();
+    if (characters.length >= 20) return alert("캐릭터는 최대 20개까지 등록할 수 있습니다.");
+
+    const nickname = $("characterNickname").value.trim();
+    if (!nickname) return;
+
+    const { data, error } = await sb.from("maple_characters").insert({
+      user_id: user.id,
+      nickname,
+      class_name: $("characterClass").value.trim() || null,
+      level: $("characterLevel").value ? Number($("characterLevel").value) : null,
+      combat_power: $("characterPower").value ? Number($("characterPower").value) : null,
+      memo: $("characterMemo").value.trim() || null,
+      sort_order: characters.length
+    }).select().single();
+
     if (error) return alert(error.message);
-    profile = data;
-    renderProfile();
-    setSync("저장됨");
+    characters.push(data);
+    ["characterNickname","characterClass","characterLevel","characterPower","characterMemo"].forEach(id => $(id).value = "");
+    renderCharacters();
+    setSync("캐릭터 추가됨");
   };
 
   function renderOverview() {
@@ -356,7 +419,7 @@
     renderChecklist();
     renderMeso();
     renderEnhancements();
-    renderProfile();
+    renderCharacters();
     renderOverview();
   }
 
