@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>Maple Personal Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=20260816-characterorder" />
+  <link rel="stylesheet" href="style.css?v=20260816-bossselector" />
 </head>
 <body>
   <main class="page">
@@ -112,7 +112,6 @@
           <form id="characterForm" class="character-add-form auto-profile-form">
             <input id="characterNickname" maxlength="20" placeholder="캐릭터 닉네임" required />
             <input id="characterOwnedMeso" type="number" min="0" step="1" placeholder="보유 메소 (선택)" />
-            <input id="characterBossMeso" type="number" min="0" step="1" placeholder="보스 메소 (선택)" />
             <input id="characterMemo" maxlength="120" placeholder="메모 (선택)" />
             <button class="primary" type="submit">닉네임으로 추가</button>
           </form>
@@ -134,8 +133,19 @@
     </section>
   </main>
 
+
+  <div id="bossModal" class="boss-modal hidden">
+    <div class="boss-modal-backdrop" data-close-boss></div>
+    <section class="boss-modal-panel">
+      <div class="boss-modal-head"><div><p class="kicker">WEEKLY BOSS</p><h2>주간 보스 설정</h2><p id="bossModalCharacter" class="muted"></p></div><button id="bossModalClose" class="boss-close" type="button">×</button></div>
+      <div class="boss-summary-bar"><strong id="bossSelectedCount">0 / 12</strong><span>예상 결정석</span><strong id="bossSelectedMeso">0</strong></div>
+      <p class="boss-guide">같은 보스는 난이도 하나만 선택할 수 있으며 총 12개까지 선택할 수 있습니다.</p>
+      <div id="bossCatalog" class="boss-catalog"></div>
+      <div class="boss-modal-actions"><button id="bossModalCancel" class="secondary" type="button">취소</button><button id="bossModalSave" class="primary" type="button">저장</button></div>
+    </section>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=20260816-characterorder"></script>
-  <script src="app.js?v=20260816-characterorder"></script>
+  <script src="config.js?v=20260816-bossselector"></script>
+  <script src="app.js?v=20260816-bossselector"></script>
 </body>
 </html>

@@ -12,6 +12,21 @@
   let user = null;
   let checklist = [];
   let characters = [];
+  let bossSelections = [];
+  let bossEditingCharacter = null;
+  let bossDraft = new Map();
+  const BOSS_CATALOG = [
+    ["시그너스","이지",4550000,"시"],["힐라","하드",1280000,"힐"],["핑크빈","카오스",1320000,"핑"],["시그너스","노멀",1360000,"시"],
+    ["자쿰","카오스",8080000,"자"],["블러디 퀸","카오스",8140000,"퀸"],["반반","카오스",8150000,"반"],["피에르","카오스",8170000,"피"],["매그너스","하드",8560000,"매"],["벨룸","카오스",9280000,"벨"],
+    ["파풀라투스","카오스",13100000,"파"],["스우","노멀",16700000,"스"],["데미안","노멀",17500000,"데"],["가디언 엔젤 슬라임","노멀",25500000,"가"],["루시드","이지",29800000,"루"],["윌","이지",32300000,"윌"],
+    ["루시드","노멀",35600000,"루"],["윌","노멀",41100000,"윌"],["더스크","노멀",44000000,"더"],["듄켈","노멀",47500000,"듄"],["데미안","하드",48900000,"데"],["스우","하드",51500000,"스"],
+    ["루시드","하드",62900000,"루"],["더스크","카오스",69800000,"더"],["진 힐라","노멀",71200000,"진"],["가디언 엔젤 슬라임","카오스",75100000,"가"],["윌","하드",77100000,"윌"],["듄켈","하드",94400000,"듄"],["진 힐라","하드",106000000,"진"],
+    ["선택받은 세렌","노멀",239000000,"세"],["감시자 칼로스","이지",280000000,"칼"],["최초의 대적자","이지",308000000,"대"],["선택받은 세렌","하드",356000000,"세"],["카링","이지",377000000,"카"],["감시자 칼로스","노멀",505000000,"칼"],
+    ["최초의 대적자","노멀",560000000,"대"],["스우","익스트림",574000000,"스"],["찬란한 흉성","노멀",625000000,"흉"],["검은 마법사","하드(월간)",665000000,"검"],["카링","노멀",678000000,"카"],["림보","노멀",1026000000,"림"],
+    ["감시자 칼로스","카오스",1273000000,"칼"],["발드릭스","노멀",1368000000,"발"],["최초의 대적자","하드",1435000000,"대"],["유피테르","노멀",1615000000,"유"],["카링","하드",1739000000,"카"],["림보","하드",2385000000,"림"],
+    ["찬란한 흉성","하드",2678000000,"흉"],["선택받은 세렌","익스트림",2835000000,"세"],["발드릭스","하드",3078000000,"발"],["감시자 칼로스","익스트림",4104000000,"칼"],["최초의 대적자","익스트림",4712000000,"대"],["유피테르","하드",4845000000,"유"],["카링","익스트림",5387000000,"카"],["검은 마법사","익스트림(월간)",8740000000,"검"]
+  ].map(([name,difficulty,price,short])=>({name,difficulty,price,short,key:`${name}-${difficulty}`}));
+
   let isLoading = false;
 
   const shortMoney = value => {
@@ -86,24 +101,19 @@
     setSync("불러오는 중…");
 
     try {
-      const [c, ch] = await Promise.all([
-        sb.from("maple_checklist")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: true }),
-
-        sb.from("maple_characters")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("sort_order", { ascending: true })
-          .order("created_at", { ascending: true })
+      const [c, ch, bs] = await Promise.all([
+        sb.from("maple_checklist").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        sb.from("maple_characters").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true }),
+        sb.from("character_boss_selections").select("*").eq("user_id", user.id)
       ]);
 
       if (c.error) throw c.error;
       if (ch.error) throw ch.error;
+      if (bs.error) throw bs.error;
 
       checklist = c.data || [];
       characters = ch.data || [];
+      bossSelections = bs.data || [];
       renderAll();
       setSync("동기화됨");
     } catch (err) {
@@ -370,13 +380,12 @@
 
         <div class="character-actions">
           <button class="character-refresh icon-action" type="button" aria-label="정보 새로고침" title="정보 새로고침">↻</button>
-          <button class="edit-toggle icon-action" type="button" aria-label="메소/메모 수정" title="메소/메모 수정">✎</button>
+          <button class="edit-toggle icon-action" type="button" aria-label="보유 메소/메모 수정" title="보유 메소/메모 수정">✎</button>
         </div>
 
         <div class="character-editor">
           <div class="character-editor-grid">
             <input class="edit-owned" type="number" min="0" step="1" placeholder="보유 메소">
-            <input class="edit-boss" type="number" min="0" step="1" placeholder="보스 메소">
             <textarea class="edit-memo" maxlength="120" placeholder="메모"></textarea>
           </div>
           <div class="character-editor-actions">
@@ -406,11 +415,9 @@
         ch.api_updated_at ? `게임 정보 갱신 ${formatUpdatedAt(ch.api_updated_at)}` : "";
 
       const owned = card.querySelector(".edit-owned");
-      const boss = card.querySelector(".edit-boss");
       const memo = card.querySelector(".edit-memo");
 
       owned.value = ch.owned_meso ?? 0;
-      boss.value = ch.boss_meso ?? 0;
       memo.value = ch.memo || "";
 
       card.querySelector(".edit-toggle").addEventListener("click", () => {
@@ -419,15 +426,13 @@
 
       card.querySelector(".cancel-character").addEventListener("click", () => {
         owned.value = ch.owned_meso ?? 0;
-        boss.value = ch.boss_meso ?? 0;
-        memo.value = ch.memo || "";
+          memo.value = ch.memo || "";
         card.classList.remove("editing");
       });
 
       card.querySelector(".save-character").addEventListener("click", async () => {
         const payload = {
           owned_meso: Number(owned.value || 0),
-          boss_meso: Number(boss.value || 0),
           memo: memo.value.trim() || null,
           updated_at: new Date().toISOString()
         };
@@ -536,7 +541,7 @@
         image_url: info.image_url || null,
         world_name: info.world_name || null,
         owned_meso: Number($("characterOwnedMeso").value || 0),
-        boss_meso: Number($("characterBossMeso").value || 0),
+        boss_meso: 0,
         memo: $("characterMemo").value.trim() || null,
         api_updated_at: new Date().toISOString(),
         sort_order: characters.length
@@ -552,7 +557,7 @@
 
       characters.push(data);
 
-      ["characterNickname","characterOwnedMeso","characterBossMeso","characterMemo"]
+      ["characterNickname","characterOwnedMeso","characterMemo"]
         .forEach(id => $(id).value = "");
 
       renderAll();
@@ -645,7 +650,7 @@
             <div class="settings-char-sub"></div>
           </div>
         </div>
-        <button class="delete-btn danger-delete" type="button">삭제</button>
+        <div class="settings-row-actions"><button class="boss-edit-btn" type="button" title="주간 보스 설정">✎</button><button class="delete-btn danger-delete" type="button">삭제</button></div>
       `;
 
       const img = row.querySelector(".settings-char-image");
@@ -670,6 +675,7 @@
       upBtn.addEventListener("click", () => moveCharacter(currentIndex, -1));
       downBtn.addEventListener("click", () => moveCharacter(currentIndex, 1));
 
+      row.querySelector(".boss-edit-btn").addEventListener("click", () => openBossModal(ch));
       row.querySelector(".danger-delete").addEventListener("click", async () => {
         if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;
 
@@ -689,6 +695,70 @@
       box.appendChild(row);
     });
   }
+
+  function openBossModal(ch) {
+    bossEditingCharacter = ch;
+    bossDraft = new Map(bossSelections.filter(x=>x.character_id===ch.id).map(x=>[x.boss_key,x]));
+    $("bossModalCharacter").textContent = `${ch.nickname} · 최대 12개`;
+    $("bossModal").classList.remove("hidden");
+    document.body.classList.add("modal-open");
+    renderBossCatalog();
+  }
+  function closeBossModal() {
+    $("bossModal").classList.add("hidden"); document.body.classList.remove("modal-open");
+    bossEditingCharacter=null; bossDraft=new Map();
+  }
+  function renderBossCatalog() {
+    const box=$("bossCatalog"); box.innerHTML="";
+    const grouped=new Map();
+    BOSS_CATALOG.forEach(b=>{if(!grouped.has(b.name)) grouped.set(b.name,[]); grouped.get(b.name).push(b);});
+    grouped.forEach((variants,name)=>{
+      const group=document.createElement("section"); group.className="boss-group";
+      group.innerHTML=`<div class="boss-group-head"><div class="boss-icon">${variants[0].short}</div><strong>${name}</strong></div><div class="boss-difficulties"></div>`;
+      const db=group.querySelector(".boss-difficulties");
+      variants.forEach(b=>{
+        const btn=document.createElement("button"); btn.type="button"; btn.className="boss-option"+(bossDraft.has(b.key)?" selected":"");
+        btn.innerHTML=`<span>${b.difficulty}</span><strong>${shortMoney(b.price)}</strong>`;
+        btn.onclick=()=>{
+          const was=bossDraft.has(b.key);
+          variants.forEach(v=>bossDraft.delete(v.key));
+          if(!was){
+            if(bossDraft.size>=12){alert("주간 보스는 최대 12개까지 선택할 수 있습니다."); renderBossCatalog(); return;}
+            bossDraft.set(b.key,b);
+          }
+          renderBossCatalog();
+        };
+        db.appendChild(btn);
+      });
+      box.appendChild(group);
+    });
+    const total=[...bossDraft.values()].reduce((s,b)=>s+Number(b.price||b.crystal_price||0),0);
+    $("bossSelectedCount").textContent=`${bossDraft.size} / 12`;
+    $("bossSelectedMeso").textContent=shortMoney(total);
+  }
+  async function saveBossSelection(){
+    if(!bossEditingCharacter)return;
+    const ch=bossEditingCharacter, chosen=[...bossDraft.values()];
+    $("bossModalSave").disabled=true; setSync("보스 설정 저장 중…");
+    try{
+      const d=await sb.from("character_boss_selections").delete().eq("user_id",user.id).eq("character_id",ch.id); if(d.error)throw d.error;
+      if(chosen.length){
+        const rows=chosen.map(b=>({user_id:user.id,character_id:ch.id,boss_key:b.key,boss_name:b.name,difficulty:b.difficulty,crystal_price:b.price}));
+        const ins=await sb.from("character_boss_selections").insert(rows); if(ins.error)throw ins.error;
+      }
+      const total=chosen.reduce((s,b)=>s+Number(b.price),0);
+      const up=await sb.from("maple_characters").update({boss_meso:total,updated_at:new Date().toISOString()}).eq("id",ch.id).eq("user_id",user.id).select().single();
+      if(up.error)throw up.error;
+      bossSelections=bossSelections.filter(x=>x.character_id!==ch.id);
+      bossSelections.push(...chosen.map(b=>({user_id:user.id,character_id:ch.id,boss_key:b.key,boss_name:b.name,difficulty:b.difficulty,crystal_price:b.price})));
+      Object.assign(ch,up.data); closeBossModal(); renderAll(); setSync("보스 설정 저장됨");
+    }catch(err){console.error(err);alert(err.message||String(err));setSync("보스 설정 저장 실패");}
+    finally{$("bossModalSave").disabled=false;}
+  }
+  $("bossModalClose")?.addEventListener("click",closeBossModal);
+  $("bossModalCancel")?.addEventListener("click",closeBossModal);
+  document.querySelector("[data-close-boss]")?.addEventListener("click",closeBossModal);
+  $("bossModalSave")?.addEventListener("click",saveBossSelection);
 
   function renderSummary() {
     const daily = checklist.filter(x => x.cycle === "daily");
