@@ -4434,3 +4434,74 @@ main{
     margin-top:0!important;
   }
 }
+
+/* ===== v1.35 header action overlap hotfix ===== */
+
+.app-header{
+  position:relative!important;
+  min-height:82px!important;
+}
+
+/* 제목 블록은 액션과 무관하게 정상 크기 유지 */
+.app-header > div:first-child{
+  position:relative!important;
+  width:auto!important;
+  max-width:max-content!important;
+  padding-right:0!important;
+}
+
+.app-header h1{
+  white-space:nowrap!important;
+  margin-right:0!important;
+}
+
+/*
+  header-actions가 제목 div 안에 들어있는 기존 HTML 구조이므로
+  제목 오른쪽 공간에 absolute 배치.
+  화면 우측 끝이 아니라 제목 기준 위치.
+*/
+.app-header .header-actions{
+  position:absolute!important;
+  top:17px!important;
+  left:305px!important;
+  right:auto!important;
+  bottom:auto!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  width:max-content!important;
+  transform:none!important;
+  z-index:20!important;
+}
+
+.app-header .header-actions .sync,
+#syncStatus,
+.sync-status{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  transform:none!important;
+}
+
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+/* 제목이 더 길거나 화면이 좁아지는 경우 아래 행으로 안전하게 이동 */
+@media(max-width:760px){
+  .app-header{
+    padding-bottom:48px!important;
+  }
+
+  .app-header .header-actions{
+    top:auto!important;
+    left:0!important;
+    bottom:0!important;
+  }
+}
