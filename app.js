@@ -369,8 +369,8 @@
         <div class="api-updated"></div>
 
         <div class="character-actions">
-          <button class="character-refresh" type="button">정보 새로고침</button>
-          <button class="edit-toggle" type="button">메소/메모 수정</button>
+          <button class="character-refresh icon-action" type="button" aria-label="정보 새로고침" title="정보 새로고침">↻</button>
+          <button class="edit-toggle icon-action" type="button" aria-label="메소/메모 수정" title="메소/메모 수정">✎</button>
         </div>
 
         <div class="character-editor">
@@ -450,7 +450,7 @@
       card.querySelector(".character-refresh").addEventListener("click", async e => {
         const btn = e.currentTarget;
         btn.disabled = true;
-        btn.textContent = "불러오는 중…";
+        btn.textContent = "…";
         setSync(`${ch.nickname} 조회 중…`);
 
         try {
@@ -486,7 +486,7 @@
           alert(err.message || String(err));
         } finally {
           btn.disabled = false;
-          btn.textContent = "정보 새로고침";
+          btn.textContent = "↻";
         }
       });
 
