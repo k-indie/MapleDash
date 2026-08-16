@@ -4258,3 +4258,179 @@ main{
     top:auto!important;
   }
 }
+
+/* ===== v1.34 header restore + summary typography + spacing system ===== */
+
+:root{
+  --v134-section-gap:14px;
+  --v134-card-gap:8px;
+}
+
+/* ---------------------------------------------------------
+   1. 동기화 상태 + 로그아웃:
+   제목 바로 오른쪽의 원래 header flow로 복귀
+   --------------------------------------------------------- */
+.app-header{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:26px!important;
+  margin-bottom:18px!important;
+  position:relative!important;
+}
+
+.app-header > div:first-child{
+  flex:0 1 auto!important;
+  min-width:0!important;
+}
+
+.app-header .header-actions{
+  position:static!important;
+  inset:auto!important;
+  margin:11px 0 0 0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex:0 0 auto!important;
+  transform:none!important;
+}
+
+#syncStatus,
+.sync-status,
+.sync{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  padding:0!important;
+  white-space:nowrap!important;
+  transform:none!important;
+}
+
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  transform:none!important;
+  z-index:auto!important;
+}
+
+/* ---------------------------------------------------------
+   2. 상단 요약 카드 제목 +2px
+   기존 약 10~11px 수준에서 13px로 통일
+   --------------------------------------------------------- */
+.dashboard-row-v130 .dash-card > span,
+.dashboard-row-v131 .dash-card > span,
+.dashboard-row .dash-card > span{
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+}
+
+/* 값과 제목 사이도 일정하게 */
+.dashboard-row-v130 .dash-card,
+.dashboard-row-v131 .dash-card,
+.dashboard-row .dash-card{
+  gap:7px!important;
+}
+
+/* ---------------------------------------------------------
+   3. 대시보드 수직 간격 시스템
+   계산기 → 요약 → 그룹 → 캐릭터 = 14px
+   --------------------------------------------------------- */
+
+/* nav와 dashboard 첫 영역 사이도 같은 계열로 정리 */
+.main-nav{
+  margin-bottom:var(--v134-section-gap)!important;
+}
+
+/* dashboard 내부 섹션 간격 */
+#dashboardView{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:var(--v134-section-gap)!important;
+}
+
+/* 기존 섹션 margin 중복 제거 */
+#dashboardView > section,
+#dashboardView > article{
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+
+/* 계산기 높이(약 52px) + 아래 간격 14px만 확보 */
+.dashboard-summary-shell{
+  padding-top:66px!important;
+  margin:0!important;
+}
+
+/* 계산기는 shell 상단 */
+.monthly-floating-calculator{
+  top:0!important;
+}
+
+/* 계산기 자체 하단 margin이 간격을 망치지 않도록 */
+.monthly-floating-calculator .economy-calculator{
+  margin:0!important;
+}
+
+/* 요약 카드 내부 gap */
+.dashboard-row,
+.dashboard-row-v130,
+.dashboard-row-v131{
+  gap:var(--v134-card-gap)!important;
+  margin:0!important;
+}
+
+/* 그룹별 현황 / 내 캐릭터 section 외부 margin 제거 */
+.group-status-panel,
+.character-list-panel{
+  margin:0!important;
+}
+
+/* section 내부 여백은 동일 */
+.group-status-panel,
+.character-list-panel,
+.section-block{
+  padding:12px!important;
+}
+
+/* 그룹 카드 / 캐릭터 카드 내부 grid gap도 통일감 */
+.group-status-grid,
+.character-grid{
+  gap:var(--v134-card-gap)!important;
+}
+
+/* ---------------------------------------------------------
+   반응형
+   --------------------------------------------------------- */
+@media(max-width:900px){
+  .app-header{
+    gap:14px!important;
+  }
+
+  .app-header .header-actions{
+    margin-top:7px!important;
+  }
+
+  .dashboard-summary-shell{
+    padding-top:0!important;
+  }
+
+  .monthly-floating-calculator{
+    position:static!important;
+    margin-bottom:var(--v134-section-gap)!important;
+  }
+}
+
+@media(max-width:620px){
+  .app-header{
+    flex-wrap:wrap!important;
+  }
+
+  .app-header .header-actions{
+    width:100%!important;
+    margin-top:0!important;
+  }
+}
