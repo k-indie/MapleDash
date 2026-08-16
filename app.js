@@ -594,7 +594,8 @@
       card.querySelector(".character-name").textContent = ch.nickname || "-";
       card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미확인";
       card.querySelector(".character-world").textContent = ch.world_name || "";
-      const dp=getCharacterChecklistProgress(ch.id,"daily"),wp=getCharacterChecklistProgress(ch.id,"weekly"),mp=getCharacterChecklistProgress(ch.id,"monthly");
+      const dp=getCharacterChecklistProgress(ch.id,"daily"),mp=getCharacterChecklistProgress(ch.id,"monthly");
+      const bp=getBossProgress(ch.id);
       const dailyBtn = card.querySelector(".daily-status");
       const weeklyBtn = card.querySelector(".weekly-status");
       const monthlyBtn = card.querySelector(".monthly-status");
@@ -604,17 +605,23 @@
       monthlyBtn.textContent="검마";
 
       dailyBtn.classList.toggle("complete", dp.total > 0 && dp.done === dp.total);
-      weeklyBtn.classList.toggle("complete", wp.total > 0 && wp.done === wp.total);
+      weeklyBtn.classList.toggle("complete", bp.selected > 0 && bp.killed === bp.selected);
       monthlyBtn.classList.toggle("complete", mp.total > 0 && mp.done === mp.total);
 
       dailyBtn.addEventListener("click", e => {
         e.stopPropagation();
         toggleWholeCycle(ch, "daily");
       });
+
+      // 주간은 별도 수동 버튼이 아니라 주간 보스 현황이 모두 완료되면 자동 점등됩니다.
+      weeklyBtn.classList.add("auto-status");
+      weeklyBtn.title = bp.selected > 0
+        ? `주간 보스 ${bp.killed}/${bp.selected} · 전부 처치하면 자동 완료`
+        : "설정에서 주간 보스를 선택하면 자동으로 연동됩니다.";
       weeklyBtn.addEventListener("click", e => {
         e.stopPropagation();
-        toggleWholeCycle(ch, "weekly");
       });
+
       monthlyBtn.addEventListener("click", e => {
         e.stopPropagation();
         toggleWholeCycle(ch, "monthly");
@@ -1085,7 +1092,22 @@
   document.querySelector("[data-close-boss]")?.addEventListener("click",closeBossModal);
   $("bossModalSave")?.addEventListener("click",saveBossSelection);
 
-  function renderSummary(){const dt=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"daily").total,0),dd=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"daily").done,0),wt=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").total,0),wd=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").done,0);$("dailySummary").textContent=`${dd} / ${dt}`;$("weeklySummary").textContent=`${wd} / ${wt}`;$("ownedMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.owned_meso||0),0));$("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.boss_meso||0),0));$("characterCountSummary").textContent=characters.length;$("characterCount").textContent=`${characters.length} / 20`;}
+  function renderSummary(){
+    const dailyDoneCharacters = characters.filter(ch => {
+      const p = getCharacterChecklistProgress(ch.id, "daily");
+      return p.total > 0 && p.done === p.total;
+    }).length;
+
+    const wt=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").total,0);
+    const wd=characters.reduce((n,ch)=>n+getCharacterChecklistProgress(ch.id,"weekly").done,0);
+
+    $("dailySummary").textContent=`${dailyDoneCharacters} / ${characters.length}`;
+    $("weeklySummary").textContent=`${wd} / ${wt}`;
+    $("ownedMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.owned_meso||0),0));
+    $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.boss_meso||0),0));
+    $("characterCountSummary").textContent=characters.length;
+    $("characterCount").textContent=`${characters.length} / 20`;
+  }
 
   function renderAll() {
     renderChecklist();

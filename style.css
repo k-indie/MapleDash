@@ -1106,3 +1106,40 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     font-size:9px;
   }
 }
+
+/* ===== UX tune: quick buttons / server label / card action icons ===== */
+
+/* 일간 / 주간 / 검마: 크기는 유지하면서 글씨만 더 읽기 쉽게 */
+.character-status-row .status-chip{
+  font-size:11px!important;
+  font-weight:900!important;
+  min-width:40px!important;
+  padding:4px 8px!important;
+}
+
+/* 주간은 보스 진행도에 따라 자동으로만 켜지는 상태 표시 버튼 */
+.character-status-row .status-chip.auto-status{
+  cursor:default!important;
+}
+.character-status-row .status-chip.auto-status:active{
+  transform:none!important;
+}
+
+/* 서버명 1px 정도 확대 */
+.character-world{
+  font-size:13px!important;
+}
+
+/* 아래 ↻ / ✎ 버튼은 살짝 더 작게 */
+.character-actions .icon-action{
+  width:28px!important;
+  height:28px!important;
+  min-width:28px!important;
+  border-radius:8px!important;
+}
+.character-actions .character-refresh{
+  font-size:19px!important;
+}
+.character-actions .edit-toggle{
+  font-size:16px!important;
+}
