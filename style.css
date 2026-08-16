@@ -3473,3 +3473,149 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* ===== v1.29 monthly calculator placement + header restore ===== */
+
+/* 헤더는 원래처럼 제목/동기화/로그아웃만 */
+header,
+.topbar,
+.site-header{
+  align-items:flex-start!important;
+}
+
+/* 상단 네비 영역에서 계산기 영향 제거 */
+.top-economy-calculator{
+  display:none!important;
+}
+
+/* 대시보드 요약: 5번째 칸에 계산기 + 월간 수익 */
+.dashboard-row-v129{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important;
+  align-items:stretch!important;
+}
+
+.monthly-summary-stack{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+
+.monthly-economy-calculator{
+  min-width:0;
+}
+
+.monthly-economy-calculator .economy-calculator{
+  width:100%!important;
+  margin:0!important;
+  padding:8px!important;
+  display:block!important;
+  border:1px solid #5d4b2d!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,rgba(193,124,28,.10),rgba(77,47,12,.08))!important;
+}
+
+/* 4개 입력은 2x2로 컴팩트하게 */
+.monthly-economy-calculator .economy-inputs{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+
+/* 메포 계산기 폰트 약 +2px */
+.monthly-economy-calculator .economy-inputs label span{
+  display:block!important;
+  margin-bottom:3px!important;
+  color:#8490a3!important;
+  font-size:10px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.monthly-economy-calculator .economy-inputs input{
+  width:100%!important;
+  min-width:0!important;
+  height:30px!important;
+  padding:5px 7px!important;
+  font-size:11px!important;
+}
+
+.monthly-economy-calculator .economy-result{
+  width:100%!important;
+  min-width:0!important;
+  margin-top:6px!important;
+  padding:7px 8px!important;
+}
+
+.monthly-economy-calculator .economy-result span{
+  font-size:10px!important;
+}
+
+.monthly-economy-calculator .economy-result strong{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:13px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* 숫자 input 화살표 숨김 유지 */
+.economy-calculator input[type="number"]::-webkit-inner-spin-button,
+.economy-calculator input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+
+.economy-calculator input[type="number"]{
+  -moz-appearance:textfield!important;
+  appearance:textfield!important;
+}
+
+/* 로그아웃 버튼은 헤더 원래 영역에 자연스럽게 */
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  margin:0!important;
+}
+
+/* v1.28 배치 영향 제거 */
+.dashboard-row-v128,
+.monthly-income-stack,
+.economy-summary-wrap{
+  display:none!important;
+}
+
+@media(max-width:1250px){
+  .dashboard-row-v129{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+
+  .monthly-summary-stack{
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+    align-items:stretch;
+  }
+
+  .monthly-economy-calculator .economy-inputs{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:760px){
+  .dashboard-row-v129{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .monthly-summary-stack{
+    grid-template-columns:1fr;
+  }
+
+  .monthly-economy-calculator .economy-inputs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.28" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.29" />
 
-  <link rel="stylesheet" href="style.css?v=1.28" />
+  <link rel="stylesheet" href="style.css?v=1.29" />
 </head>
 <body>
   <main class="page">
@@ -30,15 +30,32 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.28</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.29</span></h1>
           
         </div>
         <div class="header-actions">
           <span id="syncStatus" class="sync">동기화 준비</span>
           <button id="logoutBtn" class="ghost" type="button">로그아웃</button>
         
-          <div class="top-economy-calculator">
-            <div class="economy-calculator panel">
+          
+</div>
+      </header>
+
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="dashboardView" type="button">대시보드</button>
+        <button class="nav-btn" data-view="settingsView" type="button">설정</button>
+      </nav>
+
+      <section id="dashboardView" class="app-view-section">
+        <section class="dashboard-row dashboard-row-v129">
+          <article class="dash-card panel"><span>일일 숙제</span><strong id="dailySummary">0 / 0</strong></article>
+          <article class="dash-card panel"><span>주간 숙제</span><strong id="weeklySummary">0 / 0</strong></article>
+          <article class="dash-card panel"><span>보유중인 메소</span><strong id="ownedMesoSummary">0</strong></article>
+          <article class="dash-card panel"><span>주간 보스 수익</span><strong id="weeklyBossIncomeSummary">0</strong></article>
+
+          <div class="monthly-summary-stack">
+            <div class="monthly-economy-calculator">
+              <div class="economy-calculator panel">
               <div class="economy-inputs">
                 <label><span>챌린저스 메포 시세</span><input id="challengerRate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="예: 2500"></label>
                 <label><span>일반 서버 메포 시세</span><input id="normalRate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="예: 2800"></label>
@@ -50,22 +67,12 @@
                 <strong id="maplePointResult">0 메이플 포인트</strong>
               </div>
             </div>
+            </div>
+            <article class="dash-card panel monthly-income-card">
+              <span>월간 보스 수익</span>
+              <strong id="monthlyBossIncomeSummary">0</strong>
+            </article>
           </div>
-</div>
-      </header>
-
-      <nav class="main-nav">
-        <button class="nav-btn active" data-view="dashboardView" type="button">대시보드</button>
-        <button class="nav-btn" data-view="settingsView" type="button">설정</button>
-      </nav>
-
-      <section id="dashboardView" class="app-view-section">
-        <section class="dashboard-row dashboard-row-v128">
-          <article class="dash-card panel"><span>일일 숙제</span><strong id="dailySummary">0 / 0</strong></article>
-          <article class="dash-card panel"><span>주간 숙제</span><strong id="weeklySummary">0 / 0</strong></article>
-          <article class="dash-card panel"><span>보유중인 메소</span><strong id="ownedMesoSummary">0</strong></article>
-          <article class="dash-card panel"><span>주간 보스 수익</span><strong id="weeklyBossIncomeSummary">0</strong></article>
-          <article class="dash-card panel"><span>월간 보스 수익</span><strong id="monthlyBossIncomeSummary">0</strong></article>
         </section>
 
         <article class="panel section-block group-status-panel">
@@ -161,7 +168,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.28"></script>
-  <script src="app.js?v=1.28"></script>
+  <script src="config.js?v=1.29"></script>
+  <script src="app.js?v=1.29"></script>
 </body>
 </html>
