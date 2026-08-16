@@ -1511,3 +1511,12 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 @media(max-width:600px){
   .boss-card-grid{grid-template-columns:1fr}
 }
+
+/* ===== v1.03 boss icon crop alignment ===== */
+.boss-real-icon{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  display:block!important;
+}
