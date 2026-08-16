@@ -4729,3 +4729,63 @@ main{
 .group-meso-modal .modal-actions button:hover{
   filter:brightness(1.06)!important;
 }
+
+/* ===== v1.42 group meso buttons match memo editor ===== */
+
+/* 그룹별 현황 메소 편집의 취소/저장 버튼을 메모 편집 버튼과 동일한 느낌으로 */
+#groupMesoCancelBtn,
+.group-meso-cancel{
+  flex:1 1 0!important;
+  height:28px!important;
+  min-width:0!important;
+  min-height:28px!important;
+  padding:0 12px!important;
+  border:1px solid #273249!important;
+  border-radius:8px!important;
+  background:#202a40!important;
+  color:#f4f7fb!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:26px!important;
+  text-align:center!important;
+  box-shadow:none!important;
+}
+
+#groupMesoSaveBtn,
+.group-meso-save{
+  flex:1 1 0!important;
+  height:28px!important;
+  min-width:0!important;
+  min-height:28px!important;
+  padding:0 12px!important;
+  border:1px solid #ffb21d!important;
+  border-radius:8px!important;
+  background:#ffb21d!important;
+  color:#111827!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  line-height:26px!important;
+  text-align:center!important;
+  box-shadow:none!important;
+}
+
+#groupMesoCancelBtn:hover,
+.group-meso-cancel:hover{
+  background:#29354d!important;
+  filter:none!important;
+}
+
+#groupMesoSaveBtn:hover,
+.group-meso-save:hover{
+  background:#ffc044!important;
+  border-color:#ffc044!important;
+  filter:none!important;
+}
+
+/* 두 버튼을 메모처럼 같은 폭으로 */
+.group-meso-actions{
+  display:flex!important;
+  width:100%!important;
+  gap:5px!important;
+  margin-top:5px!important;
+}
