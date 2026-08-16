@@ -663,6 +663,10 @@
   $("characterChecklistClose")?.addEventListener("click",closeCharacterChecklist);document.querySelector("[data-close-character-checklist]")?.addEventListener("click",closeCharacterChecklist);
 
   function renderCharacters() {
+    const visibleCharacters = selectedDashboardGroupId
+      ? characters.filter(ch => ch.group_id === selectedDashboardGroupId)
+      : [];
+
     const box = $("characterGrid");
     box.innerHTML = "";
     $("characterCount").textContent = `${visibleCharacters.length} / ${characters.length}`;
@@ -671,10 +675,6 @@
       box.innerHTML = '<div class="empty-state">등록된 캐릭터가 없습니다.</div>';
       return;
     }
-
-    const visibleCharacters = selectedDashboardGroupId
-      ? characters.filter(ch => ch.group_id === selectedDashboardGroupId)
-      : [];
 
     visibleCharacters.forEach(ch => {
       const card = document.createElement("article");
