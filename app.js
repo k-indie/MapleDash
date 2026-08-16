@@ -567,6 +567,58 @@
     }
   });
 
+  async function saveCharacterOrder() {
+    setSync("순서 저장 중…");
+
+    const updates = characters.map((ch, index) => ({
+      id: ch.id,
+      user_id: user.id,
+      sort_order: index
+    }));
+
+    // 개별 update를 병렬 실행해 기존 필드를 건드리지 않습니다.
+    const results = await Promise.all(
+      updates.map(item =>
+        sb.from("maple_characters")
+          .update({ sort_order: item.sort_order })
+          .eq("id", item.id)
+          .eq("user_id", item.user_id)
+      )
+    );
+
+    const failed = results.find(result => result.error);
+    if (failed) {
+      console.error(failed.error);
+      setSync("순서 저장 실패");
+      alert(`순서를 저장하지 못했습니다.\n${failed.error.message}`);
+      await loadAll();
+      return false;
+    }
+
+    characters.forEach((ch, index) => {
+      ch.sort_order = index;
+    });
+
+    setSync("순서 저장됨");
+    return true;
+  }
+
+  async function moveCharacter(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= characters.length) return;
+
+    const temp = characters[index];
+    characters[index] = characters[target];
+    characters[target] = temp;
+
+    // UI를 먼저 바꿔 즉각적으로 보이게 합니다.
+    renderCharacters();
+    renderSettingsCharacters();
+    renderSummary();
+
+    await saveCharacterOrder();
+  }
+
   function renderSettingsCharacters() {
     const box = $("settingsCharacterList");
     if (!box) return;
@@ -582,6 +634,10 @@
       const row = document.createElement("div");
       row.className = "settings-character-row";
       row.innerHTML = `
+        <div class="settings-order-controls">
+          <button class="order-btn move-up" type="button" aria-label="위로 이동" title="위로 이동">↑</button>
+          <button class="order-btn move-down" type="button" aria-label="아래로 이동" title="아래로 이동">↓</button>
+        </div>
         <div class="settings-char-main">
           <img class="settings-char-image" alt="">
           <div>
@@ -603,6 +659,16 @@
       row.querySelector(".settings-char-name").textContent = ch.nickname || "-";
       row.querySelector(".settings-char-sub").textContent =
         `${ch.class_name || "직업 미확인"} · ${ch.world_name || "월드 미확인"}`;
+
+      const currentIndex = characters.findIndex(item => item.id === ch.id);
+      const upBtn = row.querySelector(".move-up");
+      const downBtn = row.querySelector(".move-down");
+
+      upBtn.disabled = currentIndex === 0;
+      downBtn.disabled = currentIndex === characters.length - 1;
+
+      upBtn.addEventListener("click", () => moveCharacter(currentIndex, -1));
+      downBtn.addEventListener("click", () => moveCharacter(currentIndex, 1));
 
       row.querySelector(".danger-delete").addEventListener("click", async () => {
         if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;

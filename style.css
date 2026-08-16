@@ -773,3 +773,44 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
 .character-actions .icon-action:hover{
   transform:translateY(-1px);
 }
+
+/* ===== Character order controls in Settings ===== */
+.settings-character-row{
+  display:grid!important;
+  grid-template-columns:auto 1fr auto!important;
+}
+
+.settings-order-controls{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.order-btn{
+  width:28px;
+  height:24px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#192133;
+  color:#d8deea;
+  font-size:14px;
+  line-height:1;
+  font-weight:900;
+}
+
+.order-btn:hover:not(:disabled){
+  background:#263149;
+  color:#ffffff;
+}
+
+.order-btn:disabled{
+  opacity:.25;
+  cursor:not-allowed;
+}
+
+@media(max-width:560px){
+  .settings-character-row{
+    grid-template-columns:auto 1fr auto!important;
+  }
+}
