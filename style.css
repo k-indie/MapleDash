@@ -2280,3 +2280,59 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
   .character-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .character-avatar-wrap{height:165px!important}
 }
+
+/* ===== v1.13 per-boss party size ===== */
+.boss-price-option{
+  grid-template-columns:56px minmax(0,1fr) auto auto!important;
+}
+
+.boss-party-control{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.boss-party-select{
+  min-width:50px;
+  height:24px;
+  padding:2px 5px;
+  border:1px solid #3a4760;
+  border-radius:6px;
+  background:#0e1622;
+  color:#dce3ee;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.boss-party-select:hover{
+  border-color:#63728e;
+}
+
+.boss-price-option.selected .boss-option-price{
+  color:#ffe09a!important;
+}
+
+.boss-income-value{
+  white-space:nowrap;
+}
+
+.card-boss-price{
+  min-width:86px;
+  text-align:right;
+}
+
+@media(max-width:600px){
+  .boss-price-option{
+    grid-template-columns:52px minmax(0,1fr) auto!important;
+  }
+
+  .boss-party-control{
+    grid-column:2/3;
+  }
+
+  .boss-option-kill{
+    grid-column:3/4;
+    grid-row:1/3;
+  }
+}
