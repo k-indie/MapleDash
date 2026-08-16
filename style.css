@@ -3831,3 +3831,116 @@ h1{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* ===== v1.31 thin 1x5 Maple Point calculator ===== */
+
+/* 계산기 높이가 얇아졌으므로 상단 확보 공간도 축소 */
+.dashboard-summary-shell{
+  padding-top:61px!important;
+}
+
+/* 월간 보스 수익 컬럼 위에서 왼쪽으로 길게 펼침 */
+.monthly-floating-calculator{
+  width:min(760px,calc(100% - 20px))!important;
+  top:0!important;
+  right:0!important;
+}
+
+/* 4개 입력 + 결과 = 정확히 1 x 5 */
+.monthly-floating-calculator .economy-calculator{
+  display:grid!important;
+  grid-template-columns:minmax(0,4fr) minmax(145px,1fr)!important;
+  align-items:end!important;
+  gap:6px!important;
+  padding:6px 7px!important;
+  min-height:52px!important;
+}
+
+.monthly-floating-calculator .economy-inputs{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+
+.monthly-floating-calculator .economy-inputs label{
+  min-width:0!important;
+}
+
+.monthly-floating-calculator .economy-inputs label span{
+  margin-bottom:2px!important;
+  font-size:10px!important;
+  line-height:1!important;
+}
+
+.monthly-floating-calculator .economy-inputs input{
+  height:27px!important;
+  padding:3px 6px!important;
+  font-size:11px!important;
+}
+
+/* 예상 메이플 포인트도 5번째 칸 하나로 */
+.monthly-floating-calculator .economy-result{
+  width:auto!important;
+  min-width:0!important;
+  height:42px!important;
+  margin:0!important;
+  padding:5px 7px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+
+.monthly-floating-calculator .economy-result span{
+  font-size:9px!important;
+  line-height:1!important;
+}
+
+.monthly-floating-calculator .economy-result strong{
+  margin-top:4px!important;
+  font-size:12px!important;
+  line-height:1!important;
+}
+
+/* 중간 화면에서도 가능하면 1x5 유지 */
+@media(max-width:1250px){
+  .dashboard-summary-shell{
+    padding-top:61px!important;
+  }
+
+  .monthly-floating-calculator{
+    width:min(760px,100%)!important;
+  }
+
+  .monthly-floating-calculator .economy-calculator{
+    grid-template-columns:minmax(0,4fr) minmax(145px,1fr)!important;
+  }
+
+  .monthly-floating-calculator .economy-inputs{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+
+/* 아주 좁은 화면에서만 2줄 허용 */
+@media(max-width:760px){
+  .dashboard-summary-shell{
+    padding-top:0!important;
+  }
+
+  .monthly-floating-calculator{
+    position:static!important;
+    width:100%!important;
+    margin-bottom:7px!important;
+  }
+
+  .monthly-floating-calculator .economy-calculator{
+    grid-template-columns:1fr!important;
+  }
+
+  .monthly-floating-calculator .economy-inputs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .monthly-floating-calculator .economy-result{
+    height:auto!important;
+  }
+}
