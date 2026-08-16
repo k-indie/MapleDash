@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Maple Personal Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section id="authView" class="panel auth-card">
+      <div class="logo">M</div>
+      <p class="kicker">PERSONAL MAPLE DASHBOARD</p>
+      <h1>메이플 개인 대시보드</h1>
+      <p class="muted">체크리스트 · 메소 · 강화 기록을 여러 기기에서 동기화합니다.</p>
+
+      <form id="authForm" class="auth-form">
+        <input id="emailInput" type="email" autocomplete="email" placeholder="이메일" required />
+        <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="비밀번호 (6자 이상)" required />
+        <button class="primary" type="submit">로그인</button>
+        <button id="signupBtn" class="secondary" type="button">처음이면 회원가입</button>
+      </form>
+      <p id="authMessage" class="message"></p>
+    </section>
+
+    <section id="appView" class="hidden">
+      <header class="app-header">
+        <div>
+          <p class="kicker">MAPLESTORY</p>
+          <h1>내 대시보드</h1>
+          <p id="userEmail" class="muted"></p>
+        </div>
+        <div class="header-actions">
+          <span id="syncStatus" class="sync">동기화 준비</span>
+          <button id="logoutBtn" class="ghost" type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="overview">대시보드</button>
+        <button class="tab" data-tab="checklist">체크리스트</button>
+        <button class="tab" data-tab="meso">메소</button>
+        <button class="tab" data-tab="enhance">강화 기록</button>
+        <button class="tab" data-tab="profile">내 캐릭터</button>
+      </nav>
+
+      <section id="overview" class="tab-page">
+        <section class="stats-row">
+          <article class="stat-card panel"><span>오늘 체크</span><strong id="todayCheckStat">0 / 0</strong></article>
+          <article class="stat-card panel"><span>오늘 메소</span><strong id="todayMesoStat">0</strong></article>
+          <article class="stat-card panel"><span>이번 달 순수익</span><strong id="monthNetStat">0</strong></article>
+          <article class="stat-card panel"><span>이번 달 강화 비용</span><strong id="monthEnhanceStat">0</strong></article>
+        </section>
+
+        <section class="overview-grid">
+          <article class="panel">
+            <div class="section-head">
+              <div><p class="kicker">CHECKLIST</p><h2>오늘 할 일</h2></div>
+              <button class="link-btn" data-go="checklist" type="button">전체 보기</button>
+            </div>
+            <div id="overviewChecklist" class="compact-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-head">
+              <div><p class="kicker">MESO</p><h2>최근 메소 기록</h2></div>
+              <button class="link-btn" data-go="meso" type="button">전체 보기</button>
+            </div>
+            <div id="overviewMeso" class="compact-list"></div>
+          </article>
+        </section>
+
+        <article class="panel profile-summary">
+          <div class="section-head">
+            <div><p class="kicker">CHARACTER</p><h2>내 캐릭터</h2></div>
+            <button class="link-btn" data-go="profile" type="button">수정</button>
+          </div>
+          <div class="profile-grid">
+            <div><span>닉네임</span><strong id="summaryNickname">-</strong></div>
+            <div><span>직업</span><strong id="summaryClass">-</strong></div>
+            <div><span>레벨</span><strong id="summaryLevel">-</strong></div>
+            <div><span>전투력</span><strong id="summaryPower">-</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="checklist" class="tab-page hidden">
+        <article class="panel">
+          <div class="section-head">
+            <div><p class="kicker">DAILY / WEEKLY / ONE-TIME</p><h2>체크리스트</h2></div>
+          </div>
+          <form id="checklistForm" class="triple-form">
+            <input id="checkTitle" maxlength="100" placeholder="예: 일일 보스 돌기" required />
+            <select id="checkCycle">
+              <option value="daily">일일</option>
+              <option value="weekly">주간</option>
+              <option value="once">1회</option>
+            </select>
+            <button class="primary" type="submit">추가</button>
+          </form>
+
+          <div class="filter-row">
+            <button class="filter active" data-check-filter="all" type="button">전체</button>
+            <button class="filter" data-check-filter="daily" type="button">일일</button>
+            <button class="filter" data-check-filter="weekly" type="button">주간</button>
+            <button class="filter" data-check-filter="once" type="button">1회</button>
+          </div>
+
+          <div id="checklistList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section id="meso" class="tab-page hidden">
+        <section class="stats-row">
+          <article class="stat-card panel"><span>오늘 순수익</span><strong id="mesoTodayStat">0</strong></article>
+          <article class="stat-card panel"><span>이번 달 수입</span><strong id="mesoIncomeStat">0</strong></article>
+          <article class="stat-card panel"><span>이번 달 지출</span><strong id="mesoExpenseStat">0</strong></article>
+          <article class="stat-card panel"><span>이번 달 순수익</span><strong id="mesoNetStat">0</strong></article>
+        </section>
+
+        <article class="panel">
+          <div class="section-head">
+            <div><p class="kicker">MESO LEDGER</p><h2>메소 기록</h2></div>
+          </div>
+          <form id="mesoForm" class="meso-form">
+            <select id="mesoType">
+              <option value="income">수입</option>
+              <option value="expense">지출</option>
+            </select>
+            <input id="mesoAmount" type="number" min="1" step="1" placeholder="메소 금액" required />
+            <input id="mesoCategory" maxlength="30" placeholder="분류 (사냥/보스/구매/강화)" />
+            <input id="mesoMemo" maxlength="100" placeholder="메모" />
+            <button class="primary" type="submit">기록</button>
+          </form>
+          <div id="mesoList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section id="enhance" class="tab-page hidden">
+        <section class="stats-row">
+          <article class="stat-card panel"><span>이번 달 시도</span><strong id="enhanceAttempts">0</strong></article>
+          <article class="stat-card panel"><span>성공</span><strong id="enhanceSuccess">0</strong></article>
+          <article class="stat-card panel"><span>실패/파괴</span><strong id="enhanceFail">0</strong></article>
+          <article class="stat-card panel"><span>총 비용</span><strong id="enhanceCost">0</strong></article>
+        </section>
+
+        <article class="panel">
+          <div class="section-head">
+            <div><p class="kicker">ENHANCEMENT LOG</p><h2>강화 기록</h2></div>
+          </div>
+          <form id="enhanceForm" class="enhance-form">
+            <input id="enhanceItem" maxlength="60" placeholder="아이템 이름" required />
+            <select id="enhanceType">
+              <option value="starforce">스타포스</option>
+              <option value="potential">잠재능력</option>
+              <option value="additional">에디셔널</option>
+              <option value="scroll">주문서</option>
+              <option value="other">기타</option>
+            </select>
+            <select id="enhanceResult">
+              <option value="success">성공</option>
+              <option value="fail">실패</option>
+              <option value="destroyed">파괴</option>
+              <option value="change">옵션 변경</option>
+            </select>
+            <input id="enhanceCostInput" type="number" min="0" step="1" placeholder="사용 메소" />
+            <input id="enhanceMemo" maxlength="100" placeholder="예: 21성 → 22성" />
+            <button class="primary" type="submit">기록</button>
+          </form>
+          <div id="enhanceList" class="record-list"></div>
+        </article>
+      </section>
+
+      <section id="profile" class="tab-page hidden">
+        <article class="panel">
+          <div class="section-head">
+            <div><p class="kicker">MANUAL PROFILE</p><h2>내 캐릭터 정보</h2></div>
+          </div>
+          <form id="profileForm" class="profile-form">
+            <label>닉네임<input id="profileNickname" maxlength="20" placeholder="캐릭터 닉네임" /></label>
+            <label>직업<input id="profileClass" maxlength="30" placeholder="예: 아델" /></label>
+            <label>레벨<input id="profileLevel" type="number" min="1" max="999" placeholder="예: 290" /></label>
+            <label>전투력<input id="profilePower" type="number" min="0" step="1" placeholder="예: 123456789" /></label>
+            <label class="wide">메모<textarea id="profileMemo" maxlength="500" placeholder="목표 스펙, 다음 강화 계획 등을 적어두세요."></textarea></label>
+            <button class="primary wide" type="submit">저장</button>
+          </form>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
