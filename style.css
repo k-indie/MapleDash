@@ -1297,3 +1297,217 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     radial-gradient(circle at 15% 20%,rgba(114,77,154,.15),transparent 38%),
     linear-gradient(180deg,#171326,#0b0d18)!important;
 }
+
+/* ===== v1.02 boss selector redesign using uploaded icons ===== */
+.boss-catalog{
+  display:block!important;
+}
+
+.boss-section-banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  margin:4px 0 10px;
+  border:1px solid #34415a;
+  border-radius:11px;
+  background:#111927;
+}
+
+.boss-section-banner>div{
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+}
+
+.boss-section-banner strong{
+  color:#f1f5fb;
+  font-size:14px;
+}
+
+.boss-section-banner span{
+  color:#8590a4;
+  font-size:10px;
+}
+
+.weekly-count{
+  color:#ffca68!important;
+  font-size:14px!important;
+}
+
+.boss-card-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+.boss-select-card{
+  padding:9px;
+  border:1px solid #263147;
+  border-radius:12px;
+  background:linear-gradient(180deg,#111927,#0b111d);
+}
+
+.boss-select-card.has-selection{
+  border-color:#5c4b2e;
+  box-shadow:inset 0 0 0 1px rgba(255,181,46,.05);
+}
+
+.boss-select-card-head{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+
+.boss-select-icon{
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border-radius:9px;
+  background:#090e17;
+  border:1px solid #344159;
+}
+
+.boss-real-icon{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  image-rendering:auto;
+}
+
+.boss-fallback-icon{
+  color:#d8deea;
+  font-size:14px;
+  font-weight:900;
+}
+
+.boss-select-title{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.boss-select-title strong{
+  color:#ecf1f8;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.boss-select-title span{
+  color:#778399;
+  font-size:9px;
+}
+
+.boss-select-options{
+  display:grid;
+  gap:5px;
+}
+
+.boss-price-option{
+  position:relative;
+  width:100%;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:7px;
+  padding:7px 8px;
+  border:1px solid #2b374d;
+  border-radius:8px;
+  background:#17202d;
+  color:#b7c0cf;
+  text-align:left;
+}
+
+.boss-price-option:hover{
+  background:#1e2939;
+  border-color:#4b5b77;
+}
+
+.boss-price-option.selected{
+  border-color:#d89427;
+  background:linear-gradient(180deg,rgba(201,132,28,.17),rgba(117,72,16,.12));
+}
+
+.boss-option-difficulty{
+  min-width:38px;
+  font-size:9px;
+  color:#9da7b8;
+}
+
+.boss-price-option.selected .boss-option-difficulty{
+  color:#ffd47c;
+}
+
+.boss-option-price{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:10px;
+  font-weight:850;
+  color:#f0f3f7;
+  white-space:nowrap;
+}
+
+.boss-option-price img{
+  width:13px;
+  height:13px;
+  object-fit:contain;
+}
+
+.boss-option-kill{
+  padding:3px 5px;
+  border-radius:6px;
+  background:#101721;
+  color:#8490a3;
+  font-size:8px;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.boss-option-kill.killed{
+  background:rgba(77,191,139,.16);
+  color:#7de0b3;
+}
+
+.blackmage-monthly-wrap{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:2px solid #58456d;
+}
+
+.monthly-banner{
+  border-color:#614c78;
+  background:linear-gradient(180deg,rgba(96,67,127,.23),rgba(41,29,57,.2));
+}
+
+.blackmage-card{
+  max-width:540px;
+  border-color:#5d4971!important;
+  background:
+    radial-gradient(circle at 8% 20%,rgba(119,78,158,.15),transparent 36%),
+    linear-gradient(180deg,#151224,#0a0d17)!important;
+}
+
+.monthly-option.selected{
+  border-color:#8b68b2!important;
+  background:rgba(101,67,139,.18)!important;
+}
+
+.character-status-row .status-chip.hidden{
+  display:none!important;
+}
+
+@media(max-width:1000px){
+  .boss-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .boss-card-grid{grid-template-columns:1fr}
+}

@@ -17,20 +17,103 @@
   let bossSelections = [];
   let bossEditingCharacter = null;
   let bossDraft = new Map();
+  const BOSS_ICONS = {
+    "자쿰":"assets/boss/zakum.png",
+    "블러디 퀸":"assets/boss/queen.png",
+    "반반":"assets/boss/vonbon.png",
+    "피에르":"assets/boss/pierre.png",
+    "매그너스":"assets/boss/magnus.png",
+    "벨룸":"assets/boss/vellum.png",
+    "파풀라투스":"assets/boss/papulatus.png",
+    "스우":"assets/boss/lotus.png",
+    "데미안":"assets/boss/damien.png",
+    "가디언 엔젤 슬라임":"assets/boss/slime.png",
+    "루시드":"assets/boss/lucid.png",
+    "윌":"assets/boss/will.png",
+    "더스크":"assets/boss/gloom.png",
+    "듄켈":"assets/boss/darknell.png",
+    "진 힐라":"assets/boss/vhilla.png",
+    "선택받은 세렌":"assets/boss/seren.png",
+    "감시자 칼로스":"assets/boss/kalos.png",
+    "최초의 대적자":"assets/boss/adversary.png",
+    "찬란한 흉성":"assets/boss/shining.png",
+    "카링":"assets/boss/kaling.png",
+    "림보":"assets/boss/limbo.png",
+    "발드릭스":"assets/boss/baldricks.png",
+    "유피테르":"assets/boss/jupiter.png",
+    "검은 마법사":"assets/boss/blackmage.png"
+  };
+
+  const boss = (name, difficulty, price, short) => ({
+    name, difficulty, price, short,
+    icon: BOSS_ICONS[name] || null,
+    key: `${name}-${difficulty}`
+  });
+
   const BOSS_CATALOG = [
-    ["시그너스","이지",4550000,"시"],["힐라","하드",1280000,"힐"],["핑크빈","카오스",1320000,"핑"],["시그너스","노멀",1360000,"시"],
-    ["자쿰","카오스",8080000,"자"],["블러디 퀸","카오스",8140000,"퀸"],["반반","카오스",8150000,"반"],["피에르","카오스",8170000,"피"],["매그너스","하드",8560000,"매"],["벨룸","카오스",9280000,"벨"],
-    ["파풀라투스","카오스",13100000,"파"],["스우","노멀",16700000,"스"],["데미안","노멀",17500000,"데"],["가디언 엔젤 슬라임","노멀",25500000,"가"],["루시드","이지",29800000,"루"],["윌","이지",32300000,"윌"],
-    ["루시드","노멀",35600000,"루"],["윌","노멀",41100000,"윌"],["더스크","노멀",44000000,"더"],["듄켈","노멀",47500000,"듄"],["데미안","하드",48900000,"데"],["스우","하드",51500000,"스"],
-    ["루시드","하드",62900000,"루"],["더스크","카오스",69800000,"더"],["진 힐라","노멀",71200000,"진"],["가디언 엔젤 슬라임","카오스",75100000,"가"],["윌","하드",77100000,"윌"],["듄켈","하드",94400000,"듄"],["진 힐라","하드",106000000,"진"],
-    ["선택받은 세렌","노멀",239000000,"세"],["감시자 칼로스","이지",280000000,"칼"],["최초의 대적자","이지",308000000,"대"],["선택받은 세렌","하드",356000000,"세"],["카링","이지",377000000,"카"],["감시자 칼로스","노멀",505000000,"칼"],
-    ["감시자 칼로스","카오스",1273000000,"칼"],["발드릭스","노멀",1368000000,"발"],["최초의 대적자","하드",1435000000,"대"],["유피테르","노멀",1615000000,"유"],["카링","하드",1739000000,"카"],["림보","하드",2385000000,"림"],
-  ].map(([name,difficulty,price,short])=>({name,difficulty,price,short,key:`${name}-${difficulty}`}));
+    boss("시그너스","이지",4550000,"시"),
+    boss("힐라","하드",1280000,"힐"),
+    boss("핑크빈","카오스",1320000,"핑"),
+    boss("시그너스","노멀",1360000,"시"),
+
+    boss("자쿰","카오스",8080000,"자"),
+    boss("블러디 퀸","카오스",8140000,"퀸"),
+    boss("반반","카오스",8150000,"반"),
+    boss("피에르","카오스",8170000,"피"),
+    boss("매그너스","하드",8560000,"매"),
+    boss("벨룸","카오스",9280000,"벨"),
+    boss("파풀라투스","카오스",13100000,"파"),
+
+    boss("스우","노멀",16700000,"스"),
+    boss("데미안","노멀",17500000,"데"),
+    boss("가디언 엔젤 슬라임","노멀",25500000,"가"),
+    boss("루시드","이지",29800000,"루"),
+    boss("윌","이지",32300000,"윌"),
+    boss("루시드","노멀",35600000,"루"),
+    boss("윌","노멀",41100000,"윌"),
+    boss("더스크","노멀",44000000,"더"),
+    boss("듄켈","노멀",47500000,"듄"),
+    boss("데미안","하드",48900000,"데"),
+    boss("스우","하드",51500000,"스"),
+    boss("루시드","하드",62900000,"루"),
+    boss("더스크","카오스",69800000,"더"),
+    boss("진 힐라","노멀",71200000,"진"),
+    boss("가디언 엔젤 슬라임","카오스",75100000,"가"),
+    boss("윌","하드",77100000,"윌"),
+    boss("듄켈","하드",94400000,"듄"),
+    boss("진 힐라","하드",106000000,"진"),
+
+    boss("선택받은 세렌","노멀",239000000,"세"),
+    boss("감시자 칼로스","이지",280000000,"칼"),
+    boss("최초의 대적자","이지",308000000,"대"),
+    boss("선택받은 세렌","하드",356000000,"세"),
+    boss("카링","이지",377000000,"카"),
+    boss("감시자 칼로스","노멀",505000000,"칼"),
+    boss("최초의 대적자","노멀",560000000,"대"),
+    boss("스우","익스트림",574000000,"스"),
+    boss("찬란한 흉성","노멀",625000000,"흉"),
+    boss("카링","노멀",678000000,"카"),
+
+    boss("림보","노멀",1026000000,"림"),
+    boss("감시자 칼로스","카오스",1273000000,"칼"),
+    boss("발드릭스","노멀",1368000000,"발"),
+    boss("최초의 대적자","하드",1435000000,"대"),
+    boss("유피테르","노멀",1615000000,"유"),
+    boss("카링","하드",1739000000,"카"),
+    boss("림보","하드",2385000000,"림"),
+    boss("찬란한 흉성","하드",2678000000,"흉"),
+    boss("선택받은 세렌","익스트림",2835000000,"세"),
+    boss("발드릭스","하드",3078000000,"발"),
+    boss("감시자 칼로스","익스트림",4104000000,"칼"),
+    boss("최초의 대적자","익스트림",4712000000,"대"),
+    boss("유피테르","하드",4845000000,"유"),
+    boss("카링","익스트림",5387000000,"카")
+  ];
 
   const BLACK_MAGE_CATALOG = [
-    ["최초의 대적자","노멀",560000000,"대"],["스우","익스트림",574000000,"스"],["찬란한 흉성","노멀",625000000,"흉"],["검은 마법사","하드(월간)",665000000,"검"],["카링","노멀",678000000,"카"],["림보","노멀",1026000000,"림"],
-    ["찬란한 흉성","하드",2678000000,"흉"],["선택받은 세렌","익스트림",2835000000,"세"],["발드릭스","하드",3078000000,"발"],["감시자 칼로스","익스트림",4104000000,"칼"],["최초의 대적자","익스트림",4712000000,"대"],["유피테르","하드",4845000000,"유"],["카링","익스트림",5387000000,"카"],["검은 마법사","익스트림(월간)",8740000000,"검"]
-  ].map(([name,difficulty,price,short])=>({name,difficulty,price,short,key:`${name}-${difficulty}`}));
+    boss("검은 마법사","하드",665000000,"검"),
+    boss("검은 마법사","익스트림",8740000000,"검")
+  ];
 
 
   let isLoading = false;
@@ -420,7 +503,7 @@
   function closeCharacterChecklist(){$("characterChecklistModal").classList.add("hidden");document.body.classList.remove("modal-open");checklistEditingCharacter=null;}
   async function toggleCharacterCheck(item){const ch=checklistEditingCharacter;if(!ch)return;const existing=characterCheckStates.find(x=>x.character_id===ch.id&&x.checklist_id===item.id),completed_at=isCharacterCheckDone(ch.id,item)?null:new Date().toISOString();const q=existing?await sb.from("character_check_states").update({completed_at}).eq("id",existing.id).eq("user_id",user.id).select().single():await sb.from("character_check_states").insert({user_id:user.id,character_id:ch.id,checklist_id:item.id,completed_at}).select().single();if(q.error){alert(q.error.message);return;}if(existing)Object.assign(existing,q.data);else characterCheckStates.push(q.data);renderCharacterChecklistModal();renderCharacters();renderSummary();setSync("체크 저장됨");}
   async function toggleBossKilledFromCard(selection) {
-    const killedNow = isBossKilledThisWeek(selection);
+    const killedNow = isBossKilledCurrentPeriod(selection);
     const killedAt = killedNow ? null : new Date().toISOString();
 
     setSync(killedNow ? "보스 처치 해제 중…" : "보스 처치 저장 중…");
@@ -495,7 +578,7 @@
     list.className = "card-boss-list";
 
     selectedBosses.forEach(selection => {
-      const killed = isBossKilledThisWeek(selection);
+      const killed = isBossKilledCurrentPeriod(selection);
 
       const row = document.createElement("button");
       row.type = "button";
@@ -598,38 +681,43 @@
       card.querySelector(".character-name").textContent = ch.nickname || "-";
       card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미확인";
       card.querySelector(".character-world").textContent = ch.world_name || "";
-      const dp=getCharacterChecklistProgress(ch.id,"daily"),mp=getCharacterChecklistProgress(ch.id,"monthly");
-      const bp=getBossProgress(ch.id);
+      const dp = getCharacterChecklistProgress(ch.id, "daily");
+      const bp = getBossProgress(ch.id);
+      const blackMage = getBlackMageSelection(ch.id);
       const dailyBtn = card.querySelector(".daily-status");
       const weeklyBtn = card.querySelector(".weekly-status");
       const monthlyBtn = card.querySelector(".monthly-status");
 
-      dailyBtn.textContent="일간";
-      weeklyBtn.textContent="주간";
-      monthlyBtn.textContent="검마";
+      dailyBtn.textContent = "일간";
+      weeklyBtn.textContent = "주간";
+      monthlyBtn.textContent = "검마";
 
       dailyBtn.classList.toggle("complete", dp.total > 0 && dp.done === dp.total);
       weeklyBtn.classList.toggle("complete", bp.selected > 0 && bp.killed === bp.selected);
-      monthlyBtn.classList.toggle("complete", mp.total > 0 && mp.done === mp.total);
 
       dailyBtn.addEventListener("click", e => {
         e.stopPropagation();
         toggleWholeCycle(ch, "daily");
       });
 
-      // 주간은 별도 수동 버튼이 아니라 주간 보스 현황이 모두 완료되면 자동 점등됩니다.
-      weeklyBtn.classList.add("auto-status");
       weeklyBtn.title = bp.selected > 0
-        ? `주간 보스 ${bp.killed}/${bp.selected} · 전부 처치하면 자동 완료`
-        : "설정에서 주간 보스를 선택하면 자동으로 연동됩니다.";
+        ? `주간 보스 ${bp.killed}/${bp.selected} · 클릭하면 전체 처치/해제`
+        : "설정에서 주간 보스를 먼저 선택해주세요.";
       weeklyBtn.addEventListener("click", e => {
         e.stopPropagation();
+        toggleAllWeeklyBosses(ch);
       });
 
-      monthlyBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleWholeCycle(ch, "monthly");
-      });
+      if (blackMage) {
+        monthlyBtn.classList.remove("hidden");
+        monthlyBtn.classList.toggle("complete", isBossKilledThisMonth(blackMage));
+        monthlyBtn.title = isBossKilledThisMonth(blackMage)
+          ? "이번 달 검은마법사 처치 완료"
+          : "캐릭터를 눌러 검은마법사 처치 상태를 변경하세요.";
+        monthlyBtn.addEventListener("click", e => e.stopPropagation());
+      } else {
+        monthlyBtn.classList.add("hidden");
+      }
       card.querySelector(".view-level").textContent = levelText;
       card.querySelector(".view-power").textContent = powerText;
       card.querySelector(".view-owned").textContent = ownedText;
@@ -926,10 +1014,17 @@
 
   function weeklyBossResetBoundary(now = new Date()) {
     const reset = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-    const day = reset.getDay(); // 0 Sun ... 4 Thu
-    const daysSinceThursday = (day - 4 + 7) % 7;
+    const daysSinceThursday = (reset.getDay() - 4 + 7) % 7;
     reset.setDate(reset.getDate() - daysSinceThursday);
     return reset;
+  }
+
+  function monthlyBossResetBoundary(now = new Date()) {
+    return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  }
+
+  function isBlackMageBoss(selection) {
+    return (selection?.boss_name || selection?.name) === "검은 마법사";
   }
 
   function isBossKilledThisWeek(selection) {
@@ -937,27 +1032,118 @@
     return new Date(selection.killed_at) >= weeklyBossResetBoundary();
   }
 
+  function isBossKilledThisMonth(selection) {
+    if (!selection?.killed_at) return false;
+    return new Date(selection.killed_at) >= monthlyBossResetBoundary();
+  }
+
+  function isBossKilledCurrentPeriod(selection) {
+    return isBlackMageBoss(selection)
+      ? isBossKilledThisMonth(selection)
+      : isBossKilledThisWeek(selection);
+  }
+
+  function getBlackMageSelection(characterId) {
+    return bossSelections.find(x =>
+      x.character_id === characterId && isBlackMageBoss(x)
+    ) || null;
+  }
+
   function getBossProgress(characterId) {
-    const selected = bossSelections.filter(x => x.character_id === characterId);
-    const killed = selected.filter(isBossKilledThisWeek).length;
-    return { selected: selected.length, killed };
+    const selected = bossSelections.filter(x =>
+      x.character_id === characterId && !isBlackMageBoss(x)
+    );
+    return {
+      selected: selected.length,
+      killed: selected.filter(isBossKilledThisWeek).length
+    };
+  }
+
+  async function toggleAllWeeklyBosses(ch) {
+    const weeklySelections = bossSelections.filter(x =>
+      x.character_id === ch.id && !isBlackMageBoss(x)
+    );
+
+    if (!weeklySelections.length) {
+      alert("설정에서 주간 보스를 먼저 선택해주세요.");
+      return;
+    }
+
+    const allKilled = weeklySelections.every(isBossKilledThisWeek);
+    const killedAt = allKilled ? null : new Date().toISOString();
+
+    setSync(allKilled ? "주간 보스 전체 해제 중…" : "주간 보스 전체 완료 중…");
+
+    try {
+      for (const selection of weeklySelections) {
+        const { data, error } = await sb
+          .from("character_boss_selections")
+          .update({ killed_at: killedAt })
+          .eq("user_id", user.id)
+          .eq("character_id", ch.id)
+          .eq("boss_key", selection.boss_key)
+          .select()
+          .single();
+
+        if (error) throw error;
+        Object.assign(selection, data);
+      }
+
+      renderAll();
+      if (checklistEditingCharacter?.id === ch.id) renderCharacterChecklistModal();
+      setSync(allKilled ? "주간 보스 전체 해제됨" : "주간 보스 전체 완료");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+      setSync("저장 실패");
+      await loadAll();
+    }
   }
 
   function openBossModal(ch) {
     bossEditingCharacter = ch;
-    bossDraft = new Map(bossSelections.filter(x=>x.character_id===ch.id).map(x=>[x.boss_key,x]));
-    $("bossModalCharacter").textContent = `${ch.nickname} · 최대 12개`;
+    bossDraft = new Map(
+      bossSelections
+        .filter(x => x.character_id === ch.id)
+        .map(x => [x.boss_key, x])
+    );
+    $("bossModalCharacter").textContent = `${ch.nickname} · 주간 12마리 + 월간 검은마법사`;
     $("bossModal").classList.remove("hidden");
     document.body.classList.add("modal-open");
     renderBossCatalog();
   }
+
   function closeBossModal() {
-    $("bossModal").classList.add("hidden"); document.body.classList.remove("modal-open");
-    bossEditingCharacter=null; bossDraft=new Map();
+    $("bossModal").classList.add("hidden");
+    document.body.classList.remove("modal-open");
+    bossEditingCharacter = null;
+    bossDraft = new Map();
   }
+
+  function makeBossIcon(bossItem) {
+    if (bossItem.icon) {
+      return `<img class="boss-real-icon" src="${bossItem.icon}" alt="${bossItem.name}">`;
+    }
+    return `<span class="boss-fallback-icon">${bossItem.short}</span>`;
+  }
+
   function renderBossCatalog() {
     const box = $("bossCatalog");
     box.innerHTML = "";
+
+    const weeklyHeading = document.createElement("div");
+    weeklyHeading.className = "boss-section-banner weekly-banner";
+    weeklyHeading.innerHTML = `
+      <div>
+        <strong>주간 보스</strong>
+        <span>최대 12마리 선택</span>
+      </div>
+      <strong class="weekly-count"></strong>
+    `;
+    box.appendChild(weeklyHeading);
+
+    const weeklyGrid = document.createElement("div");
+    weeklyGrid.className = "boss-card-grid";
 
     const grouped = new Map();
     BOSS_CATALOG.forEach(b => {
@@ -965,94 +1151,161 @@
       grouped.get(b.name).push(b);
     });
 
-    grouped.forEach((variants, name) => {
-      const group = document.createElement("section");
-      group.className = "boss-group";
-      group.innerHTML = `
-        <div class="boss-group-head">
-          <div class="boss-icon">${variants[0].short}</div>
-          <strong>${name}</strong>
+    grouped.forEach((variants, bossName) => {
+      const selectedVariant = variants.find(v => bossDraft.has(v.key));
+
+      const card = document.createElement("section");
+      card.className = `boss-select-card ${selectedVariant ? "has-selection" : ""}`;
+      card.innerHTML = `
+        <div class="boss-select-card-head">
+          <div class="boss-select-icon">${makeBossIcon(variants[0])}</div>
+          <div class="boss-select-title">
+            <strong>${bossName}</strong>
+            <span>${selectedVariant ? selectedVariant.difficulty + " 선택됨" : "난이도를 선택하세요"}</span>
+          </div>
         </div>
-        <div class="boss-difficulties"></div>
+        <div class="boss-select-options"></div>
       `;
 
-      const diffBox = group.querySelector(".boss-difficulties");
+      const optionBox = card.querySelector(".boss-select-options");
 
       variants.forEach(b => {
         const selectedData = bossDraft.get(b.key);
         const selected = !!selectedData;
         const killed = selected && isBossKilledThisWeek(selectedData);
 
-        const wrap = document.createElement("div");
-        wrap.className = `boss-option-wrap ${selected ? "selected" : ""}`;
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = `boss-price-option ${selected ? "selected" : ""}`;
+        option.innerHTML = `
+          <span class="boss-option-difficulty">${b.difficulty}</span>
+          <span class="boss-option-price">
+            <img src="assets/boss/meso.png" alt="">
+            ${shortMoney(b.price)}
+          </span>
+          ${selected ? `<span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 처치" : "○ 미처치"}</span>` : ""}
+        `;
 
-        const selectBtn = document.createElement("button");
-        selectBtn.type = "button";
-        selectBtn.className = "boss-option";
-        if (selected) selectBtn.classList.add("selected");
-        selectBtn.innerHTML = `<span>${b.difficulty}</span><strong>${shortMoney(b.price)}</strong>`;
+        option.addEventListener("click", e => {
+          const killTarget = e.target.closest(".boss-option-kill");
 
-        selectBtn.onclick = () => {
-          const wasSelected = bossDraft.has(b.key);
-
-          // 같은 보스의 다른 난이도 제거
-          variants.forEach(v => bossDraft.delete(v.key));
-
-          if (!wasSelected) {
-            if (bossDraft.size >= 12) {
-              alert("주간 보스는 최대 12개까지 선택할 수 있습니다.");
-              renderBossCatalog();
-              return;
-            }
-            bossDraft.set(b.key, {
-              ...b,
-              killed_at: null
-            });
-          }
-
-          renderBossCatalog();
-        };
-
-        wrap.appendChild(selectBtn);
-
-        if (selected) {
-          const killBtn = document.createElement("button");
-          killBtn.type = "button";
-          killBtn.className = `boss-kill-btn ${killed ? "killed" : ""}`;
-          killBtn.innerHTML = killed ? "✓ 처치" : "○ 미처치";
-
-          killBtn.onclick = () => {
+          if (killTarget && selected) {
             const current = bossDraft.get(b.key);
-            if (!current) return;
-
-            const nextKilledAt = isBossKilledThisWeek(current)
-              ? null
-              : new Date().toISOString();
-
             bossDraft.set(b.key, {
               ...current,
               ...b,
-              killed_at: nextKilledAt
+              killed_at: isBossKilledThisWeek(current) ? null : new Date().toISOString()
             });
-
             renderBossCatalog();
-          };
+            return;
+          }
 
-          wrap.appendChild(killBtn);
-        }
+          const wasSelected = bossDraft.has(b.key);
+          variants.forEach(v => bossDraft.delete(v.key));
 
-        diffBox.appendChild(wrap);
+          if (!wasSelected) {
+            const weeklyCount = [...bossDraft.values()].filter(x => !isBlackMageBoss(x)).length;
+            if (weeklyCount >= 12) {
+              alert("주간 보스는 최대 12마리까지 선택할 수 있습니다.");
+              renderBossCatalog();
+              return;
+            }
+            bossDraft.set(b.key, { ...b, killed_at: null });
+          }
+
+          renderBossCatalog();
+        });
+
+        optionBox.appendChild(option);
       });
 
-      box.appendChild(group);
+      weeklyGrid.appendChild(card);
     });
 
-    const values = [...bossDraft.values()];
-    const total = values.reduce((s, b) => s + Number(b.price || b.crystal_price || 0), 0);
-    const killed = values.filter(isBossKilledThisWeek).length;
+    box.appendChild(weeklyGrid);
 
-    $("bossSelectedCount").textContent = `${values.length} / 12`;
-    $("bossKilledCount").textContent = `${killed} / ${values.length}`;
+    const monthlyWrap = document.createElement("section");
+    monthlyWrap.className = "blackmage-monthly-wrap";
+
+    const monthlyHeading = document.createElement("div");
+    monthlyHeading.className = "boss-section-banner monthly-banner";
+    monthlyHeading.innerHTML = `
+      <div>
+        <strong>월간 보스 · 검은 마법사</strong>
+        <span>주간 12마리와 별도</span>
+      </div>
+    `;
+    monthlyWrap.appendChild(monthlyHeading);
+
+    const bmSelected = BLACK_MAGE_CATALOG.find(v => bossDraft.has(v.key));
+
+    const bmCard = document.createElement("section");
+    bmCard.className = `boss-select-card blackmage-card ${bmSelected ? "has-selection" : ""}`;
+    bmCard.innerHTML = `
+      <div class="boss-select-card-head">
+        <div class="boss-select-icon">${makeBossIcon(BLACK_MAGE_CATALOG[0])}</div>
+        <div class="boss-select-title">
+          <strong>검은 마법사</strong>
+          <span>${bmSelected ? bmSelected.difficulty + " 선택됨" : "선택한 캐릭터에만 검마 버튼 표시"}</span>
+        </div>
+      </div>
+      <div class="boss-select-options"></div>
+    `;
+
+    const bmOptions = bmCard.querySelector(".boss-select-options");
+
+    BLACK_MAGE_CATALOG.forEach(b => {
+      const selectedData = bossDraft.get(b.key);
+      const selected = !!selectedData;
+      const killed = selected && isBossKilledThisMonth(selectedData);
+
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = `boss-price-option monthly-option ${selected ? "selected" : ""}`;
+      option.innerHTML = `
+        <span class="boss-option-difficulty">${b.difficulty}</span>
+        <span class="boss-option-price">
+          <img src="assets/boss/meso.png" alt="">
+          ${shortMoney(b.price)}
+        </span>
+        ${selected ? `<span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 이번 달 처치" : "○ 미처치"}</span>` : ""}
+      `;
+
+      option.addEventListener("click", e => {
+        const killTarget = e.target.closest(".boss-option-kill");
+
+        if (killTarget && selected) {
+          const current = bossDraft.get(b.key);
+          bossDraft.set(b.key, {
+            ...current,
+            ...b,
+            killed_at: isBossKilledThisMonth(current) ? null : new Date().toISOString()
+          });
+          renderBossCatalog();
+          return;
+        }
+
+        const wasSelected = bossDraft.has(b.key);
+        BLACK_MAGE_CATALOG.forEach(v => bossDraft.delete(v.key));
+
+        if (!wasSelected) bossDraft.set(b.key, { ...b, killed_at: null });
+        renderBossCatalog();
+      });
+
+      bmOptions.appendChild(option);
+    });
+
+    monthlyWrap.appendChild(bmCard);
+    box.appendChild(monthlyWrap);
+
+    const values = [...bossDraft.values()];
+    const weeklyValues = values.filter(x => !isBlackMageBoss(x));
+    const weeklyKilled = weeklyValues.filter(isBossKilledThisWeek).length;
+    const total = values.reduce((sum, b) => sum + Number(b.price || b.crystal_price || 0), 0);
+
+    weeklyHeading.querySelector(".weekly-count").textContent = `${weeklyValues.length} / 12`;
+    $("bossSelectedCount").textContent = `${weeklyValues.length} / 12`;
+    $("bossKilledCount").textContent = `${weeklyKilled} / ${weeklyValues.length}`;
     $("bossSelectedMeso").textContent = shortMoney(total);
   }
 
