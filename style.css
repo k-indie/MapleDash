@@ -4666,3 +4666,66 @@ main{
 .app-view-section[aria-hidden="true"]{
   display:none!important;
 }
+
+/* ===== v1.41 group meso editor polish ===== */
+
+/* 그룹별 현황의 보유 메소 입력 숫자 화살표 제거 */
+.group-meso-input::-webkit-inner-spin-button,
+.group-meso-input::-webkit-outer-spin-button,
+#groupMesoInput::-webkit-inner-spin-button,
+#groupMesoInput::-webkit-outer-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+
+.group-meso-input,
+#groupMesoInput{
+  -moz-appearance:textfield!important;
+  appearance:textfield!important;
+}
+
+/* 그룹 메소 수정창 취소 / 저장 버튼 */
+.group-meso-actions,
+.group-meso-modal .modal-actions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+
+.group-meso-actions button,
+.group-meso-modal .modal-actions button{
+  min-width:68px!important;
+  min-height:34px!important;
+  padding:7px 14px!important;
+  border-radius:8px!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+}
+
+/* 취소: 기존 다크 테마 */
+.group-meso-actions .secondary,
+.group-meso-actions .cancel,
+.group-meso-modal .modal-actions .secondary,
+.group-meso-modal .modal-actions .cancel{
+  border:1px solid #2d3a50!important;
+  background:#111a2b!important;
+  color:#aebbd0!important;
+}
+
+/* 저장: 메이플 포인트/대시보드 포인트 컬러 */
+.group-meso-actions .primary,
+.group-meso-actions .save,
+.group-meso-modal .modal-actions .primary,
+.group-meso-modal .modal-actions .save{
+  border:1px solid #d89419!important;
+  background:#ffb21d!important;
+  color:#101522!important;
+}
+
+.group-meso-actions button:hover,
+.group-meso-modal .modal-actions button:hover{
+  filter:brightness(1.06)!important;
+}
