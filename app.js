@@ -404,10 +404,119 @@
     }
   }
 
-  function openCharacterChecklist(ch){checklistEditingCharacter=ch;$("characterChecklistTitle").textContent=ch.nickname||"캐릭터";$("characterChecklistSubtitle").textContent=`${ch.class_name||"직업 미확인"} · ${ch.world_name||"월드 미확인"}`;$("characterChecklistModal").classList.remove("hidden");document.body.classList.add("modal-open");renderCharacterChecklistModal();}
+  function openCharacterChecklist(ch){
+    checklistEditingCharacter=ch;
+    $("characterChecklistTitle").textContent=ch.nickname||"캐릭터";
+    const bp=getBossProgress(ch.id);
+    $("characterChecklistSubtitle").textContent=`${ch.class_name||"직업 미확인"} · ${ch.world_name||"월드 미확인"} · 보스 ${bp.killed}/${bp.selected}`;
+    $("characterChecklistModal").classList.remove("hidden");
+    document.body.classList.add("modal-open");
+    renderCharacterChecklistModal();
+  }
   function closeCharacterChecklist(){$("characterChecklistModal").classList.add("hidden");document.body.classList.remove("modal-open");checklistEditingCharacter=null;}
   async function toggleCharacterCheck(item){const ch=checklistEditingCharacter;if(!ch)return;const existing=characterCheckStates.find(x=>x.character_id===ch.id&&x.checklist_id===item.id),completed_at=isCharacterCheckDone(ch.id,item)?null:new Date().toISOString();const q=existing?await sb.from("character_check_states").update({completed_at}).eq("id",existing.id).eq("user_id",user.id).select().single():await sb.from("character_check_states").insert({user_id:user.id,character_id:ch.id,checklist_id:item.id,completed_at}).select().single();if(q.error){alert(q.error.message);return;}if(existing)Object.assign(existing,q.data);else characterCheckStates.push(q.data);renderCharacterChecklistModal();renderCharacters();renderSummary();setSync("체크 저장됨");}
-  function renderCharacterChecklistModal(){const ch=checklistEditingCharacter,box=$("characterChecklistContent");if(!ch||!box)return;box.innerHTML="";const labels={daily:"일일",weekly:"주간",monthly:"월간"};["daily","weekly","monthly"].forEach(cycle=>{const items=checklist.filter(x=>x.cycle===cycle),p=getCharacterChecklistProgress(ch.id,cycle),section=document.createElement("section");section.className="character-check-section";section.innerHTML=`<div class="character-check-head"><h3>${labels[cycle]}</h3><strong>${p.done} / ${p.total}</strong></div><div class="character-check-items"></div>`;const ib=section.querySelector(".character-check-items");if(!items.length)ib.innerHTML='<div class="empty-state">등록된 항목이 없습니다.</div>';else items.forEach(item=>{const done=isCharacterCheckDone(ch.id,item),btn=document.createElement("button");btn.type="button";btn.className=`character-check-item ${done?"done":""}`;btn.innerHTML=`<span class="character-check-box">${done?"✓":""}</span><span>${item.title}</span>`;btn.onclick=()=>toggleCharacterCheck(item);ib.appendChild(btn);});box.appendChild(section);});const bp=getBossProgress(ch.id),bs=document.createElement("section");bs.className="character-check-section";bs.innerHTML=`<div class="character-check-head"><h3>주간 보스</h3><strong>${bp.killed} / ${bp.selected}</strong></div><p class="muted">보스 선택/처치는 설정의 ✎에서 관리합니다.</p>`;box.appendChild(bs);}
+  async function toggleBossKilledFromCard(selection) {
+    const killedNow = isBossKilledThisWeek(selection);
+    const killedAt = killedNow ? null : new Date().toISOString();
+
+    setSync(killedNow ? "보스 처치 해제 중…" : "보스 처치 저장 중…");
+
+    const { data, error } = await sb
+      .from("character_boss_selections")
+      .update({ killed_at: killedAt })
+      .eq("user_id", user.id)
+      .eq("character_id", selection.character_id)
+      .eq("boss_key", selection.boss_key)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      setSync("저장 실패");
+      return;
+    }
+
+    const existing = bossSelections.find(x =>
+      x.character_id === selection.character_id &&
+      x.boss_key === selection.boss_key
+    );
+
+    if (existing) Object.assign(existing, data);
+
+    renderCharacterChecklistModal();
+    renderCharacters();
+    renderSettingsCharacters();
+    renderSummary();
+    setSync(killedNow ? "처치 해제됨" : "처치 완료");
+  }
+
+  function renderCharacterChecklistModal() {
+    const ch = checklistEditingCharacter;
+    const box = $("characterChecklistContent");
+
+    if (!ch || !box) return;
+
+    box.innerHTML = "";
+
+    const selectedBosses = bossSelections
+      .filter(x => x.character_id === ch.id)
+      .sort((a, b) => Number(a.crystal_price || 0) - Number(b.crystal_price || 0));
+
+    const progress = getBossProgress(ch.id);
+
+    const summary = document.createElement("div");
+    summary.className = "card-boss-summary";
+    summary.innerHTML = `
+      <div>
+        <span>보스 현황</span>
+        <strong>${progress.killed} / ${progress.selected}</strong>
+      </div>
+      <div>
+        <span>보스 메소</span>
+        <strong>${shortMoney(selectedBosses.reduce((sum, x) => sum + Number(x.crystal_price || 0), 0))}</strong>
+      </div>
+    `;
+    box.appendChild(summary);
+
+    if (!selectedBosses.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state card-boss-empty";
+      empty.textContent = "설정에서 선택한 주간 보스가 없습니다.";
+      box.appendChild(empty);
+      return;
+    }
+
+    const list = document.createElement("div");
+    list.className = "card-boss-list";
+
+    selectedBosses.forEach(selection => {
+      const killed = isBossKilledThisWeek(selection);
+
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = `card-boss-row ${killed ? "killed" : ""}`;
+      row.innerHTML = `
+        <span class="card-boss-check">${killed ? "✓" : ""}</span>
+        <span class="card-boss-main">
+          <strong class="card-boss-name"></strong>
+          <span class="card-boss-difficulty"></span>
+        </span>
+        <span class="card-boss-price"></span>
+        <span class="card-boss-state">${killed ? "처치" : "미처치"}</span>
+      `;
+
+      row.querySelector(".card-boss-name").textContent = selection.boss_name || "-";
+      row.querySelector(".card-boss-difficulty").textContent = selection.difficulty || "";
+      row.querySelector(".card-boss-price").textContent = shortMoney(selection.crystal_price || 0);
+
+      row.addEventListener("click", () => toggleBossKilledFromCard(selection));
+      list.appendChild(row);
+    });
+
+    box.appendChild(list);
+  }
+
   $("characterChecklistClose")?.addEventListener("click",closeCharacterChecklist);document.querySelector("[data-close-character-checklist]")?.addEventListener("click",closeCharacterChecklist);
 
   function renderCharacters() {
