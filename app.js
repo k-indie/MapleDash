@@ -34,15 +34,6 @@
     auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
   });
 
-  function showTab(id) {
-    document.querySelectorAll(".tab-page").forEach(el => el.classList.add("hidden"));
-    document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
-    $(id).classList.remove("hidden");
-    document.querySelector(`.tab[data-tab="${id}"]`)?.classList.add("active");
-  }
-
-  document.querySelectorAll(".tab").forEach(btn => btn.onclick = () => showTab(btn.dataset.tab));
-  document.querySelectorAll("[data-go]").forEach(btn => btn.onclick = () => showTab(btn.dataset.go));
 
   async function setUser(nextUser) {
     user = nextUser;
@@ -359,40 +350,6 @@
     $("monthEnhanceStat").textContent = shortMoney(
       enhancements.filter(x => new Date(x.created_at) >= start).reduce((s,x) => s + Number(x.cost || 0), 0)
     );
-
-    const cbox = $("overviewChecklist");
-    cbox.innerHTML = "";
-    checklist.slice(0,5).forEach(x => {
-      const done = isCompleted(x);
-      const row = document.createElement("div");
-      row.className = `compact-row overview-check-row ${done ? "done" : ""}`;
-      row.innerHTML = `
-        <div class="left overview-check-left">
-          <button class="check-btn ${done ? "checked" : ""}" type="button" aria-label="체크 상태 변경">✓</button>
-          <div class="overview-check-text">
-            <div class="title"></div>
-            <div class="sub">${cycleLabel(x.cycle)}</div>
-          </div>
-        </div>
-        <span>${done ? "완료" : "미완료"}</span>`;
-      row.querySelector(".title").textContent = x.title;
-      row.querySelector(".check-btn").onclick = () => toggleCheck(x, done);
-      cbox.appendChild(row);
-    });
-    if (!checklist.length) cbox.innerHTML = '<div class="empty-state">등록된 체크 항목이 없습니다.</div>';
-
-    const mbox = $("overviewMeso");
-    mbox.innerHTML = "";
-    meso.slice(0,5).forEach(x => {
-      const row = document.createElement("div");
-      row.className = "compact-row";
-      row.innerHTML = `<div class="left"><div class="title"></div><div class="sub"></div></div><strong class="${x.type === "income" ? "positive" : "negative"}"></strong>`;
-      row.querySelector(".title").textContent = x.memo || x.category || "메소 기록";
-      row.querySelector(".sub").textContent = dateText(x.created_at);
-      row.querySelector("strong").textContent = `${x.type === "income" ? "+" : "-"}${shortMoney(x.amount)}`;
-      mbox.appendChild(row);
-    });
-    if (!meso.length) mbox.innerHTML = '<div class="empty-state">메소 기록이 없습니다.</div>';
   }
 
   function renderAll() {

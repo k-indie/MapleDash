@@ -42,3 +42,14 @@ textarea{min-height:130px;resize:vertical}input:focus,select:focus,textarea:focu
 .overview-check-left{display:flex;align-items:center;gap:10px;min-width:0}
 .overview-check-text{min-width:0}
 .overview-check-row.done .title{text-decoration:line-through;color:#657087}
+
+.section-block{padding:22px;margin-bottom:16px}
+.section-block:last-child{margin-bottom:0}
+.inline-editor{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.profile-summary-grid{margin-bottom:0}
+.compact-stats{margin-bottom:18px}
+.compact-stats .stat-card{background:#0d1220;border:1px solid var(--line);box-shadow:none}
+#appView{display:block}
+@media(max-width:650px){
+  .section-block{padding:16px}
+}
