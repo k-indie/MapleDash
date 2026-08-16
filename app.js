@@ -187,25 +187,38 @@
     setSync("불러오는 중…");
 
     try {
-      const [c, ch, bs, cs, gr] = await Promise.all([
+      const [c, ch, bs, cs] = await Promise.all([
         sb.from("maple_checklist").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
         sb.from("maple_characters").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true }),
         sb.from("character_boss_selections").select("*").eq("user_id", user.id),
-        sb.from("character_check_states").select("*").eq("user_id", user.id),
-        sb.from("character_groups").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
+        sb.from("character_check_states").select("*").eq("user_id", user.id)
       ]);
 
       if (c.error) throw c.error;
       if (ch.error) throw ch.error;
       if (bs.error) throw bs.error;
       if (cs.error) throw cs.error;
-      if (gr.error) throw gr.error;
 
       checklist = c.data || [];
       characters = ch.data || [];
       bossSelections = bs.data || [];
       characterCheckStates = cs.data || [];
-      characterGroups = gr.data || [];
+
+      // 그룹 테이블은 선택 기능입니다.
+      // 아직 schema.sql을 실행하지 않았더라도 기존 캐릭터/체크리스트는 정상 표시합니다.
+      const gr = await sb
+        .from("character_groups")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (gr.error) {
+        console.warn("character_groups load skipped:", gr.error);
+        characterGroups = [];
+      } else {
+        characterGroups = gr.data || [];
+      }
       renderAll();
       setSync("동기화됨");
     } catch (err) {
@@ -622,45 +635,45 @@
 
       const levelText = ch.level ? `Lv.${fmt.format(ch.level)}` : "-";
       const powerText = ch.combat_power ? shortMoney(ch.combat_power) : "-";
-      const ownedText = shortMoney(ch.owned_meso || 0);
       const bossText = shortMoney(ch.boss_meso || 0);
 
       card.innerHTML = `
         <div class="character-avatar-wrap">
           <img class="character-avatar" alt="">
+          <div class="character-profile-actions">
+            <button class="character-refresh icon-action" type="button" aria-label="정보 새로고침" title="정보 새로고침">↻</button>
+            <button class="edit-toggle icon-action" type="button" aria-label="메모 수정" title="메모 수정">✎</button>
+          </div>
         </div>
 
-        <div class="character-card-top with-avatar">
-          <div class="character-title">
-            <div class="character-name"></div>
+        <div class="character-identity-row">
+          <div class="character-name-class">
+            <strong class="character-name"></strong>
             <span class="character-class-badge"></span>
-            <div class="character-world"></div><div class="character-status-row">
-              <button class="status-chip daily-status" type="button" title="일간 숙제 전체 완료/해제"></button>
-              <button class="status-chip weekly-status" type="button" title="주간 숙제 전체 완료/해제"></button>
-              <button class="status-chip monthly-status" type="button" title="검마 완료/해제"></button>
-            </div>
+          </div>
+        </div>
+
+        <div class="character-server-status-row">
+          <div class="character-world"></div>
+          <div class="character-status-row">
+            <button class="status-chip daily-status" type="button" title="일간 숙제 전체 완료/해제"></button>
+            <button class="status-chip weekly-status" type="button" title="주간 보스 전체 완료/해제"></button>
+            <button class="status-chip monthly-status" type="button" title="검마 완료/해제"></button>
           </div>
         </div>
 
         <div class="character-info">
           <div class="info-pair"><span>레벨</span><strong class="view-level"></strong></div>
           <div class="info-pair"><span>전투력</span><strong class="view-power"></strong></div>
-          <div class="info-pair"><span>보유 메소</span><strong class="view-owned"></strong></div>
           <div class="info-pair"><span>보스 메소</span><strong class="view-boss"></strong></div>
-          <div class="info-pair boss-progress-pair"><span>보스 현황</span><strong class="view-boss-progress"></strong></div>
         </div>
 
-        <div class="character-note"></div>
-        <div class="api-updated"></div>
-
-        <div class="character-actions">
-          <button class="character-refresh icon-action" type="button" aria-label="정보 새로고침" title="정보 새로고침">↻</button>
-          <button class="edit-toggle icon-action" type="button" aria-label="보유 메소/메모 수정" title="보유 메소/메모 수정">✎</button>
+        <div class="character-note-space">
+          <div class="character-note"></div>
         </div>
 
         <div class="character-editor">
           <div class="character-editor-grid">
-            <input class="edit-owned" type="number" min="0" step="1" placeholder="보유 메소">
             <textarea class="edit-memo" maxlength="120" placeholder="메모"></textarea>
           </div>
           <div class="character-editor-actions">
@@ -724,18 +737,10 @@
       }
       card.querySelector(".view-level").textContent = levelText;
       card.querySelector(".view-power").textContent = powerText;
-      card.querySelector(".view-owned").textContent = ownedText;
       card.querySelector(".view-boss").textContent = bossText;
-      const bossProgress = getBossProgress(ch.id);
-      card.querySelector(".view-boss-progress").textContent = `${bossProgress.killed} / ${bossProgress.selected}`;
-      card.querySelector(".character-note").textContent = ch.memo || "메모 없음";
-      card.querySelector(".api-updated").textContent =
-        ch.api_updated_at ? `게임 정보 갱신 ${formatUpdatedAt(ch.api_updated_at)}` : "";
+      card.querySelector(".character-note").textContent = ch.memo || "";
 
-      const owned = card.querySelector(".edit-owned");
       const memo = card.querySelector(".edit-memo");
-
-      owned.value = ch.owned_meso ?? 0;
       memo.value = ch.memo || "";
 
       card.querySelector(".edit-toggle").addEventListener("click", () => {
@@ -743,14 +748,12 @@
       });
 
       card.querySelector(".cancel-character").addEventListener("click", () => {
-        owned.value = ch.owned_meso ?? 0;
-          memo.value = ch.memo || "";
+        memo.value = ch.memo || "";
         card.classList.remove("editing");
       });
 
       card.querySelector(".save-character").addEventListener("click", async () => {
         const payload = {
-          owned_meso: Number(owned.value || 0),
           memo: memo.value.trim() || null,
           updated_at: new Date().toISOString()
         };
@@ -989,18 +992,70 @@
           </div>
           <span class="group-member-count"></span>
         </div>
-        <div class="group-status-count">
-          <span>주간 보스 처치</span>
-          <strong>${progress.killed} / 90</strong>
+
+        <div class="group-status-metrics">
+          <div class="group-status-count">
+            <span>주간 보스 처치</span>
+            <strong>${progress.killed} / 90</strong>
+          </div>
+          <div class="group-meso-line">
+            <span>보유 메소</span>
+            <strong class="group-owned-meso">${shortMoney(group.owned_meso || 0)}</strong>
+            <button class="group-meso-edit" type="button" title="보유 메소 수정">✎</button>
+          </div>
         </div>
+
         <div class="group-progress-track">
           <span style="width:${percent}%"></span>
+        </div>
+
+        <div class="group-meso-editor hidden">
+          <input class="group-meso-input" type="number" min="0" step="1" value="${Number(group.owned_meso || 0)}">
+          <button class="group-meso-cancel" type="button">취소</button>
+          <button class="group-meso-save" type="button">저장</button>
         </div>
       `;
 
       card.querySelector(".group-account").textContent = group.account_name;
       card.querySelector(".group-world").textContent = group.world_name;
       card.querySelector(".group-member-count").textContent = `${progress.members}캐릭`;
+
+      const mesoEditor = card.querySelector(".group-meso-editor");
+      const mesoInput = card.querySelector(".group-meso-input");
+
+      card.querySelector(".group-meso-edit").addEventListener("click", () => {
+        mesoEditor.classList.remove("hidden");
+        mesoInput.focus();
+        mesoInput.select();
+      });
+
+      card.querySelector(".group-meso-cancel").addEventListener("click", () => {
+        mesoInput.value = Number(group.owned_meso || 0);
+        mesoEditor.classList.add("hidden");
+      });
+
+      card.querySelector(".group-meso-save").addEventListener("click", async () => {
+        const ownedMeso = Math.max(0, Math.floor(Number(mesoInput.value || 0)));
+
+        const { data, error } = await sb
+          .from("character_groups")
+          .update({ owned_meso: ownedMeso })
+          .eq("id", group.id)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        Object.assign(group, data);
+        renderGroupStatus();
+        renderSettingsGroups();
+        renderSummary();
+        setSync("그룹 보유 메소 저장됨");
+      });
 
       box.appendChild(card);
     });
@@ -1025,7 +1080,7 @@
           <strong class="settings-group-account"></strong>
           <span class="settings-group-world"></span>
         </div>
-        <div class="settings-group-progress">보스 ${progress.killed}/90 · ${progress.members}캐릭</div>
+        <div class="settings-group-progress">보스 ${progress.killed}/90 · ${progress.members}캐릭 · 메소 ${shortMoney(group.owned_meso || 0)}</div>
         <button class="delete-btn delete-group" type="button">삭제</button>
       `;
 
@@ -1614,7 +1669,7 @@
 
     $("dailySummary").textContent=`${dailyDoneCharacters} / ${characters.length}`;
     $("weeklySummary").textContent=`${weeklyDoneCharacters} / ${characters.length}`;
-    $("ownedMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.owned_meso||0),0));
+    $("ownedMesoSummary").textContent=shortMoney(characterGroups.reduce((a,g)=>a+Number(g.owned_meso||0),0));
     $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.boss_meso||0),0));
     $("characterCountSummary").textContent=characters.length;
     $("characterCount").textContent=`${characters.length} / 20`;
