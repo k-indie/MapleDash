@@ -2406,19 +2406,26 @@ card.innerHTML = `
 
     const buckets = getMonthlyIncomeBuckets();
     const hunting = Number(economySettings.hunting_income || 0);
+    const MESO_UNIT = 100000000; // 1억 메소
 
     let points = 0;
 
-    if (rates.reboot > 0) points += buckets.helios / rates.reboot;
-    if (rates.challenger > 0) points += buckets.challenger / rates.challenger;
+    // 메포 시세 = "1억 메소당 메이플 포인트"
+    if (rates.reboot > 0) {
+      points += (buckets.helios / MESO_UNIT) * rates.reboot;
+    }
+
+    if (rates.challenger > 0) {
+      points += (buckets.challenger / MESO_UNIT) * rates.challenger;
+    }
+
     if (rates.normal > 0) {
-      points += buckets.normal / rates.normal;
-      points += hunting / rates.normal;
+      points += (buckets.normal / MESO_UNIT) * rates.normal;
+      points += (hunting / MESO_UNIT) * rates.normal;
     }
 
     return Math.floor(points);
   }
-
   function parseFormattedNumber(value) {
     const digits = String(value ?? "").replace(/[^\d]/g, "");
     return digits ? Number(digits) : 0;
