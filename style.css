@@ -3331,3 +3331,145 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* ===== v1.28 topbar calculator + five-card summary row ===== */
+
+/* 대시보드/설정 + 계산기 한 줄 */
+.topbar,
+.nav-row,
+.header-actions{
+  width:100%!important;
+}
+
+/* 계산기 래퍼 */
+.top-economy-calculator{
+  margin-left:auto!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+}
+
+/* 계산기 전체를 오른쪽 가로형으로 */
+.top-economy-calculator .economy-calculator{
+  width:min(780px,100%)!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 165px!important;
+  align-items:end!important;
+  gap:7px!important;
+}
+
+.top-economy-calculator .economy-inputs{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(105px,1fr))!important;
+  gap:5px!important;
+}
+
+.top-economy-calculator .economy-inputs label{
+  min-width:0!important;
+}
+
+.top-economy-calculator .economy-inputs label span{
+  display:block!important;
+  margin-bottom:2px!important;
+  color:#6f7d94!important;
+  font-size:8px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.top-economy-calculator .economy-inputs input{
+  width:100%!important;
+  min-width:0!important;
+  height:28px!important;
+  padding:4px 7px!important;
+  border-radius:6px!important;
+  font-size:9px!important;
+}
+
+.top-economy-calculator .economy-result{
+  width:165px!important;
+  min-width:165px!important;
+  margin:0!important;
+  padding:6px 8px!important;
+  border-radius:8px!important;
+}
+
+.top-economy-calculator .economy-result span{
+  font-size:8px!important;
+}
+
+.top-economy-calculator .economy-result strong{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:11px!important;
+  white-space:nowrap!important;
+}
+
+/* 숫자 입력 화살표 제거 */
+.economy-calculator input[type="number"]::-webkit-inner-spin-button,
+.economy-calculator input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+.economy-calculator input[type="number"]{
+  -moz-appearance:textfield!important;
+  appearance:textfield!important;
+}
+
+/* 요약은 정확히 5개 한 줄 */
+.dashboard-row-v128{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important;
+  align-items:stretch!important;
+}
+
+.dashboard-row-v128 .dash-card{
+  min-width:0!important;
+  margin:0!important;
+}
+
+/* v1.27의 월간 stack 영향 제거 */
+.monthly-income-stack,
+.economy-summary-wrap{
+  display:none!important;
+}
+
+/* 화면이 좁을 때만 자연스럽게 줄바꿈 */
+@media(max-width:1250px){
+  .top-economy-calculator .economy-calculator{
+    grid-template-columns:1fr!important;
+    width:min(620px,100%)!important;
+  }
+
+  .top-economy-calculator .economy-result{
+    width:100%!important;
+  }
+}
+
+@media(max-width:1050px){
+  .dashboard-row-v128{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:760px){
+  .top-economy-calculator{
+    width:100%!important;
+    margin-left:0!important;
+  }
+
+  .top-economy-calculator .economy-inputs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .dashboard-row-v128{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
