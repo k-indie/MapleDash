@@ -13,7 +13,7 @@
   let checklist = [];
   let characters = [];
   let characterGroups = [];
-  let selectedDashboardGroupId = null;
+  let selectedDashboardGroupId = sessionStorage.getItem("mapleSelectedDashboardGroupId") || null;
   let economySettings = {
     challenger_rate: 0,
     normal_rate: 0,
@@ -239,6 +239,11 @@
         const stillExists = characterGroups.some(g => g.id === selectedDashboardGroupId);
         if (!stillExists) {
           selectedDashboardGroupId = characterGroups[0]?.id || null;
+          if (selectedDashboardGroupId) {
+            sessionStorage.setItem("mapleSelectedDashboardGroupId", String(selectedDashboardGroupId));
+          } else {
+            sessionStorage.removeItem("mapleSelectedDashboardGroupId");
+          }
         }
       }
 
@@ -1111,7 +1116,8 @@ card.innerHTML = `
       const percent = progress.selected > 0 ? Math.min(100, (progress.killed / progress.selected) * 100) : 0;
 
       const card = document.createElement("article");
-      card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""} ${selectedDashboardGroupId === group.id ? "selected-group" : ""}`;
+      const isSelectedGroup = String(selectedDashboardGroupId || "") === String(group.id);
+      card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""} ${isSelectedGroup ? "selected-group" : ""}`;
       card.innerHTML = `
         <div class="group-status-head">
           <div>
@@ -1247,9 +1253,12 @@ card.innerHTML = `
         // 메소 수정 버튼/입력 등 인터랙션 클릭은 그룹 선택 트리거에서 제외
         if (e.target.closest("button,input,select,textarea")) return;
 
-        if (selectedDashboardGroupId === group.id) return;
+        if (String(selectedDashboardGroupId || "") === String(group.id)) return;
 
         selectedDashboardGroupId = group.id;
+        sessionStorage.setItem("mapleSelectedDashboardGroupId", String(group.id));
+
+        // 선택 ID를 먼저 확정한 뒤 다시 그려서 selected-group 클래스가 유지되게 함
         renderGroupStatus();
         renderCharacters();
         updateSelectedGroupTitle();
@@ -1401,8 +1410,13 @@ card.innerHTML = `
           if (ch.group_id === group.id) ch.group_id = null;
         });
 
-        if (selectedDashboardGroupId === group.id) {
+        if (String(selectedDashboardGroupId || "") === String(group.id)) {
           selectedDashboardGroupId = characterGroups[0]?.id || null;
+          if (selectedDashboardGroupId) {
+            sessionStorage.setItem("mapleSelectedDashboardGroupId", String(selectedDashboardGroupId));
+          } else {
+            sessionStorage.removeItem("mapleSelectedDashboardGroupId");
+          }
         }
 
         renderAll();

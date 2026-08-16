@@ -4845,3 +4845,24 @@ main{
 .group-status-card.is-selected{
   outline:none!important;
 }
+
+/* ===== v1.45 selected group persistence fix ===== */
+
+.group-status-card.selected-group{
+  border-color:#f0a51f!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,183,42,.28),
+    0 0 0 1px rgba(240,165,31,.18)!important;
+  background:
+    linear-gradient(180deg,rgba(240,165,31,.07),rgba(11,17,29,.98))!important;
+}
+
+.group-status-card:not(.selected-group){
+  border-color:#27354b!important;
+  box-shadow:none!important;
+}
+
+.group-status-card.is-selected:not(.selected-group){
+  border-color:#27354b!important;
+  box-shadow:none!important;
+}
