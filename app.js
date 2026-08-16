@@ -1116,6 +1116,7 @@ card.innerHTML = `
       const percent = progress.selected > 0 ? Math.min(100, (progress.killed / progress.selected) * 100) : 0;
 
       const card = document.createElement("article");
+      // v1.46: selectedDashboardGroupId → selected-group 클래스가 유일한 선택 표시 기준
       const isSelectedGroup = String(selectedDashboardGroupId || "") === String(group.id);
       card.className = `group-status-card ${progress.selected > 0 && progress.killed === progress.selected ? "limit-reached" : ""} ${isSelectedGroup ? "selected-group" : ""}`;
       card.innerHTML = `
