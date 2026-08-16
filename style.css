@@ -4580,3 +4580,63 @@ main{
     bottom:0!important;
   }
 }
+
+/* ===== v1.37 header baseline alignment ===== */
+
+/*
+  첨부 이미지의 빨간 가이드선 기준:
+  제목 하단과 로그아웃 버튼 하단을 같은 수평선에 맞춤.
+  가이드선 자체는 추가하지 않음.
+*/
+.app-header{
+  position:relative!important;
+}
+
+.app-header .header-actions{
+  position:absolute!important;
+  top:auto!important;
+  bottom:0!important;
+  right:10px!important;
+  left:auto!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  gap:9px!important;
+  width:auto!important;
+  transform:none!important;
+  z-index:30!important;
+}
+
+.app-header .header-actions .sync,
+#syncStatus,
+.sync-status{
+  position:static!important;
+  inset:auto!important;
+  margin:0 0 7px 0!important;
+  padding:0!important;
+  white-space:nowrap!important;
+  transform:none!important;
+  line-height:1!important;
+}
+
+#logoutBtn,
+.logout-btn{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+/* 좁은 화면에서도 헤더 아래 기준 유지 */
+@media(max-width:620px){
+  .app-header{
+    padding-bottom:0!important;
+  }
+
+  .app-header .header-actions{
+    top:auto!important;
+    bottom:0!important;
+    right:0!important;
+  }
+}
