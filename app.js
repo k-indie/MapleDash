@@ -2338,6 +2338,22 @@ card.innerHTML = `
     $("characterCount").textContent=`${characters.length} / 20`;
   }
 
+  function showAppView(viewName) {
+    const dashboard = $("dashboardView");
+    const settings = $("settingsView");
+
+    const showDashboard = viewName === "dashboard";
+
+    dashboard?.classList.toggle("hidden", !showDashboard);
+    settings?.classList.toggle("hidden", showDashboard);
+
+    dashboard?.setAttribute("aria-hidden", showDashboard ? "false" : "true");
+    settings?.setAttribute("aria-hidden", showDashboard ? "true" : "false");
+
+    $("dashboardTab")?.classList.toggle("active", showDashboard);
+    $("settingsTab")?.classList.toggle("active", !showDashboard);
+  }
+
   function updateSelectedGroupTitle() {
     const title = $("selectedGroupCharacterTitle");
     const sub = $("selectedGroupCharacterSubtitle");

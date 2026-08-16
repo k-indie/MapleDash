@@ -4640,3 +4640,29 @@ main{
     right:0!important;
   }
 }
+
+/* ===== v1.40 tab visibility hotfix ===== */
+
+/* 비활성 탭은 어떤 레이아웃 규칙보다 우선해서 완전히 숨김 */
+.app-view-section.hidden,
+#dashboardView.hidden,
+#settingsView.hidden{
+  display:none!important;
+}
+
+/* 활성 대시보드일 때만 flex 레이아웃 적용 */
+#dashboardView:not(.hidden){
+  display:flex!important;
+  flex-direction:column!important;
+  gap:14px!important;
+}
+
+/* 활성 설정 화면은 일반 block 흐름 */
+#settingsView:not(.hidden){
+  display:block!important;
+}
+
+/* 혹시 aria-hidden을 사용하는 경우도 방어 */
+.app-view-section[aria-hidden="true"]{
+  display:none!important;
+}
