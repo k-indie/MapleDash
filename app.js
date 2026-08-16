@@ -574,7 +574,7 @@
       </div>
       <div>
         <span>보스 메소</span>
-        <strong>${shortMoney(selectedBosses.reduce((sum, x) => sum + Number(x.crystal_price || 0), 0))}</strong>
+        <strong>${shortMoney(selectedBosses.reduce((sum, x) => sum + getBossPersonalIncome(x), 0))}</strong>
       </div>
     `;
     box.appendChild(summary);
@@ -608,7 +608,7 @@
 
       row.querySelector(".card-boss-name").textContent = selection.boss_name || "-";
       row.querySelector(".card-boss-difficulty").textContent = selection.difficulty || "";
-      row.querySelector(".card-boss-price").textContent = shortMoney(selection.crystal_price || 0);
+      row.querySelector(".card-boss-price").textContent = `${getBossPartySize(selection)}인 · ${shortMoney(getBossPersonalIncome(selection))}`;
 
       row.addEventListener("click", () => toggleBossKilledFromCard(selection));
       list.appendChild(row);
@@ -635,7 +635,7 @@
 
       const levelText = ch.level ? `Lv.${fmt.format(ch.level)}` : "-";
       const powerText = ch.combat_power ? shortMoney(ch.combat_power) : "-";
-      const bossText = shortMoney(ch.boss_meso || 0);
+      const bossText = shortMoney(getCharacterBossIncome(ch.id));
 
       card.innerHTML = `
         <div class="character-avatar-wrap">
@@ -1314,6 +1314,22 @@
     };
   }
 
+  function getBossPartySize(selection) {
+    const n = Math.floor(Number(selection?.party_size || 1));
+    return Math.max(1, Math.min(6, Number.isFinite(n) ? n : 1));
+  }
+
+  function getBossPersonalIncome(selection) {
+    const base = Number(selection?.price ?? selection?.crystal_price ?? 0);
+    return Math.floor(base / getBossPartySize(selection));
+  }
+
+  function getCharacterBossIncome(characterId) {
+    return bossSelections
+      .filter(x => x.character_id === characterId)
+      .reduce((sum, x) => sum + getBossPersonalIncome(x), 0);
+  }
+
   async function toggleAllWeeklyBosses(ch) {
     const weeklySelections = bossSelections.filter(x =>
       x.character_id === ch.id && !isBlackMageBoss(x)
@@ -1410,7 +1426,8 @@
             ...x,
             key: x.boss_key,
             name: x.boss_name,
-            price: Number(x.crystal_price || 0)
+            price: Number(x.crystal_price || 0),
+            party_size: getBossPartySize(x)
           }
         ])
     );
@@ -1484,16 +1501,42 @@
         const option = document.createElement("button");
         option.type = "button";
         option.className = `boss-price-option ${selected ? "selected" : ""}`;
+        const partySize = selected ? getBossPartySize(selectedData) : 1;
+        const shownIncome = selected ? Math.floor(Number(b.price) / partySize) : Number(b.price);
+
         option.innerHTML = `
           <span class="boss-option-difficulty">${b.difficulty}</span>
           <span class="boss-option-price">
             <img src="assets/boss/meso.png" alt="">
-            ${shortMoney(b.price)}
+            <span>${shortMoney(shownIncome)}</span>
           </span>
-          ${selected ? `<span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 처치" : "○ 미처치"}</span>` : ""}
+          ${selected ? `
+            <select class="boss-party-select" aria-label="${bossName} ${b.difficulty} 파티 인원" title="파티 인원">
+              ${[1,2,3,4,5,6].map(n => `<option value="${n}" ${partySize === n ? "selected" : ""}>${n}인</option>`).join("")}
+            </select>
+            <span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 처치" : "○ 미처치"}</span>
+          ` : ""}
         `;
 
+        const partySelect = option.querySelector(".boss-party-select");
+        if (partySelect) {
+          partySelect.addEventListener("click", e => e.stopPropagation());
+          partySelect.addEventListener("change", e => {
+            e.stopPropagation();
+            const current = bossDraft.get(b.key);
+            if (!current) return;
+            bossDraft.set(b.key, {
+              ...current,
+              ...b,
+              party_size: Number(e.target.value || 1)
+            });
+            renderBossCatalog();
+          });
+        }
+
         option.addEventListener("click", e => {
+          if (e.target.closest(".boss-party-select")) return;
+
           const killTarget = e.target.closest(".boss-option-kill");
 
           if (killTarget && selected) {
@@ -1501,6 +1544,7 @@
             bossDraft.set(b.key, {
               ...current,
               ...b,
+              party_size: getBossPartySize(current),
               killed_at: isBossKilledThisWeek(current) ? null : new Date().toISOString()
             });
             renderBossCatalog();
@@ -1517,7 +1561,7 @@
               renderBossCatalog();
               return;
             }
-            bossDraft.set(b.key, { ...b, killed_at: null });
+            bossDraft.set(b.key, { ...b, party_size: 1, killed_at: null });
           }
 
           renderBossCatalog();
@@ -1569,16 +1613,42 @@
       const option = document.createElement("button");
       option.type = "button";
       option.className = `boss-price-option monthly-option ${selected ? "selected" : ""}`;
+      const partySize = selected ? getBossPartySize(selectedData) : 1;
+      const shownIncome = selected ? Math.floor(Number(b.price) / partySize) : Number(b.price);
+
       option.innerHTML = `
         <span class="boss-option-difficulty">${b.difficulty}</span>
         <span class="boss-option-price">
           <img src="assets/boss/meso.png" alt="">
-          ${shortMoney(b.price)}
+          <span>${shortMoney(shownIncome)}</span>
         </span>
-        ${selected ? `<span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 이번 달 처치" : "○ 미처치"}</span>` : ""}
+        ${selected ? `
+          <select class="boss-party-select" aria-label="검은 마법사 ${b.difficulty} 파티 인원" title="파티 인원">
+            ${[1,2,3,4,5,6].map(n => `<option value="${n}" ${partySize === n ? "selected" : ""}>${n}인</option>`).join("")}
+          </select>
+          <span class="boss-option-kill ${killed ? "killed" : ""}">${killed ? "✓ 이번 달 처치" : "○ 미처치"}</span>
+        ` : ""}
       `;
 
+      const partySelect = option.querySelector(".boss-party-select");
+      if (partySelect) {
+        partySelect.addEventListener("click", e => e.stopPropagation());
+        partySelect.addEventListener("change", e => {
+          e.stopPropagation();
+          const current = bossDraft.get(b.key);
+          if (!current) return;
+          bossDraft.set(b.key, {
+            ...current,
+            ...b,
+            party_size: Number(e.target.value || 1)
+          });
+          renderBossCatalog();
+        });
+      }
+
       option.addEventListener("click", e => {
+        if (e.target.closest(".boss-party-select")) return;
+
         const killTarget = e.target.closest(".boss-option-kill");
 
         if (killTarget && selected) {
@@ -1586,6 +1656,7 @@
           bossDraft.set(b.key, {
             ...current,
             ...b,
+            party_size: getBossPartySize(current),
             killed_at: isBossKilledThisMonth(current) ? null : new Date().toISOString()
           });
           renderBossCatalog();
@@ -1595,7 +1666,7 @@
         const wasSelected = bossDraft.has(b.key);
         BLACK_MAGE_CATALOG.forEach(v => bossDraft.delete(v.key));
 
-        if (!wasSelected) bossDraft.set(b.key, { ...b, killed_at: null });
+        if (!wasSelected) bossDraft.set(b.key, { ...b, party_size: 1, killed_at: null });
         renderBossCatalog();
       });
 
@@ -1608,7 +1679,7 @@
     const values = [...bossDraft.values()];
     const weeklyValues = values.filter(x => !isBlackMageBoss(x));
     const weeklyKilled = weeklyValues.filter(isBossKilledThisWeek).length;
-    const total = values.reduce((sum, b) => sum + Number(b.price || b.crystal_price || 0), 0);
+    const total = values.reduce((sum, b) => sum + getBossPersonalIncome(b), 0);
 
     weeklyHeading.querySelector(".weekly-count").textContent = `${weeklyValues.length} / 12`;
     $("bossSelectedCount").textContent = `${weeklyValues.length} / 12`;
@@ -1630,11 +1701,12 @@
           boss_name:b.name || b.boss_name,
           difficulty:b.difficulty,
           crystal_price:Number(b.price ?? b.crystal_price ?? 0),
+          party_size:getBossPartySize(b),
           killed_at:b.killed_at || null
         }));
         const ins=await sb.from("character_boss_selections").insert(rows); if(ins.error)throw ins.error;
       }
-      const total=chosen.reduce((s,b)=>s+Number(b.price),0);
+      const total=chosen.reduce((s,b)=>s+getBossPersonalIncome(b),0);
       const up=await sb.from("maple_characters").update({boss_meso:total,updated_at:new Date().toISOString()}).eq("id",ch.id).eq("user_id",user.id).select().single();
       if(up.error)throw up.error;
       bossSelections=bossSelections.filter(x=>x.character_id!==ch.id);
@@ -1645,6 +1717,7 @@
         boss_name:b.name || b.boss_name,
         difficulty:b.difficulty,
         crystal_price:Number(b.price ?? b.crystal_price ?? 0),
+        party_size:getBossPartySize(b),
         killed_at:b.killed_at || null
       })));
       Object.assign(ch,up.data); closeBossModal(); renderAll(); setSync("보스 설정 저장됨");
@@ -1670,7 +1743,7 @@
     $("dailySummary").textContent=`${dailyDoneCharacters} / ${characters.length}`;
     $("weeklySummary").textContent=`${weeklyDoneCharacters} / ${characters.length}`;
     $("ownedMesoSummary").textContent=shortMoney(characterGroups.reduce((a,g)=>a+Number(g.owned_meso||0),0));
-    $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+Number(ch.boss_meso||0),0));
+    $("bossMesoSummary").textContent=shortMoney(characters.reduce((a,ch)=>a+getCharacterBossIncome(ch.id),0));
     $("characterCountSummary").textContent=characters.length;
     $("characterCount").textContent=`${characters.length} / 20`;
   }

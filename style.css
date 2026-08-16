@@ -2412,3 +2412,43 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     transform:scale(2.0)!important;
   }
 }
+
+/* ===== v1.14 Hotfix: boss party-size selector ===== */
+.boss-price-option{
+  grid-template-columns:56px minmax(0,1fr) 52px auto!important;
+  align-items:center!important;
+}
+
+.boss-party-select{
+  width:52px!important;
+  height:25px!important;
+  padding:2px 4px!important;
+  border:1px solid #43506a!important;
+  border-radius:6px!important;
+  background:#0f1724!important;
+  color:#e4e9f2!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  text-align:center!important;
+  cursor:pointer!important;
+}
+
+.boss-price-option.selected .boss-option-price{
+  color:#ffd98b!important;
+}
+
+.card-boss-price{
+  min-width:95px!important;
+  white-space:nowrap!important;
+  text-align:right!important;
+}
+
+@media(max-width:600px){
+  .boss-price-option{
+    grid-template-columns:50px minmax(0,1fr) 48px!important;
+  }
+  .boss-option-kill{
+    grid-column:2/4!important;
+    justify-self:end!important;
+  }
+}
