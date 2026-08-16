@@ -2419,13 +2419,23 @@ card.innerHTML = `
     return Math.floor(points);
   }
 
+  function parseFormattedNumber(value) {
+    const digits = String(value ?? "").replace(/[^\d]/g, "");
+    return digits ? Number(digits) : 0;
+  }
+
+  function formatInputNumber(value) {
+    const n = Math.max(0, Math.floor(Number(value || 0)));
+    return n > 0 ? n.toLocaleString("ko-KR") : "";
+  }
+
   function renderEconomyCalculator() {
     if (!$("challengerRate")) return;
 
-    $("challengerRate").value = economySettings.challenger_rate || "";
-    $("normalRate").value = economySettings.normal_rate || "";
-    $("rebootRate").value = economySettings.reboot_rate || "";
-    $("huntingIncome").value = economySettings.hunting_income || "";
+    $("challengerRate").value = formatInputNumber(economySettings.challenger_rate);
+    $("normalRate").value = formatInputNumber(economySettings.normal_rate);
+    $("rebootRate").value = formatInputNumber(economySettings.reboot_rate);
+    $("huntingIncome").value = formatInputNumber(economySettings.hunting_income);
 
     $("maplePointResult").textContent =
       `${calculateMaplePoints().toLocaleString("ko-KR")} 메이플 포인트`;
@@ -2473,7 +2483,17 @@ card.innerHTML = `
       input.dataset.bound = "1";
 
       input.addEventListener("input", () => {
-        economySettings[key] = Math.max(0, Number(input.value || 0));
+        const rawValue = parseFormattedNumber(input.value);
+        economySettings[key] = rawValue;
+
+        input.value = formatInputNumber(rawValue);
+
+        // 입력 중에도 커서를 항상 뒤쪽에 자연스럽게 유지
+        requestAnimationFrame(() => {
+          const end = input.value.length;
+          input.setSelectionRange(end, end);
+        });
+
         $("maplePointResult").textContent =
           `${calculateMaplePoints().toLocaleString("ko-KR")} 메이플 포인트`;
         scheduleEconomySave();
