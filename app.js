@@ -8,19 +8,36 @@
 
   const $ = id => document.getElementById(id);
   const fmt = new Intl.NumberFormat("ko-KR");
-  let sb, user = null, checklist = [], characters = [];
+  let sb = null;
+  let user = null;
+  let checklist = [];
+  let characters = [];
+  let isLoading = false;
 
   const shortMoney = value => {
     let n = Number(value || 0);
     const sign = n < 0 ? "-" : "";
     n = Math.abs(n);
-    if (n >= 1000000000000) return `${sign}${(n / 1000000000000).toFixed(n % 1000000000000 ? 1 : 0)}조`;
-    if (n >= 100000000) return `${sign}${(n / 100000000).toFixed(n % 100000000 ? 1 : 0)}억`;
-    if (n >= 10000) return `${sign}${(n / 10000).toFixed(n % 10000 ? 1 : 0)}만`;
+
+    if (n >= 1_000_000_000_000) {
+      const v = n / 1_000_000_000_000;
+      return `${sign}${v.toFixed(v >= 10 || Number.isInteger(v) ? 0 : 1)}조`;
+    }
+    if (n >= 100_000_000) {
+      const v = n / 100_000_000;
+      return `${sign}${v.toFixed(v >= 100 || Number.isInteger(v) ? 0 : 1)}억`;
+    }
+    if (n >= 10_000) {
+      const v = n / 10_000;
+      return `${sign}${v.toFixed(v >= 100 || Number.isInteger(v) ? 0 : 1)}만`;
+    }
     return `${sign}${fmt.format(n)}`;
   };
 
-  const setSync = text => $("syncStatus").textContent = text;
+  const setSync = text => {
+    const el = $("syncStatus");
+    if (el) el.textContent = text;
+  };
 
   if (!configured) {
     $("authMessage").textContent = "config.js에 Supabase URL과 Publishable Key를 입력해주세요.";
@@ -29,76 +46,124 @@
     return;
   }
 
-  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
-
-  async function setUser(nextUser) {
-    user = nextUser;
-    if (!user) {
-      $("appView").classList.add("hidden");
-      $("authView").classList.remove("hidden");
-      return;
+  sb = window.supabase.createClient(
+    cfg.SUPABASE_URL,
+    cfg.SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
     }
+  );
+
+  function showAuth() {
+    $("appView").classList.add("hidden");
+    $("authView").classList.remove("hidden");
+  }
+
+  function showApp() {
     $("authView").classList.add("hidden");
     $("appView").classList.remove("hidden");
+  }
+
+  async function loadAll() {
+    if (!user || isLoading) return;
+    isLoading = true;
+    setSync("불러오는 중…");
+
+    try {
+      const [c, ch] = await Promise.all([
+        sb.from("maple_checklist")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: true }),
+
+        sb.from("maple_characters")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true })
+      ]);
+
+      if (c.error) throw c.error;
+      if (ch.error) throw ch.error;
+
+      checklist = c.data || [];
+      characters = ch.data || [];
+      renderAll();
+      setSync("동기화됨");
+    } catch (err) {
+      console.error(err);
+      setSync("불러오기 실패");
+      alert(`데이터를 불러오지 못했습니다.\n${err.message || err}`);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async function setUser(nextUser) {
+    user = nextUser || null;
+
+    if (!user) {
+      showAuth();
+      return;
+    }
+
+    showApp();
     await loadAll();
   }
 
-  $("authForm").onsubmit = async e => {
+  $("authForm").addEventListener("submit", async e => {
     e.preventDefault();
+
     $("authMessage").textContent = "로그인 중…";
+
     const { data, error } = await sb.auth.signInWithPassword({
       email: $("emailInput").value.trim(),
       password: $("passwordInput").value
     });
+
     if (error) {
       $("authMessage").textContent = `로그인 실패: ${error.message}`;
       return;
     }
+
     $("authMessage").textContent = "";
     await setUser(data.user);
-  };
+  });
 
-  $("signupBtn").onclick = async () => {
+  $("signupBtn").addEventListener("click", async () => {
     const email = $("emailInput").value.trim();
     const password = $("passwordInput").value;
+
     if (!email || password.length < 6) {
       $("authMessage").textContent = "이메일과 6자 이상의 비밀번호를 입력해주세요.";
       return;
     }
 
     const { data, error } = await sb.auth.signUp({ email, password });
+
     if (error) {
       $("authMessage").textContent = `회원가입 실패: ${error.message}`;
       return;
     }
 
-    if (data.session) await setUser(data.user);
-    else $("authMessage").textContent = "회원가입 완료. 이메일 인증이 켜져 있다면 인증 메일을 확인한 뒤 로그인하세요.";
-  };
+    if (data.session && data.user) {
+      await setUser(data.user);
+    } else {
+      $("authMessage").textContent =
+        "회원가입 완료. 이메일 인증이 켜져 있다면 인증 메일을 확인한 뒤 로그인하세요.";
+    }
+  });
 
-  $("logoutBtn").onclick = async () => {
+  $("logoutBtn").addEventListener("click", async () => {
     await sb.auth.signOut();
-    await setUser(null);
-  };
-
-  async function loadAll() {
-    setSync("불러오는 중…");
-
-    const [c, ch] = await Promise.all([
-      sb.from("maple_checklist").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
-      sb.from("maple_characters").select("*").eq("user_id", user.id).order("sort_order", { ascending: true }).order("created_at", { ascending: true })
-    ]);
-
-    if (c.error) console.error(c.error);
-    if (ch.error) console.error(ch.error);
-
-    checklist = c.data || [];
-    characters = ch.data || [];
-    renderAll();
-    setSync("동기화됨");
-  }
+    user = null;
+    showAuth();
+  });
 
   function startOfToday(now = new Date()) {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -106,7 +171,7 @@
 
   function startOfWeeklyReset(now = new Date()) {
     const reset = startOfToday(now);
-    const day = reset.getDay(); // 0 sun ... 4 thu
+    const day = reset.getDay();
     const daysSinceThursday = (day - 4 + 7) % 7;
     reset.setDate(reset.getDate() - daysSinceThursday);
     return reset;
@@ -116,10 +181,10 @@
     return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
   }
 
-  function resetBoundary(cycle, now = new Date()) {
-    if (cycle === "daily") return startOfToday(now);
-    if (cycle === "weekly") return startOfWeeklyReset(now);
-    if (cycle === "monthly") return startOfMonth(now);
+  function resetBoundary(cycle) {
+    if (cycle === "daily") return startOfToday();
+    if (cycle === "weekly") return startOfWeeklyReset();
+    if (cycle === "monthly") return startOfMonth();
     return new Date(0);
   }
 
@@ -131,7 +196,8 @@
   function renderChecklistGroup(cycle, boxId) {
     const box = $(boxId);
     box.innerHTML = "";
-    const items = checklist.filter(x => x.cycle === cycle);
+
+    const items = checklist.filter(item => item.cycle === cycle);
 
     if (!items.length) {
       box.innerHTML = '<div class="empty-state">등록된 항목이 없습니다.</div>';
@@ -142,14 +208,45 @@
       const done = isCompleted(item);
       const row = document.createElement("div");
       row.className = `record-row ${done ? "done" : ""}`;
+
       row.innerHTML = `
-        <button class="check-btn ${done ? "checked" : ""}" type="button" aria-label="체크 상태 변경">✓</button>
-        <div><div class="record-title"></div></div>
-        <button class="delete-btn" type="button">삭제</button>`;
+        <button class="check-btn ${done ? "checked" : ""}" type="button">✓</button>
+        <div class="record-title"></div>
+        <button class="delete-btn" type="button">삭제</button>
+      `;
 
       row.querySelector(".record-title").textContent = item.title;
-      row.querySelector(".check-btn").onclick = () => toggleCheck(item, done);
-      row.querySelector(".delete-btn").onclick = () => deleteCheck(item.id);
+
+      row.querySelector(".check-btn").addEventListener("click", async () => {
+        const { data, error } = await sb
+          .from("maple_checklist")
+          .update({ completed_at: done ? null : new Date().toISOString() })
+          .eq("id", item.id)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) return alert(error.message);
+
+        Object.assign(item, data);
+        renderAll();
+      });
+
+      row.querySelector(".delete-btn").addEventListener("click", async () => {
+        if (!confirm("이 체크 항목을 삭제할까요?")) return;
+
+        const { error } = await sb
+          .from("maple_checklist")
+          .delete()
+          .eq("id", item.id)
+          .eq("user_id", user.id);
+
+        if (error) return alert(error.message);
+
+        checklist = checklist.filter(x => x.id !== item.id);
+        renderAll();
+      });
+
       box.appendChild(row);
     });
   }
@@ -160,50 +257,38 @@
     renderChecklistGroup("monthly", "monthlyChecklist");
   }
 
-  $("checklistForm").onsubmit = async e => {
+  $("checklistForm").addEventListener("submit", async e => {
     e.preventDefault();
+    e.stopPropagation();
+
     const title = $("checkTitle").value.trim();
-    if (!title) return;
+    if (!title || !user) return;
 
-    const { data, error } = await sb.from("maple_checklist").insert({
-      user_id: user.id,
-      title,
-      cycle: $("checkCycle").value
-    }).select().single();
+    const submitButton = e.currentTarget.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
 
-    if (error) return alert(error.message);
+    try {
+      const { data, error } = await sb
+        .from("maple_checklist")
+        .insert({
+          user_id: user.id,
+          title,
+          cycle: $("checkCycle").value
+        })
+        .select()
+        .single();
 
-    checklist.push(data);
-    $("checkTitle").value = "";
-    renderAll();
-  };
+      if (error) throw error;
 
-  async function toggleCheck(item, done) {
-    const { data, error } = await sb.from("maple_checklist")
-      .update({ completed_at: done ? null : new Date().toISOString() })
-      .eq("id", item.id)
-      .eq("user_id", user.id)
-      .select()
-      .single();
-
-    if (error) return alert(error.message);
-    Object.assign(item, data);
-    renderAll();
-  }
-
-  async function deleteCheck(id) {
-    if (!confirm("이 체크 항목을 삭제할까요?")) return;
-
-    const { error } = await sb.from("maple_checklist")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id);
-
-    if (error) return alert(error.message);
-
-    checklist = checklist.filter(x => x.id !== id);
-    renderAll();
-  }
+      checklist.push(data);
+      $("checkTitle").value = "";
+      renderAll();
+    } catch (err) {
+      alert(err.message || String(err));
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
 
   function renderCharacters() {
     const box = $("characterGrid");
@@ -211,58 +296,113 @@
     $("characterCount").textContent = `${characters.length} / 20`;
 
     if (!characters.length) {
-      box.innerHTML = '<div class="empty-state character-empty">등록된 캐릭터가 없습니다.</div>';
+      box.innerHTML = '<div class="empty-state">등록된 캐릭터가 없습니다.</div>';
       return;
     }
 
     characters.forEach(ch => {
       const card = document.createElement("article");
       card.className = "character-card";
+
+      const levelText = ch.level ? `Lv.${fmt.format(ch.level)}` : "-";
+      const powerText = ch.combat_power ? shortMoney(ch.combat_power) : "-";
+      const ownedText = shortMoney(ch.owned_meso || 0);
+      const bossText = shortMoney(ch.boss_meso || 0);
+
       card.innerHTML = `
-        <div class="character-card-head">
-          <div>
-            <input class="char-nickname" maxlength="20" value="">
-            <input class="char-class" maxlength="30" value="">
+        <div class="character-card-top">
+          <div class="character-title">
+            <div class="character-name"></div>
+            <span class="character-class-badge"></span>
           </div>
-          <button class="delete-btn" type="button">삭제</button>
+          <button class="character-delete" type="button">삭제</button>
         </div>
 
-        <div class="character-mini-grid two">
-          <label><span>레벨</span><input class="char-level" type="number" min="1" max="999"></label>
-          <label><span>전투력</span><input class="char-power" type="number" min="0" step="1"></label>
+        <div class="character-info">
+          <div class="info-pair"><span>레벨</span><strong class="view-level"></strong></div>
+          <div class="info-pair"><span>전투력</span><strong class="view-power"></strong></div>
+          <div class="info-pair"><span>보유 메소</span><strong class="view-owned"></strong></div>
+          <div class="info-pair"><span>보스 메소</span><strong class="view-boss"></strong></div>
         </div>
 
-        <div class="character-mini-grid two meso-grid">
-          <label><span>보유 메소</span><input class="char-owned-meso" type="number" min="0" step="1"></label>
-          <label><span>보스 메소</span><input class="char-boss-meso" type="number" min="0" step="1"></label>
+        <div class="character-note"></div>
+
+        <div class="character-actions">
+          <button class="edit-toggle" type="button">수정</button>
         </div>
 
-        <label class="char-memo-label"><span>메모</span><textarea class="char-memo" maxlength="120"></textarea></label>
-        <button class="secondary char-save" type="button">저장</button>`;
+        <div class="character-editor">
+          <div class="character-editor-grid">
+            <input class="edit-nickname" maxlength="20" placeholder="닉네임">
+            <input class="edit-class" maxlength="30" placeholder="직업">
+            <input class="edit-level" type="number" min="1" max="999" placeholder="레벨">
+            <input class="edit-power" type="number" min="0" step="1" placeholder="전투력">
+            <input class="edit-owned" type="number" min="0" step="1" placeholder="보유 메소">
+            <input class="edit-boss" type="number" min="0" step="1" placeholder="보스 메소">
+            <textarea class="edit-memo" maxlength="120" placeholder="메모"></textarea>
+          </div>
+          <div class="character-editor-actions">
+            <button class="cancel-character" type="button">취소</button>
+            <button class="save-character" type="button">저장</button>
+          </div>
+        </div>
+      `;
 
-      card.querySelector(".char-nickname").value = ch.nickname || "";
-      card.querySelector(".char-class").value = ch.class_name || "";
-      card.querySelector(".char-level").value = ch.level ?? "";
-      card.querySelector(".char-power").value = ch.combat_power ?? "";
-      card.querySelector(".char-owned-meso").value = ch.owned_meso ?? 0;
-      card.querySelector(".char-boss-meso").value = ch.boss_meso ?? 0;
-      card.querySelector(".char-memo").value = ch.memo || "";
+      card.querySelector(".character-name").textContent = ch.nickname || "-";
+      card.querySelector(".character-class-badge").textContent = ch.class_name || "직업 미입력";
+      card.querySelector(".view-level").textContent = levelText;
+      card.querySelector(".view-power").textContent = powerText;
+      card.querySelector(".view-owned").textContent = ownedText;
+      card.querySelector(".view-boss").textContent = bossText;
+      card.querySelector(".character-note").textContent = ch.memo || "메모 없음";
 
-      card.querySelector(".char-save").onclick = async () => {
+      const nickname = card.querySelector(".edit-nickname");
+      const className = card.querySelector(".edit-class");
+      const level = card.querySelector(".edit-level");
+      const power = card.querySelector(".edit-power");
+      const owned = card.querySelector(".edit-owned");
+      const boss = card.querySelector(".edit-boss");
+      const memo = card.querySelector(".edit-memo");
+
+      nickname.value = ch.nickname || "";
+      className.value = ch.class_name || "";
+      level.value = ch.level ?? "";
+      power.value = ch.combat_power ?? "";
+      owned.value = ch.owned_meso ?? 0;
+      boss.value = ch.boss_meso ?? 0;
+      memo.value = ch.memo || "";
+
+      card.querySelector(".edit-toggle").addEventListener("click", () => {
+        card.classList.toggle("editing");
+      });
+
+      card.querySelector(".cancel-character").addEventListener("click", () => {
+        nickname.value = ch.nickname || "";
+        className.value = ch.class_name || "";
+        level.value = ch.level ?? "";
+        power.value = ch.combat_power ?? "";
+        owned.value = ch.owned_meso ?? 0;
+        boss.value = ch.boss_meso ?? 0;
+        memo.value = ch.memo || "";
+        card.classList.remove("editing");
+      });
+
+      card.querySelector(".save-character").addEventListener("click", async () => {
         const payload = {
-          nickname: card.querySelector(".char-nickname").value.trim(),
-          class_name: card.querySelector(".char-class").value.trim() || null,
-          level: card.querySelector(".char-level").value ? Number(card.querySelector(".char-level").value) : null,
-          combat_power: card.querySelector(".char-power").value ? Number(card.querySelector(".char-power").value) : null,
-          owned_meso: Number(card.querySelector(".char-owned-meso").value || 0),
-          boss_meso: Number(card.querySelector(".char-boss-meso").value || 0),
-          memo: card.querySelector(".char-memo").value.trim() || null,
+          nickname: nickname.value.trim(),
+          class_name: className.value.trim() || null,
+          level: level.value ? Number(level.value) : null,
+          combat_power: power.value ? Number(power.value) : null,
+          owned_meso: Number(owned.value || 0),
+          boss_meso: Number(boss.value || 0),
+          memo: memo.value.trim() || null,
           updated_at: new Date().toISOString()
         };
 
         if (!payload.nickname) return alert("닉네임은 비워둘 수 없습니다.");
 
-        const { data, error } = await sb.from("maple_characters")
+        const { data, error } = await sb
+          .from("maple_characters")
           .update(payload)
           .eq("id", ch.id)
           .eq("user_id", user.id)
@@ -272,14 +412,15 @@
         if (error) return alert(error.message);
 
         Object.assign(ch, data);
-        renderSummary();
+        renderAll();
         setSync("캐릭터 저장됨");
-      };
+      });
 
-      card.querySelector(".delete-btn").onclick = async () => {
+      card.querySelector(".character-delete").addEventListener("click", async () => {
         if (!confirm(`${ch.nickname} 캐릭터를 삭제할까요?`)) return;
 
-        const { error } = await sb.from("maple_characters")
+        const { error } = await sb
+          .from("maple_characters")
           .delete()
           .eq("id", ch.id)
           .eq("user_id", user.id);
@@ -288,45 +429,78 @@
 
         characters = characters.filter(x => x.id !== ch.id);
         renderAll();
-      };
+      });
 
       box.appendChild(card);
     });
   }
 
-  $("characterForm").onsubmit = async e => {
+  $("characterForm").addEventListener("submit", async e => {
     e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      alert("로그인 세션이 없습니다. 새로고침 후 다시 로그인해주세요.");
+      return;
+    }
 
     if (characters.length >= 20) {
-      return alert("캐릭터는 최대 20개까지 등록할 수 있습니다.");
+      alert("캐릭터는 최대 20개까지 등록할 수 있습니다.");
+      return;
     }
 
     const nickname = $("characterNickname").value.trim();
     if (!nickname) return;
 
-    const { data, error } = await sb.from("maple_characters").insert({
-      user_id: user.id,
-      nickname,
-      class_name: $("characterClass").value.trim() || null,
-      level: $("characterLevel").value ? Number($("characterLevel").value) : null,
-      combat_power: $("characterPower").value ? Number($("characterPower").value) : null,
-      owned_meso: Number($("characterOwnedMeso").value || 0),
-      boss_meso: Number($("characterBossMeso").value || 0),
-      memo: $("characterMemo").value.trim() || null,
-      sort_order: characters.length
-    }).select().single();
+    const submitButton = e.currentTarget.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    setSync("캐릭터 추가 중…");
 
-    if (error) return alert(error.message);
+    try {
+      const payload = {
+        user_id: user.id,
+        nickname,
+        class_name: $("characterClass").value.trim() || null,
+        level: $("characterLevel").value ? Number($("characterLevel").value) : null,
+        combat_power: $("characterPower").value ? Number($("characterPower").value) : null,
+        owned_meso: Number($("characterOwnedMeso").value || 0),
+        boss_meso: Number($("characterBossMeso").value || 0),
+        memo: $("characterMemo").value.trim() || null,
+        sort_order: characters.length
+      };
 
-    characters.push(data);
-    [
-      "characterNickname","characterClass","characterLevel","characterPower",
-      "characterOwnedMeso","characterBossMeso","characterMemo"
-    ].forEach(id => $(id).value = "");
+      const { data, error } = await sb
+        .from("maple_characters")
+        .insert(payload)
+        .select()
+        .single();
 
-    renderAll();
-    setSync("캐릭터 추가됨");
-  };
+      if (error) throw error;
+
+      characters.push(data);
+
+      [
+        "characterNickname",
+        "characterClass",
+        "characterLevel",
+        "characterPower",
+        "characterOwnedMeso",
+        "characterBossMeso",
+        "characterMemo"
+      ].forEach(id => {
+        $(id).value = "";
+      });
+
+      renderAll();
+      setSync("캐릭터 추가됨");
+    } catch (err) {
+      console.error(err);
+      setSync("추가 실패");
+      alert(`캐릭터 추가에 실패했습니다.\n${err.message || err}`);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
 
   function renderSummary() {
     const daily = checklist.filter(x => x.cycle === "daily");
@@ -350,12 +524,37 @@
   }
 
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT") setUser(null);
-    if (event === "SIGNED_IN" && session?.user && session.user.id !== user?.id) setUser(session.user);
+    if (event === "SIGNED_OUT") {
+      user = null;
+      showAuth();
+      return;
+    }
+
+    if (event === "SIGNED_IN" && session?.user) {
+      user = session.user;
+      showApp();
+
+      if (!isLoading) {
+        loadAll();
+      }
+    }
   });
 
   (async () => {
-    const { data } = await sb.auth.getSession();
-    await setUser(data.session?.user || null);
+    const { data, error } = await sb.auth.getSession();
+
+    if (error) {
+      console.error(error);
+      showAuth();
+      return;
+    }
+
+    if (data.session?.user) {
+      user = data.session.user;
+      showApp();
+      await loadAll();
+    } else {
+      showAuth();
+    }
   })();
 })();
