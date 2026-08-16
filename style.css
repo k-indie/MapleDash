@@ -591,3 +591,90 @@ input:focus,select:focus,textarea:focus{border-color:#5a6686;box-shadow:0 0 0 3p
     grid-template-columns:1fr!important;
   }
 }
+
+/* ===== Bigger Maple character + slightly larger card text ===== */
+
+/* 카드 폭(6열)은 그대로 유지하고 캐릭터만 최대한 크게 */
+.character-avatar-wrap{
+  height:158px!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+.character-avatar{
+  max-width:none!important;
+  max-height:none!important;
+  width:190px!important;
+  height:190px!important;
+  object-fit:contain!important;
+  transform:scale(1.28)!important;
+  transform-origin:center center!important;
+  filter:drop-shadow(0 10px 10px rgba(0,0,0,.34))!important;
+}
+
+/* 이름/직업/월드 */
+.character-name{
+  font-size:15.5px!important;
+  line-height:1.25!important;
+}
+
+.character-class-badge{
+  font-size:9px!important;
+  padding:3px 6px!important;
+}
+
+.character-world{
+  font-size:9px!important;
+}
+
+/* 레벨/전투력/메소 */
+.character-info{
+  padding:8px!important;
+  gap:5px!important;
+}
+
+.info-pair span{
+  font-size:9px!important;
+}
+
+.info-pair strong{
+  font-size:10.5px!important;
+}
+
+/* 메모/갱신시간 */
+.character-note{
+  font-size:9px!important;
+  min-height:24px!important;
+}
+
+.api-updated{
+  font-size:8px!important;
+}
+
+/* 하단 버튼도 아주 조금 키움 */
+.edit-toggle,
+.character-refresh{
+  font-size:8.5px!important;
+  padding:6px 6px!important;
+}
+
+/* 화면이 넓을 때 캐릭터를 특히 크게 */
+@media(min-width:1181px){
+  .character-avatar-wrap{
+    height:165px!important;
+  }
+  .character-avatar{
+    width:205px!important;
+    height:205px!important;
+    transform:scale(1.32)!important;
+  }
+}
+
+/* 작은 화면에서는 카드 밖으로 과하게 넘치지 않게 */
+@media(max-width:760px){
+  .character-avatar{
+    width:175px!important;
+    height:175px!important;
+    transform:scale(1.20)!important;
+  }
+}
