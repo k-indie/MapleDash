@@ -3944,3 +3944,203 @@ h1{
     height:auto!important;
   }
 }
+
+/* ===== v1.32 layout cleanup / hover popover fix ===== */
+
+/* ---------------------------------------------------------
+   1. 로그아웃 버튼: 오른쪽 상단 고정
+   --------------------------------------------------------- */
+#logoutBtn,
+.logout-btn{
+  position:fixed!important;
+  top:16px!important;
+  right:18px!important;
+  z-index:120!important;
+  margin:0!important;
+}
+
+/* 동기화 텍스트가 로그아웃과 겹치지 않게 */
+#syncStatus,
+.sync-status{
+  margin-right:110px!important;
+}
+
+/* ---------------------------------------------------------
+   2. 대시보드 영역별 여백 통일
+   --------------------------------------------------------- */
+:root{
+  --dashboard-section-gap:14px;
+  --dashboard-side-gap:16px;
+  --dashboard-card-gap:8px;
+}
+
+/* 앱 전체 좌우 기준 통일 */
+.page,
+.app-shell,
+main{
+  padding-left:var(--dashboard-side-gap)!important;
+  padding-right:var(--dashboard-side-gap)!important;
+}
+
+/* 상단 탭 / 요약 / 그룹 / 캐릭터 간격 통일 */
+#dashboardView{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:var(--dashboard-section-gap)!important;
+}
+
+#dashboardView > section,
+#dashboardView > article{
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+
+/* 요약 카드 간격 */
+.dashboard-row,
+.dashboard-row-v130,
+.dashboard-row-v131{
+  gap:var(--dashboard-card-gap)!important;
+}
+
+/* 그룹 카드 간격 */
+.group-status-grid{
+  gap:var(--dashboard-card-gap)!important;
+}
+
+/* 캐릭터 카드 간격 */
+.character-grid{
+  gap:var(--dashboard-card-gap)!important;
+}
+
+/* 섹션 내부 padding 통일 */
+.section-block,
+.group-status-panel,
+.character-list-panel{
+  padding:12px!important;
+}
+
+/* ---------------------------------------------------------
+   3. 그룹 hover 팝업: 최상단 + 폭 축소 + 겹침 방지
+   --------------------------------------------------------- */
+
+/* 그룹 카드/그리드가 팝업을 잘라먹지 않게 */
+.group-status-panel,
+.group-status-grid,
+.group-status-card,
+.group-homework-wrap{
+  overflow:visible!important;
+}
+
+/* 카드 자체 레이어 */
+.group-status-card{
+  position:relative!important;
+  z-index:1!important;
+}
+
+/* hover 중인 카드만 위로 */
+.group-status-card:hover{
+  z-index:80!important;
+}
+
+/* 팝업을 카드보다 훨씬 위로 */
+.group-homework-popover{
+  z-index:9999!important;
+  width:220px!important;
+  max-width:220px!important;
+  min-width:220px!important;
+  left:50%!important;
+  transform:translate(-50%,-4px)!important;
+  top:calc(100% + 6px)!important;
+  padding:8px!important;
+  border-radius:8px!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.48)!important;
+}
+
+/* hover 시 중앙 유지 */
+.group-homework-wrap:hover .group-homework-popover,
+.group-homework-wrap:focus-within .group-homework-popover{
+  transform:translate(-50%,0)!important;
+}
+
+/* 팝업 내부도 더 컴팩트하게 */
+.group-homework-popover-head{
+  padding-bottom:5px!important;
+  margin-bottom:4px!important;
+}
+
+.group-homework-popover-head strong{
+  font-size:10px!important;
+}
+
+.group-homework-popover-head span{
+  font-size:8px!important;
+}
+
+.group-homework-list{
+  gap:2px!important;
+  max-height:250px!important;
+}
+
+.group-homework-character{
+  grid-template-columns:minmax(0,1fr) 34px 34px!important;
+  gap:4px!important;
+  padding:3px 4px!important;
+}
+
+.group-homework-name{
+  font-size:9px!important;
+}
+
+.mini-homework-status{
+  min-height:18px!important;
+  padding:2px 3px!important;
+  font-size:7px!important;
+}
+
+/* 화면 가장자리에서 넘치지 않도록 첫/마지막 카드 보정 */
+.group-status-card:first-child .group-homework-popover{
+  left:0!important;
+  transform:translate(0,-4px)!important;
+}
+.group-status-card:first-child:hover .group-homework-popover{
+  transform:translate(0,0)!important;
+}
+
+.group-status-card:last-child .group-homework-popover{
+  left:auto!important;
+  right:0!important;
+  transform:translate(0,-4px)!important;
+}
+.group-status-card:last-child:hover .group-homework-popover{
+  transform:translate(0,0)!important;
+}
+
+/* 반응형에서는 팝업 폭을 조금 더 줄임 */
+@media(max-width:900px){
+  .group-homework-popover{
+    width:205px!important;
+    min-width:205px!important;
+    max-width:205px!important;
+  }
+}
+
+@media(max-width:600px){
+  #logoutBtn,
+  .logout-btn{
+    top:10px!important;
+    right:10px!important;
+  }
+
+  .page,
+  .app-shell,
+  main{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  .group-homework-popover{
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+  }
+}
