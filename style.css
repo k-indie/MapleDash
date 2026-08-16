@@ -4814,3 +4814,34 @@ main{
 .group-status-card:not(.is-selected):not(.selected) .group-mayrin-badge{
   box-shadow:none!important;
 }
+
+/* ===== v1.44 selected group visual rollback ===== */
+
+/* 현재 선택된 그룹만 노란 테두리 + 약한 배경 강조 */
+.group-status-card.selected-group{
+  border-color:#d89419!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,178,29,.18),
+    0 0 0 1px rgba(216,148,25,.10)!important;
+  background:
+    linear-gradient(180deg,rgba(216,148,25,.055),rgba(11,17,29,.98))!important;
+}
+
+/* 선택되지 않은 카드는 기본 테두리 */
+.group-status-card:not(.selected-group){
+  border-color:#27354b!important;
+  box-shadow:none!important;
+}
+
+/* hover해도 선택 상태는 확실히 유지 */
+.group-status-card.selected-group:hover{
+  border-color:#f0aa2b!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,190,70,.22),
+    0 0 0 1px rgba(240,170,43,.14)!important;
+}
+
+/* v1.43의 보조 선택 클래스가 시각 스타일에 간섭하지 않게 */
+.group-status-card.is-selected{
+  outline:none!important;
+}
