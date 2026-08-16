@@ -38,3 +38,7 @@ textarea{min-height:130px;resize:vertical}input:focus,select:focus,textarea:focu
 .profile-form{display:grid;grid-template-columns:1fr 1fr;gap:13px}.profile-form label{display:grid;gap:7px;color:var(--muted);font-size:12px;font-weight:800}.wide{grid-column:1/-1}
 @media(max-width:900px){.overview-grid{grid-template-columns:1fr}.meso-form,.enhance-form{grid-template-columns:1fr 1fr}.meso-form button,.enhance-form button{grid-column:1/-1}}
 @media(max-width:650px){.page{padding-top:24px}.app-header{align-items:center}.app-header h1{font-size:30px}.sync{display:none}.stats-row,.profile-grid{grid-template-columns:1fr 1fr}.triple-form,.meso-form,.enhance-form,.profile-form{grid-template-columns:1fr}.meso-form button,.enhance-form button,.wide{grid-column:auto}}
+
+.overview-check-left{display:flex;align-items:center;gap:10px;min-width:0}
+.overview-check-text{min-width:0}
+.overview-check-row.done .title{text-decoration:line-through;color:#657087}

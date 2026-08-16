@@ -53,7 +53,6 @@
     }
     $("authView").classList.add("hidden");
     $("appView").classList.remove("hidden");
-    $("userEmail").textContent = user.email || "";
     await loadAll();
   }
 
@@ -364,10 +363,20 @@
     const cbox = $("overviewChecklist");
     cbox.innerHTML = "";
     checklist.slice(0,5).forEach(x => {
+      const done = isCompleted(x);
       const row = document.createElement("div");
-      row.className = "compact-row";
-      row.innerHTML = `<div class="left"><div class="title"></div><div class="sub">${cycleLabel(x.cycle)}</div></div><span>${isCompleted(x) ? "✓ 완료" : "미완료"}</span>`;
+      row.className = `compact-row overview-check-row ${done ? "done" : ""}`;
+      row.innerHTML = `
+        <div class="left overview-check-left">
+          <button class="check-btn ${done ? "checked" : ""}" type="button" aria-label="체크 상태 변경">✓</button>
+          <div class="overview-check-text">
+            <div class="title"></div>
+            <div class="sub">${cycleLabel(x.cycle)}</div>
+          </div>
+        </div>
+        <span>${done ? "완료" : "미완료"}</span>`;
       row.querySelector(".title").textContent = x.title;
+      row.querySelector(".check-btn").onclick = () => toggleCheck(x, done);
       cbox.appendChild(row);
     });
     if (!checklist.length) cbox.innerHTML = '<div class="empty-state">등록된 체크 항목이 없습니다.</div>';
