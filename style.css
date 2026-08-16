@@ -4789,3 +4789,28 @@ main{
   gap:5px!important;
   margin-top:5px!important;
 }
+
+/* ===== v1.43 group selection state hotfix ===== */
+
+/* 선택된 그룹만 노란 외곽선 */
+.group-status-card{
+  outline:none!important;
+}
+
+.group-status-card.is-selected,
+.group-status-card.selected{
+  border-color:#d89419!important;
+  box-shadow:0 0 0 1px rgba(255,178,29,.18)!important;
+}
+
+/* 선택되지 않은 그룹은 기본 테두리로 확실히 복귀 */
+.group-status-card:not(.is-selected):not(.selected){
+  border-color:#27354b!important;
+  box-shadow:none!important;
+}
+
+/* 메이린/챌린저스 완료 상태가 그룹 선택 테두리처럼 보이지 않도록 */
+.group-status-card:not(.is-selected):not(.selected) .mayrin-badge,
+.group-status-card:not(.is-selected):not(.selected) .group-mayrin-badge{
+  box-shadow:none!important;
+}
