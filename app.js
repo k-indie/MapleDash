@@ -51,7 +51,8 @@
     "발드릭스":"assets/boss/baldricks.png",
     "유피테르":"assets/boss/jupiter.png",
     "검은 마법사":"assets/boss/blackmage.png",
-    "메이린":"assets/boss/mayrin.png"
+    "메이린":"assets/boss/mayrin.png",
+    "벨로나":"assets/boss/belona.png"
   };
 
   const boss = (name, difficulty, price, short) => ({
@@ -62,53 +63,58 @@
 
   const BOSS_CATALOG = [
 
-    boss("자쿰","카오스",8080000,"자"),
-    boss("블러디 퀸","카오스",8140000,"퀸"),
-    boss("반반","카오스",8150000,"반"),
-    boss("피에르","카오스",8170000,"피"),
-    boss("매그너스","하드",8560000,"매"),
-    boss("벨룸","카오스",9280000,"벨"),
-    boss("파풀라투스","카오스",13100000,"파"),
+    boss("자쿰","카오스",4040000,"자"),
+    boss("피에르","카오스",4080000,"피"),
+    boss("반반","카오스",4070000,"반"),
+    boss("블러디 퀸","카오스",4070000,"퀸"),
+    boss("벨룸","카오스",4640000,"벨"),
+    boss("매그너스","하드",4280000,"매"),
+    boss("파풀라투스","카오스",6550000,"파"),
 
-    boss("스우","노멀",16700000,"스"),
-    boss("데미안","노멀",17500000,"데"),
-    boss("가디언 엔젤 슬라임","노멀",25500000,"가"),
-    boss("루시드","이지",29800000,"루"),
-    boss("윌","이지",32300000,"윌"),
-    boss("루시드","노멀",35600000,"루"),
-    boss("윌","노멀",41100000,"윌"),
-    boss("더스크","노멀",44000000,"더"),
-    boss("듄켈","노멀",47500000,"듄"),
-    boss("데미안","하드",48900000,"데"),
-    boss("스우","하드",51500000,"스"),
-    boss("루시드","하드",62900000,"루"),
-    boss("더스크","카오스",69800000,"더"),
-    boss("진 힐라","노멀",71200000,"진"),
-    boss("가디언 엔젤 슬라임","카오스",75100000,"가"),
-    boss("윌","하드",77100000,"윌"),
-    boss("듄켈","하드",94400000,"듄"),
-    boss("진 힐라","하드",106000000,"진"),
+    boss("스우","노멀",8350000,"스"),
+    boss("데미안","노멀",8750000,"데"),
+    boss("가디언 엔젤 슬라임","노멀",12700000,"가"),
+    boss("루시드","이지",14900000,"루"),
+    boss("윌","이지",16100000,"윌"),
+    boss("루시드","노멀",17800000,"루"),
+    boss("윌","노멀",20500000,"윌"),
+    boss("더스크","노멀",22000000,"더"),
+    boss("듄켈","노멀",23700000,"듄"),
 
-    boss("선택받은 세렌","노멀",239000000,"세"),
-    boss("감시자 칼로스","이지",280000000,"칼"),
-    boss("최초의 대적자","이지",308000000,"대"),
-    boss("선택받은 세렌","하드",356000000,"세"),
-    boss("카링","이지",377000000,"카"),
-    boss("감시자 칼로스","노멀",505000000,"칼"),
-    boss("최초의 대적자","노멀",560000000,"대"),
-    boss("스우","익스트림",574000000,"스"),
-    boss("찬란한 흉성","노멀",625000000,"흉"),
-    boss("카링","노멀",678000000,"카"),
+    boss("데미안","하드",46400000,"데"),
+    boss("스우","하드",48900000,"스"),
+    boss("루시드","하드",59700000,"루"),
+    boss("더스크","카오스",66300000,"더"),
+    boss("진 힐라","노멀",67600000,"진"),
+    boss("가디언 엔젤 슬라임","카오스",71300000,"가"),
+    boss("윌","하드",73200000,"윌"),
+    boss("듄켈","하드",89600000,"듄"),
+    boss("진 힐라","하드",100000000,"진"),
 
-    boss("림보","노멀",1026000000,"림"),
-    boss("감시자 칼로스","카오스",1273000000,"칼"),
-    boss("발드릭스","노멀",1368000000,"발"),
-    boss("최초의 대적자","하드",1435000000,"대"),
-    boss("유피테르","노멀",1615000000,"유"),
-    boss("카링","하드",1739000000,"카"),
+    boss("선택받은 세렌","노멀",167000000,"세"),
+    boss("감시자 칼로스","이지",238000000,"칼"),
+    boss("최초의 대적자","이지",261000000,"대"),
+    boss("선택받은 세렌","하드",302000000,"세"),
+    boss("카링","이지",320000000,"카"),
+    boss("벨로나","이지",396000000,"벨"),
+    boss("감시자 칼로스","노멀",479000000,"칼"),
+    boss("최초의 대적자","노멀",532000000,"대"),
+    boss("스우","익스트림",545000000,"스"),
+    boss("카링","노멀",576000000,"카"),
+    boss("찬란한 흉성","노멀",593000000,"흉"),
+    boss("벨로나","노멀",824000000,"벨"),
+
+    boss("림보","노멀",995000000,"림"),
+    boss("감시자 칼로스","카오스",1230000000,"칼"),
+    boss("발드릭스","노멀",1320000000,"발"),
+    boss("최초의 대적자","하드",1390000000,"대"),
+    boss("유피테르","노멀",1560000000,"유"),
+    boss("카링","하드",1560000000,"카"),
+    boss("선택받은 세렌","익스트림",1840000000,"세"),
+
+    /* 변경 가격이 따로 제시되지 않은 난이도는 기존 가격 유지 */
     boss("림보","하드",2385000000,"림"),
     boss("찬란한 흉성","하드",2678000000,"흉"),
-    boss("선택받은 세렌","익스트림",2835000000,"세"),
     boss("발드릭스","하드",3078000000,"발"),
     boss("감시자 칼로스","익스트림",4104000000,"칼"),
     boss("최초의 대적자","익스트림",4712000000,"대"),
@@ -117,8 +123,8 @@
   ];
 
   const BLACK_MAGE_CATALOG = [
-    boss("검은 마법사","하드",665000000,"검"),
-    boss("검은 마법사","익스트림",8740000000,"검")
+    boss("검은 마법사","하드",465000000,"검"),
+    boss("검은 마법사","익스트림",5680000000,"검")
   ];
 
   // 챌린저스 월드 전용 추가 주간 보스.
@@ -127,6 +133,36 @@
     boss("메이린","노멀",300000000,"메"),
     boss("메이린","하드",600000000,"메")
   ];
+
+  const ALL_BOSS_CATALOG = [
+    ...BOSS_CATALOG,
+    ...BLACK_MAGE_CATALOG,
+    ...MAYRIN_CATALOG
+  ];
+
+  const BOSS_CATALOG_BY_KEY = new Map(
+    ALL_BOSS_CATALOG.map(item => [item.key, item])
+  );
+
+  function applyCurrentBossCatalogData(selection) {
+    if (!selection) return selection;
+
+    const key = selection.key || selection.boss_key;
+    const current = BOSS_CATALOG_BY_KEY.get(key);
+    if (!current) return selection;
+
+    return {
+      ...selection,
+      key,
+      boss_key: selection.boss_key || key,
+      name: selection.name || selection.boss_name || current.name,
+      boss_name: selection.boss_name || selection.name || current.name,
+      difficulty: current.difficulty,
+      price: Number(current.price),
+      crystal_price: Number(current.price),
+      icon: current.icon
+    };
+  }
 
 
   let isLoading = false;
@@ -155,6 +191,37 @@
     const el = $("syncStatus");
     if (el) el.textContent = text;
   };
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  function isJwtIssuedAtFutureError(error) {
+    const message = String(error?.message || error || "").toLowerCase();
+    return (
+      message.includes("jwt issued at future") ||
+      message.includes("issued at future")
+    );
+  }
+
+  async function refreshSessionForJwtRecovery() {
+    setSync("세션 자동 복구 중…");
+
+    await sleep(900);
+
+    let result = await sb.auth.refreshSession();
+
+    if (result.error && isJwtIssuedAtFutureError(result.error)) {
+      await sleep(1600);
+      result = await sb.auth.refreshSession();
+    }
+
+    if (result.error) throw result.error;
+
+    if (result.data?.session?.user) {
+      user = result.data.session.user;
+    }
+
+    return result.data?.session || null;
+  }
 
   function showView(viewId) {
     document.querySelectorAll(".app-view-section").forEach(section => section.classList.add("hidden"));
@@ -197,7 +264,7 @@
     $("appView").classList.remove("hidden");
   }
 
-  async function loadAll() {
+  async function loadAll({ allowJwtRecovery = true } = {}) {
     if (!user || isLoading) return;
     isLoading = true;
     setSync("불러오는 중…");
@@ -217,7 +284,7 @@
 
       checklist = c.data || [];
       characters = ch.data || [];
-      bossSelections = bs.data || [];
+      bossSelections = (bs.data || []).map(applyCurrentBossCatalogData);
       characterCheckStates = cs.data || [];
 
       // 그룹 테이블은 선택 기능입니다.
@@ -268,6 +335,25 @@
       setSync("동기화됨");
     } catch (err) {
       console.error(err);
+
+      if (allowJwtRecovery && isJwtIssuedAtFutureError(err)) {
+        isLoading = false;
+
+        try {
+          await refreshSessionForJwtRecovery();
+          return await loadAll({ allowJwtRecovery: false });
+        } catch (recoveryError) {
+          console.error("JWT 자동 복구 실패:", recoveryError);
+          setSync("세션 복구 실패");
+          alert(
+            `로그인 세션을 자동으로 복구하지 못했습니다.\n` +
+            `${recoveryError?.message || recoveryError}\n\n` +
+            `Windows 시간 동기화 후 새로고침해주세요.`
+          );
+          return;
+        }
+      }
+
       setSync("불러오기 실패");
       alert(`데이터를 불러오지 못했습니다.\n${err.message || err}`);
     } finally {
@@ -1815,8 +1901,9 @@ card.innerHTML = `
   }
 
   function getBossPersonalIncome(selection) {
-    const base = Number(selection?.price ?? selection?.crystal_price ?? 0);
-    return Math.floor(base / getBossPartySize(selection));
+    const current = applyCurrentBossCatalogData(selection);
+    const base = Number(current?.price ?? current?.crystal_price ?? 0);
+    return Math.floor(base / getBossPartySize(current));
   }
 
   function getCharacterBossIncome(characterId) {
@@ -1960,16 +2047,19 @@ card.innerHTML = `
     bossDraft = new Map(
       bossSelections
         .filter(x => x.character_id === ch.id)
-        .map(x => [
-          x.boss_key,
-          {
-            ...x,
-            key: x.boss_key,
-            name: x.boss_name,
-            price: Number(x.crystal_price || 0),
-            party_size: getBossPartySize(x)
-          }
-        ])
+        .map(x => {
+          const current = applyCurrentBossCatalogData(x);
+          return [
+            current.boss_key,
+            {
+              ...current,
+              key: current.boss_key,
+              name: current.boss_name,
+              price: Number(current.crystal_price || 0),
+              party_size: getBossPartySize(current)
+            }
+          ];
+        })
     );
     $("bossModalCharacter").textContent = `${ch.nickname} · 주간 12마리 + 월간 검은마법사`;
     $("bossModal").classList.remove("hidden");
@@ -2674,6 +2764,23 @@ card.innerHTML = `
     if (data.session?.user) {
       user = data.session.user;
       showApp();
+
+      try {
+        const refreshed = await sb.auth.refreshSession();
+
+        if (refreshed.error) {
+          if (isJwtIssuedAtFutureError(refreshed.error)) {
+            await refreshSessionForJwtRecovery();
+          } else {
+            console.warn("startup session refresh skipped:", refreshed.error);
+          }
+        } else if (refreshed.data?.session?.user) {
+          user = refreshed.data.session.user;
+        }
+      } catch (refreshError) {
+        console.warn("startup session refresh failed:", refreshError);
+      }
+
       await loadAll();
     } else {
       showAuth();
