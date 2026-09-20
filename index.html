@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.48" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.49" />
 
-  <link rel="stylesheet" href="style.css?v=1.48" />
+  <link rel="stylesheet" href="style.css?v=1.49" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.48</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.49</span></h1>
           
         </div>
         <div class="header-actions">
@@ -43,6 +43,7 @@
 
       <nav class="main-nav">
         <button class="nav-btn active" data-view="dashboardView" type="button">대시보드</button>
+        <button class="nav-btn" data-view="mvpView" type="button">MVP</button>
         <button class="nav-btn" data-view="settingsView" type="button">설정</button>
       </nav>
 
@@ -91,6 +92,51 @@
             </div>
           </div>
           <div id="characterGrid" class="character-grid"></div>
+        </article>
+      </section>
+
+      <section id="mvpView" class="app-view-section hidden">
+        <article class="panel section-block mvp-panel">
+          <div class="section-head mvp-head">
+            <div>
+              <p class="kicker">MVP BLACK CALCULATOR</p>
+              <h2>MVP 블랙 재화 계산기</h2>
+              <p class="muted section-desc">캐시샵 아이템을 경매장에 판매했을 때의 메소 효율을 계산합니다. 입력값은 이 브라우저에 자동 저장됩니다.</p>
+            </div>
+          </div>
+
+          <div class="mvp-summary-grid">
+            <article class="mvp-summary-card">
+              <span>필요한 넥슨캐시</span>
+              <strong id="mvpRequiredCash">0 캐시</strong>
+            </article>
+            <label class="mvp-summary-card mvp-input-card">
+              <span>1억당 판매 메소 (디코)</span>
+              <input id="mvpDiscordRate" type="text" inputmode="numeric" placeholder="예: 2,500">
+            </label>
+            <label class="mvp-summary-card mvp-input-card">
+              <span>1억당 판매 메소 (마켓)</span>
+              <input id="mvpMarketRate" type="text" inputmode="numeric" placeholder="예: 2,800">
+            </label>
+            <article class="mvp-summary-card mvp-total-card">
+              <span>총 획득 메소</span>
+              <strong id="mvpTotalMeso">0 메소</strong>
+            </article>
+          </div>
+
+          <div class="mvp-table-wrap">
+            <div class="mvp-table-head">
+              <span>아이템명</span>
+              <span>넥슨캐시 가격</span>
+              <span>경매장 가격</span>
+              <span>캐시 1당 메소</span>
+              <span></span>
+            </div>
+            <div id="mvpItemRows" class="mvp-item-rows"></div>
+            <button id="mvpAddItemBtn" class="mvp-add-item primary" type="button">+ 아이템 추가</button>
+          </div>
+
+          <p class="mvp-save-note">입력 내용은 자동 저장됩니다.</p>
         </article>
       </section>
 
@@ -165,7 +211,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.48"></script>
-  <script src="app.js?v=1.48"></script>
+  <script src="config.js?v=1.49"></script>
+  <script src="app.js?v=1.49"></script>
 </body>
 </html>

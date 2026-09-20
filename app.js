@@ -223,6 +223,180 @@
     return result.data?.session || null;
   }
 
+  // ===== v1.49 MVP BLACK calculator =====
+  const MVP_STORAGE_KEY = "mapleMvpBlackCalculatorV1";
+
+  let mvpCalculator = {
+    discordRate: 0,
+    marketRate: 0,
+    items: []
+  };
+
+  function loadMvpCalculator() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(MVP_STORAGE_KEY) || "null");
+      if (saved && typeof saved === "object") {
+        mvpCalculator = {
+          discordRate: Math.max(0, Number(saved.discordRate || 0)),
+          marketRate: Math.max(0, Number(saved.marketRate || 0)),
+          items: Array.isArray(saved.items) ? saved.items.map(item => ({
+            id: String(item.id || `${Date.now()}-${Math.random()}`),
+            name: String(item.name || ""),
+            cash: Math.max(0, Number(item.cash || 0)),
+            auction: Math.max(0, Number(item.auction || 0))
+          })) : []
+        };
+      }
+    } catch (error) {
+      console.warn("MVP calculator load failed:", error);
+    }
+  }
+
+  function saveMvpCalculator() {
+    try {
+      localStorage.setItem(MVP_STORAGE_KEY, JSON.stringify(mvpCalculator));
+    } catch (error) {
+      console.warn("MVP calculator save failed:", error);
+    }
+  }
+
+  function formatMvpNumber(value) {
+    return Math.max(0, Math.floor(Number(value || 0))).toLocaleString("ko-KR");
+  }
+
+  function parseMvpNumber(value) {
+    return Math.max(0, Number(String(value || "").replace(/[^\d.]/g, "")) || 0);
+  }
+
+  function formatMvpMeso(value) {
+    const amount = Math.max(0, Math.floor(Number(value || 0)));
+    if (typeof shortMoney === "function") return shortMoney(amount);
+    return `${amount.toLocaleString("ko-KR")} 메소`;
+  }
+
+  function renderMvpSummary() {
+    const requiredCash = mvpCalculator.items.reduce((sum, item) => sum + Number(item.cash || 0), 0);
+    const totalMeso = mvpCalculator.items.reduce((sum, item) => sum + Number(item.auction || 0), 0);
+
+    const required = $("mvpRequiredCash");
+    const total = $("mvpTotalMeso");
+    const discord = $("mvpDiscordRate");
+    const market = $("mvpMarketRate");
+
+    if (required) required.textContent = `${formatMvpNumber(requiredCash)} 캐시`;
+    if (total) total.textContent = `${formatMvpMeso(totalMeso)}`;
+    if (discord && document.activeElement !== discord) discord.value = mvpCalculator.discordRate ? formatMvpNumber(mvpCalculator.discordRate) : "";
+    if (market && document.activeElement !== market) market.value = mvpCalculator.marketRate ? formatMvpNumber(mvpCalculator.marketRate) : "";
+  }
+
+  function renderMvpItems() {
+    const box = $("mvpItemRows");
+    if (!box) return;
+    box.innerHTML = "";
+
+    if (!mvpCalculator.items.length) {
+      const empty = document.createElement("div");
+      empty.className = "mvp-empty";
+      empty.textContent = "아래 ‘아이템 추가’를 눌러 판매할 캐시 아이템을 등록해주세요.";
+      box.appendChild(empty);
+      renderMvpSummary();
+      return;
+    }
+
+    mvpCalculator.items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "mvp-item-row";
+
+      const efficiency = item.cash > 0 ? Math.floor(item.auction / item.cash) : 0;
+
+      row.innerHTML = `
+        <input class="mvp-item-name" type="text" maxlength="60" placeholder="아이템명">
+        <input class="mvp-item-cash" type="text" inputmode="numeric" placeholder="넥슨캐시">
+        <input class="mvp-item-auction" type="text" inputmode="numeric" placeholder="메소">
+        <strong class="mvp-item-efficiency">${formatMvpNumber(efficiency)} 메소</strong>
+        <button class="mvp-delete-item" type="button" title="삭제">삭제</button>
+      `;
+
+      const name = row.querySelector(".mvp-item-name");
+      const cash = row.querySelector(".mvp-item-cash");
+      const auction = row.querySelector(".mvp-item-auction");
+
+      name.value = item.name;
+      cash.value = item.cash ? formatMvpNumber(item.cash) : "";
+      auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+
+      name.addEventListener("input", () => {
+        item.name = name.value;
+        saveMvpCalculator();
+      });
+
+      cash.addEventListener("input", () => {
+        item.cash = parseMvpNumber(cash.value);
+        cash.value = item.cash ? formatMvpNumber(item.cash) : "";
+        row.querySelector(".mvp-item-efficiency").textContent =
+          `${formatMvpNumber(item.cash > 0 ? item.auction / item.cash : 0)} 메소`;
+        renderMvpSummary();
+        saveMvpCalculator();
+        requestAnimationFrame(() => cash.setSelectionRange(cash.value.length, cash.value.length));
+      });
+
+      auction.addEventListener("input", () => {
+        item.auction = parseMvpNumber(auction.value);
+        auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+        row.querySelector(".mvp-item-efficiency").textContent =
+          `${formatMvpNumber(item.cash > 0 ? item.auction / item.cash : 0)} 메소`;
+        renderMvpSummary();
+        saveMvpCalculator();
+        requestAnimationFrame(() => auction.setSelectionRange(auction.value.length, auction.value.length));
+      });
+
+      row.querySelector(".mvp-delete-item").addEventListener("click", () => {
+        mvpCalculator.items = mvpCalculator.items.filter(x => x.id !== item.id);
+        saveMvpCalculator();
+        renderMvpItems();
+      });
+
+      box.appendChild(row);
+    });
+
+    renderMvpSummary();
+  }
+
+  function bindMvpCalculator() {
+    const add = $("mvpAddItemBtn");
+    if (add && add.dataset.bound !== "1") {
+      add.dataset.bound = "1";
+      add.addEventListener("click", () => {
+        mvpCalculator.items.push({
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: "",
+          cash: 0,
+          auction: 0
+        });
+        saveMvpCalculator();
+        renderMvpItems();
+        $("mvpItemRows")?.lastElementChild?.querySelector(".mvp-item-name")?.focus();
+      });
+    }
+
+    [
+      ["mvpDiscordRate", "discordRate"],
+      ["mvpMarketRate", "marketRate"]
+    ].forEach(([id, key]) => {
+      const input = $(id);
+      if (!input || input.dataset.bound === "1") return;
+      input.dataset.bound = "1";
+      input.addEventListener("input", () => {
+        mvpCalculator[key] = parseMvpNumber(input.value);
+        input.value = mvpCalculator[key] ? formatMvpNumber(mvpCalculator[key]) : "";
+        saveMvpCalculator();
+        requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+      });
+    });
+  }
+
+  loadMvpCalculator();
+
   function showView(viewId) {
     document.querySelectorAll(".app-view-section").forEach(section => section.classList.add("hidden"));
     document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
@@ -2733,6 +2907,8 @@ card.innerHTML = `
     renderSummary();
     renderEconomyCalculator();
     bindEconomyCalculator();
+    renderMvpItems();
+    bindMvpCalculator();
   }
 
   sb.auth.onAuthStateChange((event, session) => {

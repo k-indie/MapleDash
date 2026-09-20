@@ -4998,3 +4998,121 @@ main{
     justify-content:flex-end!important;
   }
 }
+
+
+/* ===== v1.49 MVP BLACK calculator ===== */
+.mvp-panel{padding:18px!important}
+.mvp-head{margin-bottom:14px}
+.mvp-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.mvp-summary-card{
+  min-height:86px;
+  padding:13px 14px;
+  border:1px solid #2a3850;
+  border-radius:12px;
+  background:#0e1727;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:8px;
+}
+.mvp-summary-card>span{
+  color:#8f9db3;
+  font-size:12px;
+  font-weight:750;
+}
+.mvp-summary-card strong{
+  color:#f7f9fc;
+  font-size:20px;
+  line-height:1.1;
+}
+.mvp-input-card input{
+  width:100%;
+  height:34px;
+  border:1px solid #34445f;
+  border-radius:8px;
+  background:#09111e;
+  color:#fff;
+  padding:0 10px;
+  font-size:14px;
+  font-weight:800;
+}
+.mvp-total-card{
+  border-color:rgba(255,178,29,.48);
+  background:linear-gradient(180deg,rgba(255,178,29,.07),#0e1727);
+}
+.mvp-total-card strong{color:#ffb21d}
+.mvp-table-wrap{
+  border:1px solid #27354b;
+  border-radius:12px;
+  overflow:hidden;
+  background:#0c1422;
+}
+.mvp-table-head,.mvp-item-row{
+  display:grid;
+  grid-template-columns:minmax(180px,1.4fr) minmax(135px,.8fr) minmax(165px,1fr) minmax(145px,.8fr) 64px;
+  gap:8px;
+  align-items:center;
+}
+.mvp-table-head{
+  padding:10px 12px;
+  background:#121d30;
+  color:#8f9db3;
+  font-size:11px;
+  font-weight:800;
+}
+.mvp-item-row{
+  padding:9px 12px;
+  border-top:1px solid #202d42;
+}
+.mvp-item-row input{
+  width:100%;
+  height:34px;
+  padding:0 9px;
+  border:1px solid #30405a;
+  border-radius:7px;
+  background:#09111e;
+  color:#f5f7fb;
+  font-size:12px;
+  font-weight:700;
+}
+.mvp-item-efficiency{
+  color:#ffb21d;
+  font-size:12px;
+  text-align:right;
+}
+.mvp-delete-item{
+  height:31px;
+  border:1px solid #3b465b;
+  border-radius:7px;
+  background:#1d273a;
+  color:#dce4ef;
+  font-size:10px;
+  font-weight:800;
+}
+.mvp-delete-item:hover{border-color:#7d899e}
+.mvp-add-item{
+  margin:10px 12px 12px;
+  height:34px;
+  padding:0 14px;
+}
+.mvp-empty{
+  padding:28px 14px;
+  color:#7f8da3;
+  text-align:center;
+  font-size:12px;
+}
+.mvp-save-note{
+  margin:9px 2px 0;
+  color:#6f7c91;
+  font-size:10px;
+}
+@media(max-width:900px){
+  .mvp-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mvp-table-wrap{overflow-x:auto}
+  .mvp-table-head,.mvp-item-row{min-width:780px}
+}
