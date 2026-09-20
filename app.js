@@ -298,9 +298,10 @@
         ? sum + Number(item.cash || 0) * Math.max(0, Number(item.qty ?? 1))
         : sum, 0
     );
+    // 경매장 판매 수수료 3% 반영: 실제 획득 메소는 판매가의 97%
     const totalMeso = mvpCalculator.items.reduce(
       (sum, item) => item.included !== false
-        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1))
+        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1)) * 0.97
         : sum, 0
     );
     const earnedCredit = Math.floor(requiredCash * 0.05);
@@ -312,7 +313,7 @@
     );
     const creditTotalMeso = mvpCalculator.creditItems.reduce(
       (sum, item) => item.included !== false
-        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1))
+        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1)) * 0.97
         : sum, 0
     );
     const combinedTotalMeso = totalMeso + creditTotalMeso;
@@ -442,7 +443,8 @@
           : requiredCashAll;
         const effectiveFactor = requiredCashAll > 0 ? actualAll / requiredCashAll : 1;
         const investedCash = nominalCash * effectiveFactor;
-        const earnedMeso = Number(item.auction || 0) * qty;
+        // 경매장 예상가는 판매 등록가이며, 실제 획득 메소는 수수료 3% 차감
+        const earnedMeso = Number(item.auction || 0) * qty * 0.97;
         const discordRate = Number(mvpCalculator.discordRate || 0);
         const recoveredWon = discordRate > 0 ? (earnedMeso / 100000000) * discordRate : 0;
         const recoveryRate = investedCash > 0 ? (recoveredWon / investedCash) * 100 : 0;
@@ -633,7 +635,7 @@
       const row = document.createElement("div");
       row.className = "mvp-item-row mvp-credit-item-row";
 
-      const efficiency = item.credit > 0 ? Math.floor(item.auction / item.credit) : 0;
+      const efficiency = item.credit > 0 ? Math.floor((item.auction * 0.97) / item.credit) : 0;
 
       row.innerHTML = `
         <input class="mvp-credit-name" type="text" maxlength="60" placeholder="아이템명">
@@ -671,7 +673,7 @@
 
       const recalcRow = () => {
         row.querySelector(".mvp-item-efficiency").textContent =
-          `${formatMvpNumber(item.credit > 0 ? item.auction / item.credit : 0)} 메소`;
+          `${formatMvpNumber(item.credit > 0 ? (item.auction * 0.97) / item.credit : 0)} 메소`;
         renderMvpSummary();
         saveMvpCalculator();
       };
