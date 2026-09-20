@@ -5236,3 +5236,51 @@ main{
   grid-template-columns:minmax(180px,1.35fr) minmax(125px,.75fr) 72px minmax(155px,.95fr) minmax(140px,.8fr) 64px!important;
   min-width:900px!important;
 }
+
+
+/* ===== v1.54 compact MVP actions + Discord recovery ===== */
+.mvp-discord-recovery{
+  color:#ffb21d!important;
+  font-weight:900!important;
+}
+.mvp-list-toolbar{
+  min-height:38px;
+  padding:6px 10px 6px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:#101a2b;
+  border-bottom:1px solid #27354b;
+}
+.mvp-list-toolbar>span{
+  color:#dce4ef;
+  font-size:11px;
+  font-weight:850;
+}
+.mvp-compact-add{
+  height:26px;
+  padding:0 10px;
+  border:1px solid #3a4b66;
+  border-radius:7px;
+  background:#18243a;
+  color:#dfe8f5;
+  font-size:10px;
+  font-weight:850;
+  line-height:24px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.mvp-compact-add:hover{
+  border-color:#61738f;
+  background:#202e47;
+  color:#fff;
+}
+.mvp-credit-heading{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+}
+.mvp-credit-heading .mvp-compact-add{
+  margin-bottom:1px;
+}

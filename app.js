@@ -305,6 +305,7 @@
     // 총 획득 메소(억) × 디코 1억당 원화 시세
     const auctionMesoEok = totalMeso / 100000000;
     const discordWon = discordRate > 0 ? auctionMesoEok * discordRate : 0;
+    const discordRecovery = requiredCash > 0 ? (discordWon / requiredCash) * 100 : 0;
 
     // 메소마켓 루트:
     // 필요한 넥슨캐시를 동일 수치의 메이플포인트로 보았을 때
@@ -323,6 +324,7 @@
     const usedCreditEl = $("mvpUsedCredit");
     const creditTotalMesoEl = $("mvpCreditTotalMeso");
     const discordWonEl = $("mvpDiscordWon");
+    const discordRecoveryEl = $("mvpDiscordRecovery");
     const marketMesoEl = $("mvpMarketMeso");
     const marketWonEl = $("mvpMarketWon");
     const marketRecoveryEl = $("mvpMarketRecovery");
@@ -336,6 +338,7 @@
     if (market && document.activeElement !== market) market.value = mvpCalculator.marketRate ? formatMvpNumber(mvpCalculator.marketRate) : "";
 
     if (discordWonEl) discordWonEl.textContent = `${formatMvpNumber(discordWon)}원`;
+    if (discordRecoveryEl) discordRecoveryEl.textContent = `${discordRecovery.toFixed(2)}%`;
     if (marketMesoEl) marketMesoEl.textContent = `${marketMesoEok.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}억 메소`;
     if (marketWonEl) marketWonEl.textContent = `${formatMvpNumber(marketWon)}원`;
     if (marketRecoveryEl) marketRecoveryEl.textContent = `회수율 ${marketRecovery.toFixed(2)}%`;

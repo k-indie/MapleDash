@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.53" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.54" />
 
-  <link rel="stylesheet" href="style.css?v=1.53" />
+  <link rel="stylesheet" href="style.css?v=1.54" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.53</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.54</span></h1>
           
         </div>
         <div class="header-actions">
@@ -120,6 +120,8 @@
               <div class="mvp-route-result">
                 <small>경매장 판매 메소 현금 환산</small>
                 <strong id="mvpDiscordWon">0원</strong>
+                <small>디코 기준 회수율</small>
+                <strong id="mvpDiscordRecovery" class="mvp-discord-recovery">0.00%</strong>
               </div>
             </label>
             <label class="mvp-summary-card mvp-input-card">
@@ -140,6 +142,10 @@
           </div>
 
           <div class="mvp-table-wrap">
+            <div class="mvp-list-toolbar">
+              <span>캐시샵 아이템</span>
+              <button id="mvpAddItemBtn" class="mvp-compact-add" type="button">+ 아이템</button>
+            </div>
             <div class="mvp-table-head mvp-cash-table-head">
               <span>아이템 이름</span>
               <span>캐시 원가</span>
@@ -153,14 +159,16 @@
               <span></span>
             </div>
             <div id="mvpItemRows" class="mvp-item-rows"></div>
-            <button id="mvpAddItemBtn" class="mvp-add-item primary" type="button">+ 캐시 아이템 추가</button>
           </div>
 
           <div class="mvp-credit-section">
             <div class="mvp-credit-title">
-              <div>
-                <p class="kicker">CREDIT SHOP</p>
-                <h3>크레딧 샵 판매 계산</h3>
+              <div class="mvp-credit-heading">
+                <div>
+                  <p class="kicker">CREDIT SHOP</p>
+                  <h3>크레딧 샵 판매 계산</h3>
+                </div>
+                <button id="mvpAddCreditItemBtn" class="mvp-compact-add" type="button">+ 아이템</button>
               </div>
               <div class="mvp-credit-summary">
                 <span>사용 크레딧 <strong id="mvpUsedCredit">0</strong></span>
@@ -178,7 +186,6 @@
                 <span></span>
               </div>
               <div id="mvpCreditRows" class="mvp-item-rows"></div>
-              <button id="mvpAddCreditItemBtn" class="mvp-add-item primary" type="button">+ 크레딧 아이템 추가</button>
             </div>
           </div>
 
@@ -257,7 +264,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.53"></script>
-  <script src="app.js?v=1.53"></script>
+  <script src="config.js?v=1.54"></script>
+  <script src="app.js?v=1.54"></script>
 </body>
 </html>
