@@ -5417,3 +5417,82 @@ main{
 .mvp-item-row.is-excluded .mvp-include-toggle{
   opacity:1;
 }
+
+
+/* ===== v1.57 charge methods + credit balance ===== */
+.mvp-charge-panel{
+  margin:0 0 12px;
+  border:1px solid #2c3b52;
+  border-radius:12px;
+  overflow:hidden;
+  background:#0c1524;
+}
+.mvp-charge-title{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+.mvp-charge-title>span{font-size:11px;font-weight:900;color:#dce4ef}
+.mvp-charge-title>small{font-size:9px;color:#74839a}
+.mvp-charge-head,.mvp-charge-row{
+  display:grid;
+  grid-template-columns:minmax(150px,1.2fr) minmax(120px,.9fr) 110px minmax(120px,.9fr) 38px;
+  gap:8px;
+  align-items:center;
+  min-width:680px;
+}
+.mvp-charge-head{
+  padding:8px 12px;
+  color:#8290a5;
+  background:#111b2c;
+  font-size:10px;
+  font-weight:800;
+}
+.mvp-charge-row{
+  padding:7px 12px;
+  border-top:1px solid #202d42;
+}
+.mvp-charge-row input{
+  width:100%;
+  height:31px;
+  padding:0 8px;
+  border:1px solid #30405a;
+  border-radius:7px;
+  background:#09111e;
+  color:#f5f7fb;
+  font-size:11px;
+  font-weight:750;
+}
+.mvp-discount-input{position:relative}
+.mvp-discount-input input{padding-right:24px}
+.mvp-discount-input span{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  color:#7f8da3;font-size:10px
+}
+.mvp-charge-actual{
+  color:#ffb21d;
+  font-size:11px;
+  text-align:right;
+}
+.mvp-charge-empty{
+  padding:16px 12px;
+  color:#738198;
+  font-size:10px;
+  text-align:center;
+  border-top:1px solid #202d42;
+}
+.mvp-charge-summary{
+  padding:8px 12px;
+  display:flex;
+  justify-content:flex-end;
+  gap:18px;
+  flex-wrap:wrap;
+  border-top:1px solid #26344a;
+  background:#0f1929;
+  color:#7f8da3;
+  font-size:10px;
+}
+.mvp-charge-summary strong{margin-left:4px;color:#eef3fa;font-size:11px}
+@media(max-width:900px){
+  .mvp-charge-panel{overflow-x:auto}
+}

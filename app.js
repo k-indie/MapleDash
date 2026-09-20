@@ -230,7 +230,8 @@
     discordRate: 0,
     marketRate: 0,
     items: [],
-    creditItems: []
+    creditItems: [],
+    chargeMethods: []
   };
 
   function loadMvpCalculator() {
@@ -255,6 +256,12 @@
             qty: Math.max(0, Math.floor(Number(item.qty ?? 1))),
             auction: Math.max(0, Number(item.auction || 0)),
             included: item.included !== false
+          })) : [],
+          chargeMethods: Array.isArray(saved.chargeMethods) ? saved.chargeMethods.map(item => ({
+            id: String(item.id || `${Date.now()}-${Math.random()}`),
+            name: String(item.name || ""),
+            cash: Math.max(0, Number(item.cash || 0)),
+            discount: Math.min(100, Math.max(0, Number(item.discount || 0)))
           })) : []
         };
       }
@@ -309,6 +316,33 @@
         : sum, 0
     );
     const combinedTotalMeso = totalMeso + creditTotalMeso;
+
+    const chargeCash = mvpCalculator.chargeMethods.reduce(
+      (sum, item) => sum + Number(item.cash || 0), 0
+    );
+    const chargedActualSpent = mvpCalculator.chargeMethods.reduce(
+      (sum, item) => sum + Number(item.cash || 0) * (1 - Number(item.discount || 0) / 100), 0
+    );
+    // 충전 수단을 등록하지 않았으면 기존처럼 넥슨캐시 1 = 1원으로 계산.
+    // 등록한 경우에는 필요한 캐시 중 등록된 충전분은 할인 적용,
+    // 부족한 캐시는 정가(1캐시=1원)로 계산.
+    const discountedAppliedCash = Math.min(requiredCash, chargeCash);
+    let discountedAppliedSpent = 0;
+    let remainingAppliedCash = discountedAppliedCash;
+    for (const method of mvpCalculator.chargeMethods) {
+      if (remainingAppliedCash <= 0) break;
+      const methodCash = Number(method.cash || 0);
+      const applied = Math.min(methodCash, remainingAppliedCash);
+      discountedAppliedSpent += applied * (1 - Number(method.discount || 0) / 100);
+      remainingAppliedCash -= applied;
+    }
+    const actualCashSpent = mvpCalculator.chargeMethods.length
+      ? discountedAppliedSpent + Math.max(0, requiredCash - discountedAppliedCash)
+      : requiredCash;
+    const averageDiscount = requiredCash > 0
+      ? Math.max(0, (1 - actualCashSpent / requiredCash) * 100)
+      : 0;
+
     const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
     const marketRate = Number(mvpCalculator.marketRate || 0);   // 1억 메소당 메이플포인트
 
@@ -316,7 +350,7 @@
     // 총 획득 메소(억) × 디코 1억당 원화 시세
     const auctionMesoEok = combinedTotalMeso / 100000000;
     const discordWon = discordRate > 0 ? auctionMesoEok * discordRate : 0;
-    const discordRecovery = requiredCash > 0 ? (discordWon / requiredCash) * 100 : 0;
+    const discordRecovery = actualCashSpent > 0 ? (discordWon / actualCashSpent) * 100 : 0;
 
     // 메소마켓 루트:
     // 필요한 넥슨캐시를 동일 수치의 메이플포인트로 보았을 때
@@ -325,13 +359,18 @@
     const marketWon = discordRate > 0 ? marketMesoEok * discordRate : 0;
 
     // 넥슨캐시 1 = 1원 명목가 기준 회수율
-    const marketRecovery = requiredCash > 0 ? (marketWon / requiredCash) * 100 : 0;
+    const marketRecovery = actualCashSpent > 0 ? (marketWon / actualCashSpent) * 100 : 0;
 
     const required = $("mvpRequiredCash");
     const total = $("mvpTotalMeso");
     const discord = $("mvpDiscordRate");
     const market = $("mvpMarketRate");
     const earnedCreditEl = $("mvpEarnedCredit");
+    const creditEarnedSummaryEl = $("mvpCreditEarnedSummary");
+    const remainingCreditEl = $("mvpRemainingCredit");
+    const chargeCashEl = $("mvpChargeCash");
+    const actualCashSpentEl = $("mvpActualCashSpent");
+    const averageDiscountEl = $("mvpAverageDiscount");
     const usedCreditEl = $("mvpUsedCredit");
     const creditTotalMesoEl = $("mvpCreditTotalMeso");
     const discordWonEl = $("mvpDiscordWon");
@@ -342,6 +381,11 @@
 
     if (required) required.textContent = `${formatMvpNumber(requiredCash)} 캐시`;
     if (earnedCreditEl) earnedCreditEl.textContent = `${formatMvpNumber(earnedCredit)} 크레딧`;
+    if (creditEarnedSummaryEl) creditEarnedSummaryEl.textContent = formatMvpNumber(earnedCredit);
+    if (remainingCreditEl) remainingCreditEl.textContent = formatMvpNumber(Math.max(0, earnedCredit - usedCredit));
+    if (chargeCashEl) chargeCashEl.textContent = `${formatMvpNumber(chargeCash)} 캐시`;
+    if (actualCashSpentEl) actualCashSpentEl.textContent = `${formatMvpNumber(actualCashSpent)}원`;
+    if (averageDiscountEl) averageDiscountEl.textContent = `${averageDiscount.toFixed(2)}%`;
     if (usedCreditEl) usedCreditEl.textContent = formatMvpNumber(usedCredit);
     if (creditTotalMesoEl) creditTotalMesoEl.textContent = formatMvpMeso(creditTotalMeso);
     if (total) total.textContent = `${formatMvpMeso(combinedTotalMeso)}`;
@@ -377,12 +421,32 @@
 
       const updateRowResult = () => {
         const qty = Math.max(0, Number(item.qty ?? 1));
-        const investedCash = Number(item.cash || 0) * qty;
+        const nominalCash = Number(item.cash || 0) * qty;
+        const requiredCashAll = mvpCalculator.items.reduce(
+          (sum, x) => x.included !== false
+            ? sum + Number(x.cash || 0) * Math.max(0, Number(x.qty ?? 1))
+            : sum, 0
+        );
+        const chargeCashAll = mvpCalculator.chargeMethods.reduce((sum, x) => sum + Number(x.cash || 0), 0);
+        let appliedCash = Math.min(requiredCashAll, chargeCashAll);
+        let appliedSpent = 0;
+        let remain = appliedCash;
+        for (const method of mvpCalculator.chargeMethods) {
+          if (remain <= 0) break;
+          const use = Math.min(Number(method.cash || 0), remain);
+          appliedSpent += use * (1 - Number(method.discount || 0) / 100);
+          remain -= use;
+        }
+        const actualAll = mvpCalculator.chargeMethods.length
+          ? appliedSpent + Math.max(0, requiredCashAll - appliedCash)
+          : requiredCashAll;
+        const effectiveFactor = requiredCashAll > 0 ? actualAll / requiredCashAll : 1;
+        const investedCash = nominalCash * effectiveFactor;
         const earnedMeso = Number(item.auction || 0) * qty;
         const discordRate = Number(mvpCalculator.discordRate || 0);
         const recoveredWon = discordRate > 0 ? (earnedMeso / 100000000) * discordRate : 0;
         const recoveryRate = investedCash > 0 ? (recoveredWon / investedCash) * 100 : 0;
-        const earnedCredit = Math.floor(investedCash * 0.05);
+        const earnedCredit = Math.floor(nominalCash * 0.05);
 
         row.querySelector(".mvp-row-invested").textContent =
           investedCash > 0 ? `${formatMvpNumber(investedCash)}원` : "—";
@@ -476,6 +540,76 @@
 
       box.appendChild(row);
       updateRowResult();
+    });
+
+    renderMvpSummary();
+  }
+
+  function renderMvpChargeMethods() {
+    const box = $("mvpChargeRows");
+    if (!box) return;
+    box.innerHTML = "";
+
+    if (!mvpCalculator.chargeMethods.length) {
+      const empty = document.createElement("div");
+      empty.className = "mvp-charge-empty";
+      empty.textContent = "충전 수단을 등록하지 않으면 1캐시 = 1원 기준으로 계산됩니다.";
+      box.appendChild(empty);
+      renderMvpSummary();
+      return;
+    }
+
+    mvpCalculator.chargeMethods.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "mvp-charge-row";
+      const actual = Number(item.cash || 0) * (1 - Number(item.discount || 0) / 100);
+
+      row.innerHTML = `
+        <input class="mvp-charge-name" type="text" maxlength="40" placeholder="예: 카드 / 쿠폰">
+        <input class="mvp-charge-cash" type="text" inputmode="numeric" placeholder="충전 캐시">
+        <div class="mvp-discount-input"><input class="mvp-charge-discount" type="number" min="0" max="100" step="0.1"><span>%</span></div>
+        <strong class="mvp-charge-actual">${formatMvpNumber(actual)}원</strong>
+        <button class="mvp-delete-item" type="button" title="삭제">×</button>
+      `;
+
+      const name = row.querySelector(".mvp-charge-name");
+      const cash = row.querySelector(".mvp-charge-cash");
+      const discount = row.querySelector(".mvp-charge-discount");
+      name.value = item.name;
+      cash.value = item.cash ? formatMvpNumber(item.cash) : "";
+      discount.value = Number(item.discount || 0);
+
+      const recalc = () => {
+        row.querySelector(".mvp-charge-actual").textContent =
+          `${formatMvpNumber(Number(item.cash || 0) * (1 - Number(item.discount || 0) / 100))}원`;
+        // 할인율이 품목별 투입현금/회수율에도 영향을 주므로 캐시 행 전체 갱신
+        renderMvpItems();
+        renderMvpSummary();
+        saveMvpCalculator();
+      };
+
+      name.addEventListener("input", () => {
+        item.name = name.value;
+        saveMvpCalculator();
+      });
+      cash.addEventListener("input", () => {
+        item.cash = parseMvpNumber(cash.value);
+        cash.value = item.cash ? formatMvpNumber(item.cash) : "";
+        recalc();
+        requestAnimationFrame(() => cash.setSelectionRange(cash.value.length, cash.value.length));
+      });
+      discount.addEventListener("input", () => {
+        item.discount = Math.min(100, Math.max(0, Number(discount.value || 0)));
+        recalc();
+      });
+      row.querySelector(".mvp-delete-item").addEventListener("click", () => {
+        mvpCalculator.chargeMethods = mvpCalculator.chargeMethods.filter(x => x.id !== item.id);
+        saveMvpCalculator();
+        renderMvpChargeMethods();
+        renderMvpItems();
+      });
+
+      box.appendChild(row);
     });
 
     renderMvpSummary();
@@ -583,6 +717,22 @@
   }
 
   function bindMvpCalculator() {
+    const addCharge = $("mvpAddChargeBtn");
+    if (addCharge && addCharge.dataset.bound !== "1") {
+      addCharge.dataset.bound = "1";
+      addCharge.addEventListener("click", () => {
+        mvpCalculator.chargeMethods.push({
+          id: `charge-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: "",
+          cash: 0,
+          discount: 0
+        });
+        saveMvpCalculator();
+        renderMvpChargeMethods();
+        $("mvpChargeRows")?.lastElementChild?.querySelector(".mvp-charge-name")?.focus();
+      });
+    }
+
     const addCredit = $("mvpAddCreditItemBtn");
     if (addCredit && addCredit.dataset.bound !== "1") {
       addCredit.dataset.bound = "1";
@@ -3178,6 +3328,7 @@ card.innerHTML = `
     renderSummary();
     renderEconomyCalculator();
     bindEconomyCalculator();
+    renderMvpChargeMethods();
     renderMvpItems();
     renderMvpCreditItems();
     bindMvpCalculator();
