@@ -229,7 +229,8 @@
   let mvpCalculator = {
     discordRate: 0,
     marketRate: 0,
-    items: []
+    items: [],
+    creditItems: []
   };
 
   function loadMvpCalculator() {
@@ -243,6 +244,14 @@
             id: String(item.id || `${Date.now()}-${Math.random()}`),
             name: String(item.name || ""),
             cash: Math.max(0, Number(item.cash || 0)),
+            qty: Math.max(1, Math.floor(Number(item.qty || 1))),
+            auction: Math.max(0, Number(item.auction || 0))
+          })) : [],
+          creditItems: Array.isArray(saved.creditItems) ? saved.creditItems.map(item => ({
+            id: String(item.id || `${Date.now()}-${Math.random()}`),
+            name: String(item.name || ""),
+            credit: Math.max(0, Number(item.credit || 0)),
+            qty: Math.max(1, Math.floor(Number(item.qty || 1))),
             auction: Math.max(0, Number(item.auction || 0))
           })) : []
         };
@@ -275,8 +284,20 @@
   }
 
   function renderMvpSummary() {
-    const requiredCash = mvpCalculator.items.reduce((sum, item) => sum + Number(item.cash || 0), 0);
-    const totalMeso = mvpCalculator.items.reduce((sum, item) => sum + Number(item.auction || 0), 0);
+    const requiredCash = mvpCalculator.items.reduce(
+      (sum, item) => sum + Number(item.cash || 0) * Math.max(1, Number(item.qty || 1)), 0
+    );
+    const totalMeso = mvpCalculator.items.reduce(
+      (sum, item) => sum + Number(item.auction || 0) * Math.max(1, Number(item.qty || 1)), 0
+    );
+    const earnedCredit = Math.floor(requiredCash * 0.05);
+
+    const usedCredit = mvpCalculator.creditItems.reduce(
+      (sum, item) => sum + Number(item.credit || 0) * Math.max(1, Number(item.qty || 1)), 0
+    );
+    const creditTotalMeso = mvpCalculator.creditItems.reduce(
+      (sum, item) => sum + Number(item.auction || 0) * Math.max(1, Number(item.qty || 1)), 0
+    );
     const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
     const marketRate = Number(mvpCalculator.marketRate || 0);   // 1억 메소당 메이플포인트
 
@@ -298,12 +319,18 @@
     const total = $("mvpTotalMeso");
     const discord = $("mvpDiscordRate");
     const market = $("mvpMarketRate");
+    const earnedCreditEl = $("mvpEarnedCredit");
+    const usedCreditEl = $("mvpUsedCredit");
+    const creditTotalMesoEl = $("mvpCreditTotalMeso");
     const discordWonEl = $("mvpDiscordWon");
     const marketMesoEl = $("mvpMarketMeso");
     const marketWonEl = $("mvpMarketWon");
     const marketRecoveryEl = $("mvpMarketRecovery");
 
     if (required) required.textContent = `${formatMvpNumber(requiredCash)} 캐시`;
+    if (earnedCreditEl) earnedCreditEl.textContent = `${formatMvpNumber(earnedCredit)} 크레딧`;
+    if (usedCreditEl) usedCreditEl.textContent = formatMvpNumber(usedCredit);
+    if (creditTotalMesoEl) creditTotalMesoEl.textContent = formatMvpMeso(creditTotalMeso);
     if (total) total.textContent = `${formatMvpMeso(totalMeso)}`;
     if (discord && document.activeElement !== discord) discord.value = mvpCalculator.discordRate ? formatMvpNumber(mvpCalculator.discordRate) : "";
     if (market && document.activeElement !== market) market.value = mvpCalculator.marketRate ? formatMvpNumber(mvpCalculator.marketRate) : "";
@@ -322,7 +349,7 @@
     if (!mvpCalculator.items.length) {
       const empty = document.createElement("div");
       empty.className = "mvp-empty";
-      empty.textContent = "아래 ‘아이템 추가’를 눌러 판매할 캐시 아이템을 등록해주세요.";
+      empty.textContent = "아래 ‘캐시 아이템 추가’를 눌러 품목별 회수율을 계산해보세요.";
       box.appendChild(empty);
       renderMvpSummary();
       return;
@@ -330,24 +357,52 @@
 
     mvpCalculator.items.forEach(item => {
       const row = document.createElement("div");
-      row.className = "mvp-item-row";
+      row.className = "mvp-item-row mvp-cash-item-row";
 
-      const efficiency = item.cash > 0 ? Math.floor(item.auction / item.cash) : 0;
+      const qtyValue = Math.max(1, Number(item.qty || 1));
+
+      const updateRowResult = () => {
+        const qty = Math.max(1, Number(item.qty || 1));
+        const investedCash = Number(item.cash || 0) * qty;
+        const earnedMeso = Number(item.auction || 0) * qty;
+        const discordRate = Number(mvpCalculator.discordRate || 0);
+        const recoveredWon = discordRate > 0 ? (earnedMeso / 100000000) * discordRate : 0;
+        const recoveryRate = investedCash > 0 ? (recoveredWon / investedCash) * 100 : 0;
+        const earnedCredit = Math.floor(investedCash * 0.05);
+
+        row.querySelector(".mvp-row-invested").textContent =
+          investedCash > 0 ? `${formatMvpNumber(investedCash)}원` : "—";
+        row.querySelector(".mvp-row-meso").textContent =
+          earnedMeso > 0 ? formatMvpMeso(earnedMeso) : "—";
+        row.querySelector(".mvp-row-recovered").textContent =
+          recoveredWon > 0 ? `${formatMvpNumber(recoveredWon)}원` : "—";
+        row.querySelector(".mvp-row-recovery").textContent =
+          investedCash > 0 && discordRate > 0 ? `${recoveryRate.toFixed(2)}%` : "—";
+        row.querySelector(".mvp-row-credit").textContent =
+          investedCash > 0 ? `${formatMvpNumber(earnedCredit)}` : "—";
+      };
 
       row.innerHTML = `
-        <input class="mvp-item-name" type="text" maxlength="60" placeholder="아이템명">
-        <input class="mvp-item-cash" type="text" inputmode="numeric" placeholder="넥슨캐시">
-        <input class="mvp-item-auction" type="text" inputmode="numeric" placeholder="메소">
-        <strong class="mvp-item-efficiency">${formatMvpNumber(efficiency)} 메소</strong>
-        <button class="mvp-delete-item" type="button" title="삭제">삭제</button>
+        <input class="mvp-item-name" type="text" maxlength="60" placeholder="아이템 이름">
+        <input class="mvp-item-cash" type="text" inputmode="numeric" placeholder="캐시 원가">
+        <input class="mvp-item-qty" type="text" inputmode="numeric" placeholder="수량">
+        <input class="mvp-item-auction" type="text" inputmode="numeric" placeholder="경매장 예상가">
+        <strong class="mvp-row-result mvp-row-invested">—</strong>
+        <strong class="mvp-row-result mvp-row-meso">—</strong>
+        <strong class="mvp-row-result mvp-row-recovered">—</strong>
+        <strong class="mvp-row-result mvp-row-recovery">—</strong>
+        <strong class="mvp-row-result mvp-row-credit">—</strong>
+        <button class="mvp-delete-item" type="button" title="삭제">×</button>
       `;
 
       const name = row.querySelector(".mvp-item-name");
       const cash = row.querySelector(".mvp-item-cash");
+      const qty = row.querySelector(".mvp-item-qty");
       const auction = row.querySelector(".mvp-item-auction");
 
       name.value = item.name;
       cash.value = item.cash ? formatMvpNumber(item.cash) : "";
+      qty.value = formatMvpNumber(qtyValue);
       auction.value = item.auction ? formatMvpNumber(item.auction) : "";
 
       name.addEventListener("input", () => {
@@ -358,18 +413,25 @@
       cash.addEventListener("input", () => {
         item.cash = parseMvpNumber(cash.value);
         cash.value = item.cash ? formatMvpNumber(item.cash) : "";
-        row.querySelector(".mvp-item-efficiency").textContent =
-          `${formatMvpNumber(item.cash > 0 ? item.auction / item.cash : 0)} 메소`;
+        updateRowResult();
         renderMvpSummary();
         saveMvpCalculator();
         requestAnimationFrame(() => cash.setSelectionRange(cash.value.length, cash.value.length));
       });
 
+      qty.addEventListener("input", () => {
+        item.qty = Math.max(1, Math.floor(parseMvpNumber(qty.value) || 1));
+        qty.value = formatMvpNumber(item.qty);
+        updateRowResult();
+        renderMvpSummary();
+        saveMvpCalculator();
+        requestAnimationFrame(() => qty.setSelectionRange(qty.value.length, qty.value.length));
+      });
+
       auction.addEventListener("input", () => {
         item.auction = parseMvpNumber(auction.value);
         auction.value = item.auction ? formatMvpNumber(item.auction) : "";
-        row.querySelector(".mvp-item-efficiency").textContent =
-          `${formatMvpNumber(item.cash > 0 ? item.auction / item.cash : 0)} 메소`;
+        updateRowResult();
         renderMvpSummary();
         saveMvpCalculator();
         requestAnimationFrame(() => auction.setSelectionRange(auction.value.length, auction.value.length));
@@ -382,12 +444,114 @@
       });
 
       box.appendChild(row);
+      updateRowResult();
+    });
+
+    renderMvpSummary();
+  }
+
+  function renderMvpCreditItems() {
+    const box = $("mvpCreditRows");
+    if (!box) return;
+    box.innerHTML = "";
+
+    if (!mvpCalculator.creditItems.length) {
+      const empty = document.createElement("div");
+      empty.className = "mvp-empty";
+      empty.textContent = "획득한 크레딧으로 구매해 판매할 아이템을 추가해주세요.";
+      box.appendChild(empty);
+      renderMvpSummary();
+      return;
+    }
+
+    mvpCalculator.creditItems.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "mvp-item-row mvp-credit-item-row";
+
+      const efficiency = item.credit > 0 ? Math.floor(item.auction / item.credit) : 0;
+
+      row.innerHTML = `
+        <input class="mvp-credit-name" type="text" maxlength="60" placeholder="아이템명">
+        <input class="mvp-credit-cost" type="text" inputmode="numeric" placeholder="필요 크레딧">
+        <input class="mvp-credit-qty" type="text" inputmode="numeric" placeholder="개수">
+        <input class="mvp-credit-auction" type="text" inputmode="numeric" placeholder="메소">
+        <strong class="mvp-item-efficiency">${formatMvpNumber(efficiency)} 메소</strong>
+        <button class="mvp-delete-item" type="button" title="삭제">삭제</button>
+      `;
+
+      const name = row.querySelector(".mvp-credit-name");
+      const credit = row.querySelector(".mvp-credit-cost");
+      const qty = row.querySelector(".mvp-credit-qty");
+      const auction = row.querySelector(".mvp-credit-auction");
+
+      name.value = item.name;
+      credit.value = item.credit ? formatMvpNumber(item.credit) : "";
+      qty.value = formatMvpNumber(item.qty || 1);
+      auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+
+      name.addEventListener("input", () => {
+        item.name = name.value;
+        saveMvpCalculator();
+      });
+
+      const recalcRow = () => {
+        row.querySelector(".mvp-item-efficiency").textContent =
+          `${formatMvpNumber(item.credit > 0 ? item.auction / item.credit : 0)} 메소`;
+        renderMvpSummary();
+        saveMvpCalculator();
+      };
+
+      credit.addEventListener("input", () => {
+        item.credit = parseMvpNumber(credit.value);
+        credit.value = item.credit ? formatMvpNumber(item.credit) : "";
+        recalcRow();
+        requestAnimationFrame(() => credit.setSelectionRange(credit.value.length, credit.value.length));
+      });
+
+      qty.addEventListener("input", () => {
+        item.qty = Math.max(1, Math.floor(parseMvpNumber(qty.value) || 1));
+        qty.value = formatMvpNumber(item.qty);
+        recalcRow();
+        requestAnimationFrame(() => qty.setSelectionRange(qty.value.length, qty.value.length));
+      });
+
+      auction.addEventListener("input", () => {
+        item.auction = parseMvpNumber(auction.value);
+        auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+        recalcRow();
+        requestAnimationFrame(() => auction.setSelectionRange(auction.value.length, auction.value.length));
+      });
+
+      row.querySelector(".mvp-delete-item").addEventListener("click", () => {
+        mvpCalculator.creditItems = mvpCalculator.creditItems.filter(x => x.id !== item.id);
+        saveMvpCalculator();
+        renderMvpCreditItems();
+      });
+
+      box.appendChild(row);
     });
 
     renderMvpSummary();
   }
 
   function bindMvpCalculator() {
+    const addCredit = $("mvpAddCreditItemBtn");
+    if (addCredit && addCredit.dataset.bound !== "1") {
+      addCredit.dataset.bound = "1";
+      addCredit.addEventListener("click", () => {
+        mvpCalculator.creditItems.push({
+          id: `credit-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: "",
+          credit: 0,
+          qty: 1,
+          auction: 0
+        });
+        saveMvpCalculator();
+        renderMvpCreditItems();
+        $("mvpCreditRows")?.lastElementChild?.querySelector(".mvp-credit-name")?.focus();
+      });
+    }
+
     const add = $("mvpAddItemBtn");
     if (add && add.dataset.bound !== "1") {
       add.dataset.bound = "1";
@@ -396,6 +560,7 @@
           id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
           name: "",
           cash: 0,
+          qty: 1,
           auction: 0
         });
         saveMvpCalculator();
@@ -414,8 +579,32 @@
       input.addEventListener("input", () => {
         mvpCalculator[key] = parseMvpNumber(input.value);
         input.value = mvpCalculator[key] ? formatMvpNumber(mvpCalculator[key]) : "";
+
+        // 시세 입력 즉시 품목별 회수금액/회수율과 상단 요약을 모두 다시 계산
+        if (key === "discordRate") {
+          renderMvpItems();
+        } else {
+          renderMvpSummary();
+        }
         saveMvpCalculator();
-        requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+
+        requestAnimationFrame(() => {
+          input.setSelectionRange(input.value.length, input.value.length);
+        });
+      });
+    });
+  }
+
+  function bindMvpRealtimeDelegation() {
+    const rows = $("mvpItemRows");
+    if (!rows || rows.dataset.realtimeBound === "1") return;
+    rows.dataset.realtimeBound = "1";
+
+    rows.addEventListener("input", event => {
+      if (!event.target.closest(".mvp-item-row")) return;
+      queueMicrotask(() => {
+        renderMvpSummary();
+        saveMvpCalculator();
       });
     });
   }
@@ -427,6 +616,13 @@
     document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
     $(viewId).classList.remove("hidden");
     document.querySelector(`.nav-btn[data-view="${viewId}"]`)?.classList.add("active");
+
+    if (viewId === "mvpView") {
+      renderMvpItems();
+      bindMvpCalculator();
+      bindMvpRealtimeDelegation();
+      renderMvpSummary();
+    }
   }
 
   document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -2933,7 +3129,9 @@ card.innerHTML = `
     renderEconomyCalculator();
     bindEconomyCalculator();
     renderMvpItems();
+    renderMvpCreditItems();
     bindMvpCalculator();
+    bindMvpRealtimeDelegation();
   }
 
   sb.auth.onAuthStateChange((event, session) => {

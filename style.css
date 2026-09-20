@@ -5152,3 +5152,87 @@ main{
   font-weight:900;
   text-align:right;
 }
+
+
+/* ===== v1.52 MVP credit shop + quantity ===== */
+.mvp-table-head,.mvp-item-row{
+  grid-template-columns:minmax(180px,1.35fr) minmax(125px,.75fr) 72px minmax(155px,.95fr) minmax(140px,.8fr) 64px!important;
+}
+.mvp-credit-section{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid #26344a;
+}
+.mvp-credit-title{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:10px;
+}
+.mvp-credit-title h3{
+  margin:2px 0 0;
+  color:#f4f7fb;
+  font-size:16px;
+}
+.mvp-credit-summary{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  color:#8492a7;
+  font-size:11px;
+}
+.mvp-credit-summary strong{
+  margin-left:4px;
+  color:#ffb21d;
+  font-size:13px;
+}
+.mvp-item-qty,.mvp-credit-qty{text-align:center}
+@media(max-width:900px){
+  .mvp-table-head,.mvp-item-row{min-width:900px!important}
+  .mvp-credit-title{align-items:flex-start;flex-direction:column}
+}
+
+
+/* ===== v1.53 item-by-item MVP financial table ===== */
+.mvp-cash-table-head,
+.mvp-cash-item-row{
+  grid-template-columns:
+    minmax(160px,1.35fr)
+    minmax(100px,.72fr)
+    62px
+    minmax(145px,1fr)
+    minmax(105px,.78fr)
+    minmax(120px,.88fr)
+    minmax(105px,.78fr)
+    minmax(82px,.62fr)
+    minmax(92px,.68fr)
+    38px!important;
+  min-width:1250px!important;
+}
+.mvp-cash-table-head span{
+  white-space:nowrap;
+}
+.mvp-cash-item-row{
+  min-width:1250px!important;
+}
+.mvp-row-result{
+  font-size:11px;
+  font-weight:800;
+  text-align:right;
+  white-space:nowrap;
+  color:#d9e2ef;
+}
+.mvp-row-recovered{color:#ff875e}
+.mvp-row-recovery{color:#f4f7fb}
+.mvp-row-credit{color:#8d55ff}
+.mvp-cash-item-row .mvp-delete-item{
+  width:28px;
+  padding:0;
+  font-size:16px;
+}
+.mvp-credit-table-head,
+.mvp-credit-item-row{
+  grid-template-columns:minmax(180px,1.35fr) minmax(125px,.75fr) 72px minmax(155px,.95fr) minmax(140px,.8fr) 64px!important;
+  min-width:900px!important;
+}

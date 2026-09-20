@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.50" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.53" />
 
-  <link rel="stylesheet" href="style.css?v=1.50" />
+  <link rel="stylesheet" href="style.css?v=1.53" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.50</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.53</span></h1>
           
         </div>
         <div class="header-actions">
@@ -109,6 +109,10 @@
             <article class="mvp-summary-card">
               <span>필요한 넥슨캐시</span>
               <strong id="mvpRequiredCash">0 캐시</strong>
+              <div class="mvp-route-result">
+                <small>사용 캐시의 5% 적립</small>
+                <strong id="mvpEarnedCredit">0 크레딧</strong>
+              </div>
             </article>
             <label class="mvp-summary-card mvp-input-card">
               <span>1억당 판매 메소 (디코)</span>
@@ -136,18 +140,49 @@
           </div>
 
           <div class="mvp-table-wrap">
-            <div class="mvp-table-head">
-              <span>아이템명</span>
-              <span>넥슨캐시 가격</span>
-              <span>경매장 가격</span>
-              <span>캐시 1당 메소</span>
+            <div class="mvp-table-head mvp-cash-table-head">
+              <span>아이템 이름</span>
+              <span>캐시 원가</span>
+              <span>수량</span>
+              <span>경매장 예상가 (메소)</span>
+              <span>투입 현금</span>
+              <span>획득 메소</span>
+              <span>회수 금액</span>
+              <span>회수율</span>
+              <span>크레딧 적립</span>
               <span></span>
             </div>
             <div id="mvpItemRows" class="mvp-item-rows"></div>
-            <button id="mvpAddItemBtn" class="mvp-add-item primary" type="button">+ 아이템 추가</button>
+            <button id="mvpAddItemBtn" class="mvp-add-item primary" type="button">+ 캐시 아이템 추가</button>
           </div>
 
-          <p class="mvp-save-note">입력 내용은 자동 저장됩니다.</p>
+          <div class="mvp-credit-section">
+            <div class="mvp-credit-title">
+              <div>
+                <p class="kicker">CREDIT SHOP</p>
+                <h3>크레딧 샵 판매 계산</h3>
+              </div>
+              <div class="mvp-credit-summary">
+                <span>사용 크레딧 <strong id="mvpUsedCredit">0</strong></span>
+                <span>총 획득 메소 <strong id="mvpCreditTotalMeso">0 메소</strong></span>
+              </div>
+            </div>
+
+            <div class="mvp-table-wrap mvp-credit-table">
+              <div class="mvp-table-head mvp-credit-table-head">
+                <span>아이템명</span>
+                <span>필요 크레딧</span>
+                <span>개수</span>
+                <span>거래소 가격</span>
+                <span>크레딧 1당 메소</span>
+                <span></span>
+              </div>
+              <div id="mvpCreditRows" class="mvp-item-rows"></div>
+              <button id="mvpAddCreditItemBtn" class="mvp-add-item primary" type="button">+ 크레딧 아이템 추가</button>
+            </div>
+          </div>
+
+          <p class="mvp-save-note">입력 내용과 아이템 목록은 자동 저장됩니다.</p>
         </article>
       </section>
 
@@ -222,7 +257,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.50"></script>
-  <script src="app.js?v=1.50"></script>
+  <script src="config.js?v=1.53"></script>
+  <script src="app.js?v=1.53"></script>
 </body>
 </html>
