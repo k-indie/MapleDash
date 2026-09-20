@@ -277,16 +277,41 @@
   function renderMvpSummary() {
     const requiredCash = mvpCalculator.items.reduce((sum, item) => sum + Number(item.cash || 0), 0);
     const totalMeso = mvpCalculator.items.reduce((sum, item) => sum + Number(item.auction || 0), 0);
+    const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
+    const marketRate = Number(mvpCalculator.marketRate || 0);   // 1억 메소당 메이플포인트
+
+    // 경매장 판매 루트:
+    // 총 획득 메소(억) × 디코 1억당 원화 시세
+    const auctionMesoEok = totalMeso / 100000000;
+    const discordWon = discordRate > 0 ? auctionMesoEok * discordRate : 0;
+
+    // 메소마켓 루트:
+    // 필요한 넥슨캐시를 동일 수치의 메이플포인트로 보았을 때
+    // 필요한 캐시 ÷ (1억당 메포 시세) = 획득 가능한 억 메소
+    const marketMesoEok = marketRate > 0 ? requiredCash / marketRate : 0;
+    const marketWon = discordRate > 0 ? marketMesoEok * discordRate : 0;
+
+    // 넥슨캐시 1 = 1원 명목가 기준 회수율
+    const marketRecovery = requiredCash > 0 ? (marketWon / requiredCash) * 100 : 0;
 
     const required = $("mvpRequiredCash");
     const total = $("mvpTotalMeso");
     const discord = $("mvpDiscordRate");
     const market = $("mvpMarketRate");
+    const discordWonEl = $("mvpDiscordWon");
+    const marketMesoEl = $("mvpMarketMeso");
+    const marketWonEl = $("mvpMarketWon");
+    const marketRecoveryEl = $("mvpMarketRecovery");
 
     if (required) required.textContent = `${formatMvpNumber(requiredCash)} 캐시`;
     if (total) total.textContent = `${formatMvpMeso(totalMeso)}`;
     if (discord && document.activeElement !== discord) discord.value = mvpCalculator.discordRate ? formatMvpNumber(mvpCalculator.discordRate) : "";
     if (market && document.activeElement !== market) market.value = mvpCalculator.marketRate ? formatMvpNumber(mvpCalculator.marketRate) : "";
+
+    if (discordWonEl) discordWonEl.textContent = `${formatMvpNumber(discordWon)}원`;
+    if (marketMesoEl) marketMesoEl.textContent = `${marketMesoEok.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}억 메소`;
+    if (marketWonEl) marketWonEl.textContent = `${formatMvpNumber(marketWon)}원`;
+    if (marketRecoveryEl) marketRecoveryEl.textContent = `회수율 ${marketRecovery.toFixed(2)}%`;
   }
 
   function renderMvpItems() {

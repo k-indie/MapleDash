@@ -5116,3 +5116,39 @@ main{
   .mvp-table-wrap{overflow-x:auto}
   .mvp-table-head,.mvp-item-row{min-width:780px}
 }
+
+
+/* ===== v1.50 MVP route comparison ===== */
+.mvp-summary-card{min-height:118px}
+.mvp-route-result{
+  margin-top:3px;
+  padding-top:8px;
+  border-top:1px solid #26354b;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:4px 8px;
+  align-items:center;
+}
+.mvp-route-result small{
+  color:#77869c;
+  font-size:10px;
+  font-weight:700;
+}
+.mvp-route-result strong{
+  color:#f6f8fb;
+  font-size:13px;
+  text-align:right;
+}
+.mvp-market-result em{
+  grid-column:1/-1;
+  margin-top:3px;
+  padding:5px 7px;
+  border:1px solid rgba(255,178,29,.32);
+  border-radius:6px;
+  background:rgba(255,178,29,.07);
+  color:#ffb21d;
+  font-size:11px;
+  font-style:normal;
+  font-weight:900;
+  text-align:right;
+}

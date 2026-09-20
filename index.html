@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.49" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.50" />
 
-  <link rel="stylesheet" href="style.css?v=1.49" />
+  <link rel="stylesheet" href="style.css?v=1.50" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.49</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.50</span></h1>
           
         </div>
         <div class="header-actions">
@@ -112,11 +112,22 @@
             </article>
             <label class="mvp-summary-card mvp-input-card">
               <span>1억당 판매 메소 (디코)</span>
-              <input id="mvpDiscordRate" type="text" inputmode="numeric" placeholder="예: 2,500">
+              <input id="mvpDiscordRate" type="text" inputmode="numeric" placeholder="예: 1,600원">
+              <div class="mvp-route-result">
+                <small>경매장 판매 메소 현금 환산</small>
+                <strong id="mvpDiscordWon">0원</strong>
+              </div>
             </label>
             <label class="mvp-summary-card mvp-input-card">
               <span>1억당 판매 메소 (마켓)</span>
-              <input id="mvpMarketRate" type="text" inputmode="numeric" placeholder="예: 2,800">
+              <input id="mvpMarketRate" type="text" inputmode="numeric" placeholder="예: 2,600 메포">
+              <div class="mvp-route-result mvp-market-result">
+                <small>필요 캐시로 교환 시</small>
+                <strong id="mvpMarketMeso">0억 메소</strong>
+                <small>디코 시세 현금 환산</small>
+                <strong id="mvpMarketWon">0원</strong>
+                <em id="mvpMarketRecovery">회수율 0.00%</em>
+              </div>
             </label>
             <article class="mvp-summary-card mvp-total-card">
               <span>총 획득 메소</span>
@@ -211,7 +222,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.49"></script>
-  <script src="app.js?v=1.49"></script>
+  <script src="config.js?v=1.50"></script>
+  <script src="app.js?v=1.50"></script>
 </body>
 </html>
