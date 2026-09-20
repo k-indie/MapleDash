@@ -5364,3 +5364,56 @@ main{
   .mvp-market-standalone-body>div{border-bottom:1px solid #26354b}
   .mvp-summary-grid{grid-template-columns:1fr!important}
 }
+
+
+/* ===== v1.56 zero quantity + per-item total inclusion ===== */
+.mvp-cash-table-head,
+.mvp-cash-item-row{
+  grid-template-columns:
+    minmax(160px,1.35fr)
+    minmax(100px,.72fr)
+    62px
+    minmax(145px,1fr)
+    minmax(105px,.78fr)
+    minmax(120px,.88fr)
+    minmax(105px,.78fr)
+    minmax(82px,.62fr)
+    minmax(92px,.68fr)
+    58px
+    38px!important;
+  min-width:1320px!important;
+}
+.mvp-credit-table-head,
+.mvp-credit-item-row{
+  grid-template-columns:
+    minmax(180px,1.35fr)
+    minmax(125px,.75fr)
+    72px
+    minmax(155px,.95fr)
+    minmax(140px,.8fr)
+    58px
+    64px!important;
+  min-width:970px!important;
+}
+.mvp-include-toggle{
+  height:27px;
+  padding:0 7px;
+  border:1px solid #48566d;
+  border-radius:7px;
+  background:#172235;
+  color:#8e9bb0;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+.mvp-include-toggle.is-included{
+  border-color:rgba(62,201,130,.48);
+  background:rgba(62,201,130,.10);
+  color:#67d99f;
+}
+.mvp-item-row.is-excluded{
+  opacity:.55;
+}
+.mvp-item-row.is-excluded .mvp-include-toggle{
+  opacity:1;
+}

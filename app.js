@@ -244,15 +244,17 @@
             id: String(item.id || `${Date.now()}-${Math.random()}`),
             name: String(item.name || ""),
             cash: Math.max(0, Number(item.cash || 0)),
-            qty: Math.max(1, Math.floor(Number(item.qty || 1))),
-            auction: Math.max(0, Number(item.auction || 0))
+            qty: Math.max(0, Math.floor(Number(item.qty ?? 1))),
+            auction: Math.max(0, Number(item.auction || 0)),
+            included: item.included !== false
           })) : [],
           creditItems: Array.isArray(saved.creditItems) ? saved.creditItems.map(item => ({
             id: String(item.id || `${Date.now()}-${Math.random()}`),
             name: String(item.name || ""),
             credit: Math.max(0, Number(item.credit || 0)),
-            qty: Math.max(1, Math.floor(Number(item.qty || 1))),
-            auction: Math.max(0, Number(item.auction || 0))
+            qty: Math.max(0, Math.floor(Number(item.qty ?? 1))),
+            auction: Math.max(0, Number(item.auction || 0)),
+            included: item.included !== false
           })) : []
         };
       }
@@ -285,18 +287,26 @@
 
   function renderMvpSummary() {
     const requiredCash = mvpCalculator.items.reduce(
-      (sum, item) => sum + Number(item.cash || 0) * Math.max(1, Number(item.qty || 1)), 0
+      (sum, item) => item.included !== false
+        ? sum + Number(item.cash || 0) * Math.max(0, Number(item.qty ?? 1))
+        : sum, 0
     );
     const totalMeso = mvpCalculator.items.reduce(
-      (sum, item) => sum + Number(item.auction || 0) * Math.max(1, Number(item.qty || 1)), 0
+      (sum, item) => item.included !== false
+        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1))
+        : sum, 0
     );
     const earnedCredit = Math.floor(requiredCash * 0.05);
 
     const usedCredit = mvpCalculator.creditItems.reduce(
-      (sum, item) => sum + Number(item.credit || 0) * Math.max(1, Number(item.qty || 1)), 0
+      (sum, item) => item.included !== false
+        ? sum + Number(item.credit || 0) * Math.max(0, Number(item.qty ?? 1))
+        : sum, 0
     );
     const creditTotalMeso = mvpCalculator.creditItems.reduce(
-      (sum, item) => sum + Number(item.auction || 0) * Math.max(1, Number(item.qty || 1)), 0
+      (sum, item) => item.included !== false
+        ? sum + Number(item.auction || 0) * Math.max(0, Number(item.qty ?? 1))
+        : sum, 0
     );
     const combinedTotalMeso = totalMeso + creditTotalMeso;
     const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
@@ -363,10 +373,10 @@
       const row = document.createElement("div");
       row.className = "mvp-item-row mvp-cash-item-row";
 
-      const qtyValue = Math.max(1, Number(item.qty || 1));
+      const qtyValue = Math.max(0, Number(item.qty ?? 1));
 
       const updateRowResult = () => {
-        const qty = Math.max(1, Number(item.qty || 1));
+        const qty = Math.max(0, Number(item.qty ?? 1));
         const investedCash = Number(item.cash || 0) * qty;
         const earnedMeso = Number(item.auction || 0) * qty;
         const discordRate = Number(mvpCalculator.discordRate || 0);
@@ -396,6 +406,7 @@
         <strong class="mvp-row-result mvp-row-recovered">—</strong>
         <strong class="mvp-row-result mvp-row-recovery">—</strong>
         <strong class="mvp-row-result mvp-row-credit">—</strong>
+        <button class="mvp-include-toggle" type="button" title="총 계산 포함 여부"></button>
         <button class="mvp-delete-item" type="button" title="삭제">×</button>
       `;
 
@@ -403,11 +414,20 @@
       const cash = row.querySelector(".mvp-item-cash");
       const qty = row.querySelector(".mvp-item-qty");
       const auction = row.querySelector(".mvp-item-auction");
+      const includeToggle = row.querySelector(".mvp-include-toggle");
 
       name.value = item.name;
       cash.value = item.cash ? formatMvpNumber(item.cash) : "";
       qty.value = formatMvpNumber(qtyValue);
       auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+
+      const syncIncludeToggle = () => {
+        const included = item.included !== false;
+        includeToggle.textContent = included ? "포함" : "제외";
+        includeToggle.classList.toggle("is-included", included);
+        row.classList.toggle("is-excluded", !included);
+      };
+      syncIncludeToggle();
 
       name.addEventListener("input", () => {
         item.name = name.value;
@@ -424,7 +444,7 @@
       });
 
       qty.addEventListener("input", () => {
-        item.qty = Math.max(1, Math.floor(parseMvpNumber(qty.value) || 1));
+        item.qty = Math.max(0, Math.floor(parseMvpNumber(qty.value)));
         qty.value = formatMvpNumber(item.qty);
         updateRowResult();
         renderMvpSummary();
@@ -439,6 +459,13 @@
         renderMvpSummary();
         saveMvpCalculator();
         requestAnimationFrame(() => auction.setSelectionRange(auction.value.length, auction.value.length));
+      });
+
+      includeToggle.addEventListener("click", () => {
+        item.included = item.included === false;
+        syncIncludeToggle();
+        renderMvpSummary();
+        saveMvpCalculator();
       });
 
       row.querySelector(".mvp-delete-item").addEventListener("click", () => {
@@ -480,6 +507,7 @@
         <input class="mvp-credit-qty" type="text" inputmode="numeric" placeholder="개수">
         <input class="mvp-credit-auction" type="text" inputmode="numeric" placeholder="메소">
         <strong class="mvp-item-efficiency">${formatMvpNumber(efficiency)} 메소</strong>
+        <button class="mvp-include-toggle" type="button" title="총 계산 포함 여부"></button>
         <button class="mvp-delete-item" type="button" title="삭제">삭제</button>
       `;
 
@@ -487,11 +515,20 @@
       const credit = row.querySelector(".mvp-credit-cost");
       const qty = row.querySelector(".mvp-credit-qty");
       const auction = row.querySelector(".mvp-credit-auction");
+      const includeToggle = row.querySelector(".mvp-include-toggle");
 
       name.value = item.name;
       credit.value = item.credit ? formatMvpNumber(item.credit) : "";
-      qty.value = formatMvpNumber(item.qty || 1);
+      qty.value = formatMvpNumber(Math.max(0, Number(item.qty ?? 1)));
       auction.value = item.auction ? formatMvpNumber(item.auction) : "";
+
+      const syncIncludeToggle = () => {
+        const included = item.included !== false;
+        includeToggle.textContent = included ? "포함" : "제외";
+        includeToggle.classList.toggle("is-included", included);
+        row.classList.toggle("is-excluded", !included);
+      };
+      syncIncludeToggle();
 
       name.addEventListener("input", () => {
         item.name = name.value;
@@ -513,7 +550,7 @@
       });
 
       qty.addEventListener("input", () => {
-        item.qty = Math.max(1, Math.floor(parseMvpNumber(qty.value) || 1));
+        item.qty = Math.max(0, Math.floor(parseMvpNumber(qty.value)));
         qty.value = formatMvpNumber(item.qty);
         recalcRow();
         requestAnimationFrame(() => qty.setSelectionRange(qty.value.length, qty.value.length));
@@ -524,6 +561,13 @@
         auction.value = item.auction ? formatMvpNumber(item.auction) : "";
         recalcRow();
         requestAnimationFrame(() => auction.setSelectionRange(auction.value.length, auction.value.length));
+      });
+
+      includeToggle.addEventListener("click", () => {
+        item.included = item.included === false;
+        syncIncludeToggle();
+        renderMvpSummary();
+        saveMvpCalculator();
       });
 
       row.querySelector(".mvp-delete-item").addEventListener("click", () => {
@@ -548,7 +592,8 @@
           name: "",
           credit: 0,
           qty: 1,
-          auction: 0
+          auction: 0,
+          included: true
         });
         saveMvpCalculator();
         renderMvpCreditItems();
@@ -565,7 +610,8 @@
           name: "",
           cash: 0,
           qty: 1,
-          auction: 0
+          auction: 0,
+          included: true
         });
         saveMvpCalculator();
         renderMvpItems();
