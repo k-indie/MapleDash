@@ -298,12 +298,13 @@
     const creditTotalMeso = mvpCalculator.creditItems.reduce(
       (sum, item) => sum + Number(item.auction || 0) * Math.max(1, Number(item.qty || 1)), 0
     );
+    const combinedTotalMeso = totalMeso + creditTotalMeso;
     const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
     const marketRate = Number(mvpCalculator.marketRate || 0);   // 1억 메소당 메이플포인트
 
     // 경매장 판매 루트:
     // 총 획득 메소(억) × 디코 1억당 원화 시세
-    const auctionMesoEok = totalMeso / 100000000;
+    const auctionMesoEok = combinedTotalMeso / 100000000;
     const discordWon = discordRate > 0 ? auctionMesoEok * discordRate : 0;
     const discordRecovery = requiredCash > 0 ? (discordWon / requiredCash) * 100 : 0;
 
@@ -333,7 +334,7 @@
     if (earnedCreditEl) earnedCreditEl.textContent = `${formatMvpNumber(earnedCredit)} 크레딧`;
     if (usedCreditEl) usedCreditEl.textContent = formatMvpNumber(usedCredit);
     if (creditTotalMesoEl) creditTotalMesoEl.textContent = formatMvpMeso(creditTotalMeso);
-    if (total) total.textContent = `${formatMvpMeso(totalMeso)}`;
+    if (total) total.textContent = `${formatMvpMeso(combinedTotalMeso)}`;
     if (discord && document.activeElement !== discord) discord.value = mvpCalculator.discordRate ? formatMvpNumber(mvpCalculator.discordRate) : "";
     if (market && document.activeElement !== market) market.value = mvpCalculator.marketRate ? formatMvpNumber(mvpCalculator.marketRate) : "";
 
@@ -341,7 +342,7 @@
     if (discordRecoveryEl) discordRecoveryEl.textContent = `${discordRecovery.toFixed(2)}%`;
     if (marketMesoEl) marketMesoEl.textContent = `${marketMesoEok.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}억 메소`;
     if (marketWonEl) marketWonEl.textContent = `${formatMvpNumber(marketWon)}원`;
-    if (marketRecoveryEl) marketRecoveryEl.textContent = `회수율 ${marketRecovery.toFixed(2)}%`;
+    if (marketRecoveryEl) marketRecoveryEl.textContent = `${marketRecovery.toFixed(2)}%`;
   }
 
   function renderMvpItems() {

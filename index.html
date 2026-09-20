@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.54" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.55" />
 
-  <link rel="stylesheet" href="style.css?v=1.54" />
+  <link rel="stylesheet" href="style.css?v=1.55" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.54</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.55</span></h1>
           
         </div>
         <div class="header-actions">
@@ -105,6 +105,33 @@
             </div>
           </div>
 
+          <div class="mvp-market-standalone">
+            <div class="mvp-market-standalone-head">
+              <div>
+                <span>메소마켓 단독 계산</span>
+                <small>아이템 판매와 별개로 필요한 넥슨캐시를 메소마켓으로 환산합니다.</small>
+              </div>
+            </div>
+            <div class="mvp-market-standalone-body">
+              <label>
+                <span>1억당 판매 메소 (마켓)</span>
+                <input id="mvpMarketRate" type="text" inputmode="numeric" placeholder="예: 2,600 메포">
+              </label>
+              <div>
+                <span>획득 가능 메소</span>
+                <strong id="mvpMarketMeso">0억 메소</strong>
+              </div>
+              <div>
+                <span>디코 시세 현금 환산</span>
+                <strong id="mvpMarketWon">0원</strong>
+              </div>
+              <div>
+                <span>회수율</span>
+                <strong id="mvpMarketRecovery">0.00%</strong>
+              </div>
+            </div>
+          </div>
+
           <div class="mvp-summary-grid">
             <article class="mvp-summary-card">
               <span>필요한 넥슨캐시</span>
@@ -124,20 +151,11 @@
                 <strong id="mvpDiscordRecovery" class="mvp-discord-recovery">0.00%</strong>
               </div>
             </label>
-            <label class="mvp-summary-card mvp-input-card">
-              <span>1억당 판매 메소 (마켓)</span>
-              <input id="mvpMarketRate" type="text" inputmode="numeric" placeholder="예: 2,600 메포">
-              <div class="mvp-route-result mvp-market-result">
-                <small>필요 캐시로 교환 시</small>
-                <strong id="mvpMarketMeso">0억 메소</strong>
-                <small>디코 시세 현금 환산</small>
-                <strong id="mvpMarketWon">0원</strong>
-                <em id="mvpMarketRecovery">회수율 0.00%</em>
-              </div>
-            </label>
+
             <article class="mvp-summary-card mvp-total-card">
               <span>총 획득 메소</span>
               <strong id="mvpTotalMeso">0 메소</strong>
+              <small class="mvp-total-caption">캐시샵 + 크레딧샵 판매 합계</small>
             </article>
           </div>
 
@@ -264,7 +282,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.54"></script>
-  <script src="app.js?v=1.54"></script>
+  <script src="config.js?v=1.55"></script>
+  <script src="app.js?v=1.55"></script>
 </body>
 </html>

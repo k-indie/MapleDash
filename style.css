@@ -5284,3 +5284,83 @@ main{
 .mvp-credit-heading .mvp-compact-add{
   margin-bottom:1px;
 }
+
+
+/* ===== v1.55 standalone meso market + combined credit sales ===== */
+.mvp-market-standalone{
+  margin-bottom:12px;
+  border:1px solid #31425d;
+  border-radius:12px;
+  overflow:hidden;
+  background:#0d1625;
+}
+.mvp-market-standalone-head{
+  padding:9px 12px;
+  border-bottom:1px solid #28374d;
+  background:#121d30;
+}
+.mvp-market-standalone-head>div{
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+}
+.mvp-market-standalone-head span{
+  color:#e7edf6;
+  font-size:12px;
+  font-weight:900;
+}
+.mvp-market-standalone-head small{
+  color:#77869c;
+  font-size:10px;
+}
+.mvp-market-standalone-body{
+  display:grid;
+  grid-template-columns:1.25fr repeat(3,1fr);
+  align-items:stretch;
+}
+.mvp-market-standalone-body>label,
+.mvp-market-standalone-body>div{
+  min-height:68px;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:6px;
+  border-right:1px solid #26354b;
+}
+.mvp-market-standalone-body>div:last-child{border-right:0}
+.mvp-market-standalone-body span{
+  color:#8492a7;
+  font-size:10px;
+  font-weight:750;
+}
+.mvp-market-standalone-body input{
+  width:100%;
+  height:31px;
+  padding:0 9px;
+  border:1px solid #34445f;
+  border-radius:7px;
+  background:#09111e;
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+}
+.mvp-market-standalone-body strong{
+  color:#f5f8fc;
+  font-size:15px;
+}
+.mvp-market-standalone-body>div:last-child strong{color:#ffb21d}
+.mvp-total-caption{
+  color:#77869c;
+  font-size:9px;
+  font-weight:650;
+}
+.mvp-summary-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+@media(max-width:900px){
+  .mvp-market-standalone-body{grid-template-columns:1fr 1fr}
+  .mvp-market-standalone-body>label,
+  .mvp-market-standalone-body>div{border-bottom:1px solid #26354b}
+  .mvp-summary-grid{grid-template-columns:1fr!important}
+}
