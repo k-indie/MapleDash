@@ -5496,3 +5496,19 @@ main{
 @media(max-width:900px){
   .mvp-charge-panel{overflow-x:auto}
 }
+
+/* ===== v1.60 Maple Point benefits ===== */
+.mvp-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.mvp-maplepoint-value-input{display:grid;grid-template-columns:auto minmax(70px,1fr);gap:6px;align-items:center;margin-top:4px}
+.mvp-maplepoint-value-input small{font-size:9px;color:#78879c;white-space:nowrap}
+.mvp-maplepoint-value-input input{width:100%;min-width:0;height:27px;padding:0 7px;border:1px solid #34445f;border-radius:6px;background:#09111e;color:#fff;font-size:10px;font-weight:800}
+.mvp-maplepoint-meso-value{font-size:9px;color:#7d8ba0}
+.mvp-maplepoint-meso-value strong{margin-left:4px;color:#ffb21d!important;font-size:11px!important}
+.mvp-maplepoint-benefit-section{margin-top:14px}
+.mvp-maplepoint-table-head,.mvp-maplepoint-item-row{display:grid;grid-template-columns:minmax(190px,1.4fr) minmax(125px,.8fr) 72px minmax(130px,.85fr) 58px 38px;gap:8px;align-items:center;min-width:760px}
+.mvp-maplepoint-table-head{padding:8px 12px}
+.mvp-maplepoint-item-row{padding:7px 12px;border-top:1px solid #202d42}
+.mvp-maplepoint-item-row input{width:100%}
+.mvp-mp-total{color:#ffb21d;font-size:11px;text-align:right}
+@media(max-width:1150px){.mvp-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:700px){.mvp-summary-grid{grid-template-columns:1fr!important}}

@@ -231,7 +231,9 @@
     marketRate: 0,
     items: [],
     creditItems: [],
-    chargeMethods: []
+    chargeMethods: [],
+    maplePointRate: 0,
+    maplePointBenefits: []
   };
 
   function loadMvpCalculator() {
@@ -262,6 +264,14 @@
             name: String(item.name || ""),
             cash: Math.max(0, Number(item.cash || 0)),
             discount: Math.min(100, Math.max(0, Number(item.discount || 0)))
+          })) : [],
+          maplePointRate: Math.max(0, Number(saved.maplePointRate || 0)),
+          maplePointBenefits: Array.isArray(saved.maplePointBenefits) ? saved.maplePointBenefits.map(item => ({
+            id: String(item.id || `${Date.now()}-${Math.random()}`),
+            name: String(item.name || ""),
+            points: Math.max(0, Number(item.points || 0)),
+            qty: Math.max(0, Math.floor(Number(item.qty ?? 1))),
+            included: item.included !== false
           })) : []
         };
       }
@@ -344,6 +354,14 @@
       ? Math.max(0, (1 - actualCashSpent / requiredCash) * 100)
       : 0;
 
+    const totalMaplePoints = mvpCalculator.maplePointBenefits.reduce(
+      (sum, item) => item.included !== false
+        ? sum + Number(item.points || 0) * Math.max(0, Number(item.qty ?? 1))
+        : sum, 0
+    );
+    const maplePointRate = Number(mvpCalculator.maplePointRate || 0);
+    const maplePointMesoEok = maplePointRate > 0 ? totalMaplePoints / maplePointRate : 0;
+
     const discordRate = Number(mvpCalculator.discordRate || 0); // 1억 메소당 원
     const marketRate = Number(mvpCalculator.marketRate || 0);   // 1억 메소당 메이플포인트
 
@@ -372,6 +390,10 @@
     const chargeCashEl = $("mvpChargeCash");
     const actualCashSpentEl = $("mvpActualCashSpent");
     const averageDiscountEl = $("mvpAverageDiscount");
+    const totalMaplePointsEl = $("mvpTotalMaplePoints");
+    const maplePointMesoValueEl = $("mvpMaplePointMesoValue");
+    const benefitTotalPointsEl = $("mvpBenefitTotalPoints");
+    const benefitMesoValueEl = $("mvpBenefitMesoValue");
     const usedCreditEl = $("mvpUsedCredit");
     const creditTotalMesoEl = $("mvpCreditTotalMeso");
     const discordWonEl = $("mvpDiscordWon");
@@ -387,6 +409,10 @@
     if (chargeCashEl) chargeCashEl.textContent = `${formatMvpNumber(chargeCash)} 캐시`;
     if (actualCashSpentEl) actualCashSpentEl.textContent = `${formatMvpNumber(actualCashSpent)}원`;
     if (averageDiscountEl) averageDiscountEl.textContent = `${averageDiscount.toFixed(2)}%`;
+    if (totalMaplePointsEl) totalMaplePointsEl.textContent = `${formatMvpNumber(totalMaplePoints)} 메포`;
+    if (maplePointMesoValueEl) maplePointMesoValueEl.textContent = `${formatMvpNumber(maplePointMesoEok)}억`;
+    if (benefitTotalPointsEl) benefitTotalPointsEl.textContent = formatMvpNumber(totalMaplePoints);
+    if (benefitMesoValueEl) benefitMesoValueEl.textContent = `${formatMvpNumber(maplePointMesoEok)}억`;
     if (usedCreditEl) usedCreditEl.textContent = formatMvpNumber(usedCredit);
     if (creditTotalMesoEl) creditTotalMesoEl.textContent = formatMvpMeso(creditTotalMeso);
     if (total) total.textContent = `${formatMvpMeso(combinedTotalMeso)}`;
@@ -544,6 +570,42 @@
       updateRowResult();
     });
 
+    renderMvpSummary();
+  }
+
+  function renderMvpMaplePointBenefits() {
+    const box = $("mvpMaplePointBenefitRows");
+    if (!box) return;
+    box.innerHTML = "";
+    if (!mvpCalculator.maplePointBenefits.length) {
+      const empty=document.createElement("div");
+      empty.className="mvp-charge-empty";
+      empty.textContent="받는 메이플포인트 혜택을 추가해 주세요.";
+      box.appendChild(empty); renderMvpSummary(); return;
+    }
+    mvpCalculator.maplePointBenefits.forEach(item=>{
+      const row=document.createElement("div");
+      row.className="mvp-item-row mvp-maplepoint-item-row";
+      row.innerHTML=`<input class="mvp-mp-name" type="text" maxlength="60" placeholder="혜택 이름">
+        <input class="mvp-mp-points" type="text" inputmode="numeric" placeholder="받는 메포">
+        <input class="mvp-mp-qty" type="text" inputmode="numeric" placeholder="수량">
+        <strong class="mvp-mp-total">0 메포</strong>
+        <button class="mvp-include-toggle" type="button"></button>
+        <button class="mvp-delete-item" type="button">×</button>`;
+      const name=row.querySelector(".mvp-mp-name"), points=row.querySelector(".mvp-mp-points"),
+            qty=row.querySelector(".mvp-mp-qty"), toggle=row.querySelector(".mvp-include-toggle");
+      name.value=item.name; points.value=item.points?formatMvpNumber(item.points):"";
+      qty.value=formatMvpNumber(Math.max(0,Number(item.qty??1)));
+      const sync=()=>{const inc=item.included!==false;toggle.textContent=inc?"포함":"제외";toggle.classList.toggle("is-included",inc);row.classList.toggle("is-excluded",!inc);};
+      const recalc=()=>{row.querySelector(".mvp-mp-total").textContent=`${formatMvpNumber(Number(item.points||0)*Math.max(0,Number(item.qty??1)))} 메포`;renderMvpSummary();saveMvpCalculator();};
+      sync(); recalc();
+      name.addEventListener("input",()=>{item.name=name.value;saveMvpCalculator();});
+      points.addEventListener("input",()=>{item.points=parseMvpNumber(points.value);points.value=item.points?formatMvpNumber(item.points):"";recalc();requestAnimationFrame(()=>points.setSelectionRange(points.value.length,points.value.length));});
+      qty.addEventListener("input",()=>{item.qty=Math.max(0,Math.floor(parseMvpNumber(qty.value)));qty.value=formatMvpNumber(item.qty);recalc();requestAnimationFrame(()=>qty.setSelectionRange(qty.value.length,qty.value.length));});
+      toggle.addEventListener("click",()=>{item.included=item.included===false;sync();renderMvpSummary();saveMvpCalculator();});
+      row.querySelector(".mvp-delete-item").addEventListener("click",()=>{mvpCalculator.maplePointBenefits=mvpCalculator.maplePointBenefits.filter(x=>x.id!==item.id);saveMvpCalculator();renderMvpMaplePointBenefits();});
+      box.appendChild(row);
+    });
     renderMvpSummary();
   }
 
@@ -719,6 +781,17 @@
   }
 
   function bindMvpCalculator() {
+    const mpRate=$("mvpMaplePointRate");
+    if(mpRate && mpRate.dataset.bound!=="1"){
+      mpRate.dataset.bound="1";
+      mpRate.value=mvpCalculator.maplePointRate?formatMvpNumber(mvpCalculator.maplePointRate):"";
+      mpRate.addEventListener("input",()=>{mvpCalculator.maplePointRate=parseMvpNumber(mpRate.value);mpRate.value=mvpCalculator.maplePointRate?formatMvpNumber(mvpCalculator.maplePointRate):"";renderMvpSummary();saveMvpCalculator();requestAnimationFrame(()=>mpRate.setSelectionRange(mpRate.value.length,mpRate.value.length));});
+    }
+    const addMp=$("mvpAddMaplePointBenefitBtn");
+    if(addMp && addMp.dataset.bound!=="1"){
+      addMp.dataset.bound="1";
+      addMp.addEventListener("click",()=>{mvpCalculator.maplePointBenefits.push({id:`mp-${Date.now()}-${Math.random().toString(16).slice(2)}`,name:"",points:0,qty:1,included:true});saveMvpCalculator();renderMvpMaplePointBenefits();$("mvpMaplePointBenefitRows")?.lastElementChild?.querySelector(".mvp-mp-name")?.focus();});
+    }
     const addCharge = $("mvpAddChargeBtn");
     if (addCharge && addCharge.dataset.bound !== "1") {
       addCharge.dataset.bound = "1";
@@ -3333,6 +3406,7 @@ card.innerHTML = `
     renderMvpChargeMethods();
     renderMvpItems();
     renderMvpCreditItems();
+    renderMvpMaplePointBenefits();
     bindMvpCalculator();
     bindMvpRealtimeDelegation();
   }

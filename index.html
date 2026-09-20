@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
   <title>숙제 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png?v=1.59" />
+  <link rel="icon" type="image/png" href="favicon.png?v=1.60" />
 
-  <link rel="stylesheet" href="style.css?v=1.59" />
+  <link rel="stylesheet" href="style.css?v=1.60" />
 </head>
 <body>
   <main class="page">
@@ -30,7 +30,7 @@
       <header class="app-header">
         <div>
           <p class="kicker">MAPLESTORY</p>
-          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.59</span></h1>
+          <h1>꿀벌메숭이의 곳간 <span class="app-version">v1.60</span></h1>
           
         </div>
         <div class="header-actions">
@@ -180,6 +180,15 @@
               <strong id="mvpTotalMeso">0 메소</strong>
               <small class="mvp-total-caption">캐시샵 + 크레딧샵 판매 합계</small>
             </article>
+            <article class="mvp-summary-card mvp-total-card mvp-maplepoint-summary-card">
+              <span>총 받는 메이플포인트</span>
+              <strong id="mvpTotalMaplePoints">0 메포</strong>
+              <div class="mvp-maplepoint-value-input">
+                <small>1억 메소당 메포</small>
+                <input id="mvpMaplePointRate" type="text" inputmode="numeric" placeholder="예: 2,600">
+              </div>
+              <small class="mvp-maplepoint-meso-value">메소 가치 <strong id="mvpMaplePointMesoValue">0억</strong></small>
+            </article>
           </div>
 
           <div class="mvp-table-wrap">
@@ -231,6 +240,28 @@
                 <span></span>
               </div>
               <div id="mvpCreditRows" class="mvp-item-rows"></div>
+            </div>
+          </div>
+
+          <div class="mvp-credit-panel mvp-maplepoint-benefit-section">
+            <div class="mvp-credit-title">
+              <div class="mvp-credit-heading">
+                <div>
+                  <p class="kicker">MAPLE POINT BENEFIT</p>
+                  <h3>메이플포인트 혜택 계산</h3>
+                </div>
+                <button id="mvpAddMaplePointBenefitBtn" class="mvp-compact-add" type="button">+ 혜택</button>
+              </div>
+              <div class="mvp-credit-summary">
+                <span>총 받는 메포 <strong id="mvpBenefitTotalPoints">0</strong></span>
+                <span>메소 환산 가치 <strong id="mvpBenefitMesoValue">0억</strong></span>
+              </div>
+            </div>
+            <div class="mvp-table-wrap">
+              <div class="mvp-table-head mvp-maplepoint-table-head">
+                <span>혜택 이름</span><span>받는 메포</span><span>수량</span><span>총 메포</span><span>합계</span><span></span>
+              </div>
+              <div id="mvpMaplePointBenefitRows" class="mvp-item-rows"></div>
             </div>
           </div>
 
@@ -309,7 +340,7 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=1.59"></script>
-  <script src="app.js?v=1.59"></script>
+  <script src="config.js?v=1.60"></script>
+  <script src="app.js?v=1.60"></script>
 </body>
 </html>
